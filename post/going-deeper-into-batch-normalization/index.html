@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="theme" content="hugo-academic">
+  <meta name="generator" content="Hugo 0.40.3" />
+  <meta name="author" content="Tong Shen">
+
+  
+  
+  
+  
+    
+      
+    
+  
+  <meta name="description" content="This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.
+Here is the original paper about batch normalization on Arxiv:
+Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/going-deeper-into-batch-normalization/">
+
+  
+
+
+  
+
+  
+  
+  <meta name="theme-color" content="#0095eb">
+  
+  
+  
+  
+    
+  
+  
+    
+    
+      
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+      
+    
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha512-6MXa8B6uaO18Hid6blRMetEIoPqHf7Ux1tnyIQdpt9qI5OACx7C+O3IVTr98vwGnlcg0LOLa02i9Y1HpVhlfiw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+  
+  
+  
+  
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:400,700%7cMerriweather%7cRoboto&#43;Mono%7cPermanent&#43;Marker%7cPrata">
+  
+  <link rel="stylesheet" href="/styles.css">
+  
+
+  
+
+  
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  <link rel="feed" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/going-deeper-into-batch-normalization/">
+
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="og:site_name" content="Tong Shen">
+  <meta property="og:url" content="/post/going-deeper-into-batch-normalization/">
+  <meta property="og:title" content="Going Deeper in Batch Normalization | Tong Shen">
+  <meta property="og:description" content="This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.
+Here is the original paper about batch normalization on Arxiv:
+Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.">
+  <meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2018-05-17T21:00:00-04:00">
+  
+  <meta property="article:modified_time" content="2018-05-17T21:00:00-04:00">
+  
+
+  
+  
+
+  <title>Going Deeper in Batch Normalization | Tong Shen</title>
+
+</head>
+<body id="top" data-spy="scroll" data-target="#toc" data-offset="71" >
+
+<nav class="navbar navbar-default navbar-fixed-top" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="navbar-header">
+      
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+              data-target=".navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      
+      <a class="navbar-brand" href="/">Tong Shen</a>
+    </div>
+
+    
+    <div class="collapse navbar-collapse">
+
+      
+      
+      <ul class="nav navbar-nav navbar-right">
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#about">
+            
+            <span>Home</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#myself">
+            
+            <span>CV</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#projects">
+            
+            <span>Projects</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#publications_selected">
+            
+            <span>Publications</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#posts">
+            
+            <span>Posts</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#contact">
+            
+            <span>Contact</span>
+            
+          </a>
+        </li>
+
+        
+        
+      
+
+      
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+<article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+  <div class="article-container">
+    <h1 itemprop="name">Going Deeper in Batch Normalization</h1>
+
+    
+
+<div class="article-metadata">
+
+  <span class="article-date">
+    
+    <time datetime="2018-05-17 21:00:00 -0400 EDT" itemprop="datePublished dateModified">
+      May 17, 2018
+    </time>
+  </span>
+  <span itemscope itemprop="author publisher" itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Tong Shen">
+  </span>
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    9 min read
+  </span>
+  
+
+  
+  
+
+  
+
+  
+  
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    <li>
+      <a class="twitter"
+         href="https://twitter.com/intent/tweet?text=Going%20Deeper%20in%20Batch%20Normalization&amp;url=%2fpost%2fgoing-deeper-into-batch-normalization%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-twitter"></i>
+      </a>
+    </li>
+    <li>
+      <a class="facebook"
+         href="https://www.facebook.com/sharer.php?u=%2fpost%2fgoing-deeper-into-batch-normalization%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-facebook"></i>
+      </a>
+    </li>
+    <li>
+      <a class="linkedin"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fgoing-deeper-into-batch-normalization%2f&amp;title=Going%20Deeper%20in%20Batch%20Normalization"
+         target="_blank" rel="noopener">
+        <i class="fa fa-linkedin"></i>
+      </a>
+    </li>
+    <li>
+      <a class="weibo"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fgoing-deeper-into-batch-normalization%2f&amp;title=Going%20Deeper%20in%20Batch%20Normalization"
+         target="_blank" rel="noopener">
+        <i class="fa fa-weibo"></i>
+      </a>
+    </li>
+    <li>
+      <a class="email"
+         href="mailto:?subject=Going%20Deeper%20in%20Batch%20Normalization&amp;body=%2fpost%2fgoing-deeper-into-batch-normalization%2f">
+        <i class="fa fa-envelope"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+<p>This article will thoroughly explain batch normalization in a simple way.
+I wrote this article after getting failed an interview because of detailed batchnorm related question.
+I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.</p>
+
+<p>Here is the original paper about batch normalization on Arxiv:<br />
+<a href="https://arxiv.org/abs/1502.03167" target="_blank">Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift</a>.</p>
+
+<h3 id="interpretation-and-advantage-of-batch-norm">Interpretation and Advantage of Batch Norm</h3>
+
+<p>Of course, batch norm is used to normalize the input for certain layer. We can think it in this way: if some of our input image have a scale between 0-1 while others are
+between 1-1000. It is better to normalize them before training. We can apply the same idea to the input of every layer input.
+There are several advantages to use batch norm:</p>
+
+<ol>
+<li><span class="markup-quote">Batch norm can reduce the covariance shift</span>. For example, we train a model to classify cat and flowers.
+And the training data of cat are all black cats. In this way, the model won&rsquo;t work because it can only
+classify the distribution of black cat and flowers. What batch norm does is to reduce this kind of error and make the
+input shift, like reduce the difference between black cat and other cats. And the same thing also applies to
+every layer in the neural network. Batch norm can reduce the shift around of previous output and make
+the training of next layers easier.</li>
+<li><span class="markup-quote">Batch norm can remove the linear interactions in output</span>. In this way, linear layers would be useless, because they cano only have effect on
+linear component.  In a deep neural network with nonlinearactivation functions, the lower layers can perform nonlinear transformations of the data, so they remain useful.
+Batch normalization acts to standardize only the mean and variance of each unit in order to stabilize learning, but it allows therelationships
+between units and the nonlinear statistics of a single unit to change.</li>
+<li><span class="markup-quote">Batch normalization can greatly speed up training process</span>. Batch normalization accelerates training by requiring less iterations to
+converge to a given loss value. This can be done by using higher learning rates, but with smaller learning rates you can still see an improvement.<br />
+Batch normalization also makes the optimization problem &ldquo;easier&rdquo;, as minimizing the covariate shift avoid lots of plateaus where the loss stagnates
+or decreases slowly. It can still happen but it is much less frequent.<br /></li>
+<li><span class="markup-quote">Batch norm also has some regularization effect</span>. Every mini-batch is a biased sample from the total dataset.
+When doing batch norm, we will subtract mean and divide it by variance. This can also be treated as add
+noise to data. Similar to regularization techniques like dropout, network can gain some regularization
+from this. But this effect is quite minor.<br /></li>
+</ol>
+
+<h3 id="algorithm-and-implementation">Algorithm and implementation</h3>
+
+<blockquote>
+<p>Here is the algorithm diagram batch norm.
+<img src="/img/batch_norm_fp.png" alt="Batch norm algorithm" /></p>
+</blockquote>
+
+<p>Nothing fancy but extremely practical algorithm. One thing has to mention, <span class="markup-quote">the learnable variables
+$\gamma$ and $\beta$. The deep learning book gives clear explaination about this</span>. Normalizing the mean and deviation of a unit can
+reduce the expressive power of a neural network. In this way, it is common to multiply the normalized result with $\gamma$ and add $\beta$. For exmaple,
+if we have sigmoid activation afterwards, the network may don&rsquo;t want the output lies in the near linear part of sigmoid. With $\gamma$ and $\beta$,
+the network has the freedom to shift whatever it wants.</p>
+
+<blockquote>
+<p>This is a new parametrization can represent the same family of functions of the input as the old parametrization, but the new parametrization
+ has different learning dynamics. In the old parametrization, the mean of H was determined by a complicated interaction between the parameters
+ in the layers below H. In the new parametrization, the mean of $y=\gamma x + \beta$ is determined solely by $\gamma$. The new parametrization
+ is much easier to learn with gradient descent.    &ndash; Deep Learning Book</p>
+</blockquote>
+
+<p><span class="markup-quote">At test time, we need the mean and variance directly. So, the method is using an exponentially weighted average across mini-batches. </span>
+We have $ x_1, x_2, &hellip; ,x_i $ outputs from different mini-batches. What we do is put expotential
+weight on previous processed mini-batches. The calculation is quite simple:
+$$Mean_{running} = \mu * Mean_{running} + (1.0 - \mu) * Mean_{sample}$$
+$$Var_{running} = \mu * Var_{running} + (1.0 - \mu) * Var_{sample}$$
+And we use running mean and var to calculate batchnorm.<br />
+Alternatively, we can first calculate the total mean and variance of total test dataset. But
+this exponential weighted method are more popular in practice.</p>
+
+<p>And last but not least, the code for forward and backward pass(from my cs231n homework):</p>
+
+<pre><code class="language-python">def batchnorm_forward(x, gamma, beta, bn_param):
+    &quot;&quot;&quot;
+    Forward pass for batch normalization.
+    During training the sample mean and (uncorrected) sample variance are
+    computed from minibatch statistics and used to normalize the incoming data.
+    During training we also keep an exponentially decaying running mean of the
+    mean and variance of each feature, and these averages are used to normalize
+    data at test-time.
+    At each timestep we update the running averages for mean and variance using
+    an exponential decay based on the momentum parameter:
+    running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+    running_var = momentum * running_var + (1 - momentum) * sample_var
+    Note that the batch normalization paper suggests a different test-time
+    behavior: they compute sample mean and variance for each feature using a
+    large number of training images rather than using a running average. For
+    this implementation we have chosen to use running averages instead since
+    they do not require an additional estimation step; the torch7
+    implementation of batch normalization also uses running averages.
+    Input:
+    - x: Data of shape (N, D)
+    - gamma: Scale parameter of shape (D,)
+    - beta: Shift paremeter of shape (D,)
+    - bn_param: Dictionary with the following keys:
+      - mode: 'train' or 'test'; required
+      - eps: Constant for numeric stability
+      - momentum: Constant for running mean / variance.
+      - running_mean: Array of shape (D,) giving running mean of features
+      - running_var Array of shape (D,) giving running variance of features
+    Returns a tuple of:
+    - out: of shape (N, D)
+    - cache: A tuple of values needed in the backward pass
+    &quot;&quot;&quot;
+    mode = bn_param['mode']
+    eps = bn_param.get('eps', 1e-5)
+    momentum = bn_param.get('momentum', 0.9)
+
+    N, D = x.shape
+    running_mean = bn_param.get('running_mean', np.zeros(D, dtype=x.dtype))
+    running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
+
+    out, cache = None, None
+    if mode == 'train':
+       
+        sample_mean = np.mean(x, axis=0)
+        sample_var = np.var(x, axis=0)
+        x_stand = (x - sample_mean.T) / np.sqrt(sample_var.T + eps)
+
+        out = x_stand * gamma + beta
+
+        running_mean = momentum * running_mean + (1.0 - momentum) * sample_mean
+        running_var = momentum * running_var + (1.0 - momentum) * sample_var
+
+        cache = (sample_mean, sample_var, x_stand, x, gamma, beta, eps)
+
+       
+    elif mode == 'test':
+        
+
+        x_stand = (x - running_mean) / np.sqrt(running_var)
+        out = x_stand * gamma + beta
+
+        
+    else:
+        raise ValueError('Invalid forward batchnorm mode &quot;%s&quot;' % mode)
+
+    # Store the updated running means back into bn_param
+    bn_param['running_mean'] = running_mean
+    bn_param['running_var'] = running_var
+
+    return out, cache
+
+</code></pre>
+
+<pre><code class="language-python">def batchnorm_backward(dout, cache):
+    &quot;&quot;&quot;
+    Backward pass for batch normalization.
+    For this implementation, you should write out a computation graph for
+    batch normalization on paper and propagate gradients backward through
+    intermediate nodes.
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, D)
+    - cache: Variable of intermediates from batchnorm_forward.
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs x, of shape (N, D)
+    - dgamma: Gradient with respect to scale parameter gamma, of shape (D,)
+    - dbeta: Gradient with respect to shift parameter beta, of shape (D,)
+    &quot;&quot;&quot;
+    dx, dgamma, dbeta = None, None, None
+    
+
+    sample_mean, sample_var, x_stand, x, gamma, beta, eps = cache
+    N, D = dout.shape
+
+    dbeta = np.sum(dout, axis=0)
+    dgamma = np.sum(x_stand * dout, axis=0)
+    dx = (1. / N) * gamma * (sample_var + eps)**(-1. / 2.) * (
+         N * dout - np.sum(dout, axis=0) - (x - sample_mean) * (
+         sample_var + eps)**(-1.0) * np.sum(dout * (x - sample_mean), axis=0))
+
+
+    return dx, dgamma, dbeta
+
+</code></pre>
+
+<p>During training, the moving_mean and moving_variance need to be updated.
+By default the update ops are placed in tf.GraphKeys.UPDATE_OPS, so they need to be added as a dependency to the train_op.
+So, the template is:</p>
+
+<pre><code class="language-python">update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+with tf.control_dependencies(update_ops):
+    train_op = optimizer.minimize(loss)
+</code></pre>
+
+<p>And also tensorflow official evaluate function (classification model zoo):</p>
+
+<pre><code class="language-python">update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, first_clone_scope)
+with tf.control_dependencies([update_op]):
+      train_tensor = tf.identity(total_loss, name='train_op')
+</code></pre>
+
+<h3 id="improvements-and-alternatives">Improvements and Alternatives</h3>
+
+<h4 id="batch-norm-fused-with-convolution">Batch norm fused with Convolution</h4>
+
+<p>This is the question makes me fail the interview. Actually, there is no magic stuff about fused batch normalization. Just mathematically
+calculate two layers together and treat them as one layer in forward and backward pass:</p>
+
+<p>Conv:
+$$convout(N_i,C_{out})=bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)$$
+Batch Norm:
+$$bnout(N_i,C_{out})=(convout(N_i,C_{out})-\mu)/\sqrt{((\epsilon + \sigma)^2)}$$
+$$bnout(N_i,C_{out})=\gamma*bnout(N_i,C_{out})+\beta$$
+Here, $convout(N_i,C_{out})$ means the $N_ith$ sample in the $C_{out}$ channel. Same notation applies to input and bnout.
+$weight(C_{out},k)$ is the conv kernel corresponding to $C_{out}$. And $\epsilon, \sigma, \mu, \gamma, \beta$ are the same as above.<br />
+After fusion, the total calculation becomes:</p>
+
+<p>$$out(N_i,C_{out})=\gamma*(bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$
+In this way, the weight and bias of fused conv layer is:</p>
+
+<p>$$bias = \gamma*(bias(C_{out})$$
+$$weight = weight(C_{out},k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$</p>
+
+<p>We can use the fused bias and weight in previous conv layers. We can drop the intermediate result between conv and batch norm using this method,
+which can save up to 50% memory and a minor increase of training time.</p>
+
+<h4 id="layer-normalization">Layer normalization</h4>
+
+<p>Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu and \sigma$ at every location,
+It uses all the neuron activations in one layer to produce $\mu and \sigma$.
+This method is especially useful when not using mini-batch like RNN, where batch norm cannot be used. But its performance in convs layers are not as good
+as batch norm.</p>
+
+<h4 id="instance-normalization">Instance Normalization</h4>
+
+<h4 id="group-normalization">Group Normalization</h4>
+
+<h4 id="other-normalization-techniques">Other normalization techniques*</h4>
+
+<p>Recurrent Batch Normalization (BN) (Cooijmans, 2016; also proposed concurrently by Qianli Liao &amp; Tomaso Poggio, but tested on Recurrent ConvNets,
+instead of RNN/LSTM): Same as batch normalization. Use different normalization statistics for each time step. You need to store a set of mean and
+standard deviation for each time step.</p>
+
+<p>Batch Normalized Recurrent Neural Networks (Laurent, 2015): batch normalization is only applied between the input and hidden state, but not between
+hidden states. i.e., normalization is not applied over time.</p>
+
+<p>Streaming Normalization (Liao et al. 2016) : it summarizes existing normalizations and overcomes most issues mentioned above. It works well with
+ConvNets, recurrent learning and online learning (i.e., small mini-batch or one sample at a time):</p>
+
+<p>Weight Normalization (Salimans and Kingma 2016): whenever a weight is used, it is divided by its L2 norm first, such that the resulting weight has
+L2 norm 1. That is, output y=x*(w/|w|), where x and w denote the input and weight respectively. A scalar scaling factor g is then multiplied to the
+output y=y*g. But in my experience g seems not essential for performance (also downstream learnable layers can learn this anyway).</p>
+
+<p>Cosine Normalization (Luo et al. 2017): weight normalization is very similar to cosine normalization, where the same L2 normalization is applied
+to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differentiation can compute appropriate gradients of x and w.</p>
+
+<p>Here are some great reference materials:<br />
+1. <a href="http://www.deeplearningbook.org/contents/optimization.html" target="_blank">Deep Learning Book, Chapter 8.7.1</a><br />
+2. <a href="https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow" target="_blank">Stackoverflow: How could I use Batch Normalization in TensorFlow?</a><br />
+3. <a href="http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html" target="_blank">Explaination on Covariance Shift</a><br />
+4. <a href="https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization" target="_blank">Tensorflow batch normalization docs</a><br />
+5. <a href="https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal" target="_blank">Various Normalization Techniques in Deep Learning</a></p>
+
+    </div>
+
+    
+
+
+<div class="article-tags">
+  
+  <a class="btn btn-primary btn-outline" href="/tags/batch-norm/">batch norm</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/deep-learning/">deep learning</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/tensorflow/">tensorflow</a>
+  
+</div>
+
+
+
+
+    
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p class="powered-by">
+
+      &copy; 2018 &middot; 
+
+      Powered by
+      
+      <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>. 
+	  
+	  All rights reserved.
+
+      <span class="pull-right" aria-hidden="true">
+        <a href="#" id="back_to_top">
+          <span class="button_icon">
+            <i class="fa fa-chevron-up fa-2x"></i>
+          </span>
+        </a>
+      </span>
+
+    </p>
+  </div>
+</footer>
+
+
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close btn-large" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Cite</h4>
+      </div>
+      <div>
+        <pre><code class="modal-body tex"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-primary btn-outline js-copy-cite" href="#" target="_blank">
+          <i class="fa fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-primary btn-outline js-download-cite" href="#" target="_blank">
+          <i class="fa fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+    
+
+    
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha512-3P8rXCuGJdNZOnUx/03c1jOTnMn3rP63nBip5gOP2qmUh5YAdVAvFZ1E+QLZZbC1rtMrQb+mah3AfYW11RUrWA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.3/imagesloaded.pkgd.min.js" integrity="sha512-umsR78NN0D23AzgoZ11K7raBD+R6hqKojyBZs1w8WvYlsI+QuKRGBx3LFCwhatzBunCjDuJpDHwxD13sLMbpRA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha512-iztkobsvnjKfAtTNdHkGVjAYTrrtlC7mGp/54c40wowO7LhURYl3gVzzcEqGl/qKXQltJ2HwMrdLcNUdo+N/RQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.4/isotope.pkgd.min.js" integrity="sha512-VDBOIlDbuC4VWxGJNmuFRQ0Li0SKkDpmGyuhAG5LTDLd/dJ/S0WMVxriR2Y+CyPL5gzjpN4f/6iqWVBJlht0tQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+    
+    
+    <script src="/js/hugo-academic.js"></script>
+    
+
+    
+    
+      
+      
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+      
+
+      
+
+      
+
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_CHTML" integrity="sha512-tOav5w1OjvsSJzePRtt2uQPFwBoHt1VZcUq8l8nm5284LEKE9FSJBQryzMBzHxY5P0zRdNqEcpLIRVYFNgu1jw==" crossorigin="anonymous"></script>
+    
+    
+
+  </body>
+</html>
+

@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tong Shen on Tong Shen</title>
+    <link>/</link>
+    <description>Recent content in Tong Shen on Tong Shen</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy; 2018</copyright>
+    <lastBuildDate>Sun, 15 Oct 2017 00:00:00 -0400</lastBuildDate>
+    <atom:link href="/" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Going Deeper in Batch Normalization</title>
+      <link>/post/going-deeper-into-batch-normalization/</link>
+      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
+      
+      <guid>/post/going-deeper-into-batch-normalization/</guid>
+      <description>
+
+&lt;p&gt;This article will thoroughly explain batch normalization in a simple way.
+I wrote this article after getting failed an interview because of detailed batchnorm related question.
+I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.&lt;/p&gt;
+
+&lt;p&gt;Here is the original paper about batch normalization on Arxiv:&lt;br /&gt;
+&lt;a href=&#34;https://arxiv.org/abs/1502.03167&#34; target=&#34;_blank&#34;&gt;Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;interpretation-and-advantage-of-batch-norm&#34;&gt;Interpretation and Advantage of Batch Norm&lt;/h3&gt;
+
+&lt;p&gt;Of course, batch norm is used to normalize the input for certain layer. We can think it in this way: if some of our input image have a scale between 0-1 while others are
+between 1-1000. It is better to normalize them before training. We can apply the same idea to the input of every layer input.
+There are several advantages to use batch norm:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm can reduce the covariance shift&lt;/span&gt;. For example, we train a model to classify cat and flowers.
+And the training data of cat are all black cats. In this way, the model won&amp;rsquo;t work because it can only
+classify the distribution of black cat and flowers. What batch norm does is to reduce this kind of error and make the
+input shift, like reduce the difference between black cat and other cats. And the same thing also applies to
+every layer in the neural network. Batch norm can reduce the shift around of previous output and make
+the training of next layers easier.&lt;/li&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm can remove the linear interactions in output&lt;/span&gt;. In this way, linear layers would be useless, because they cano only have effect on
+linear component.  In a deep neural network with nonlinearactivation functions, the lower layers can perform nonlinear transformations of the data, so they remain useful.
+Batch normalization acts to standardize only the mean and variance of each unit in order to stabilize learning, but it allows therelationships
+between units and the nonlinear statistics of a single unit to change.&lt;/li&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch normalization can greatly speed up training process&lt;/span&gt;. Batch normalization accelerates training by requiring less iterations to
+converge to a given loss value. This can be done by using higher learning rates, but with smaller learning rates you can still see an improvement.&lt;br /&gt;
+Batch normalization also makes the optimization problem &amp;ldquo;easier&amp;rdquo;, as minimizing the covariate shift avoid lots of plateaus where the loss stagnates
+or decreases slowly. It can still happen but it is much less frequent.&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm also has some regularization effect&lt;/span&gt;. Every mini-batch is a biased sample from the total dataset.
+When doing batch norm, we will subtract mean and divide it by variance. This can also be treated as add
+noise to data. Similar to regularization techniques like dropout, network can gain some regularization
+from this. But this effect is quite minor.&lt;br /&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;algorithm-and-implementation&#34;&gt;Algorithm and implementation&lt;/h3&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Here is the algorithm diagram batch norm.
+&lt;img src=&#34;/img/batch_norm_fp.png&#34; alt=&#34;Batch norm algorithm&#34; /&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Nothing fancy but extremely practical algorithm. One thing has to mention, &lt;span class=&#34;markup-quote&#34;&gt;the learnable variables
+$\gamma$ and $\beta$. The deep learning book gives clear explaination about this&lt;/span&gt;. Normalizing the mean and deviation of a unit can
+reduce the expressive power of a neural network. In this way, it is common to multiply the normalized result with $\gamma$ and add $\beta$. For exmaple,
+if we have sigmoid activation afterwards, the network may don&amp;rsquo;t want the output lies in the near linear part of sigmoid. With $\gamma$ and $\beta$,
+the network has the freedom to shift whatever it wants.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;This is a new parametrization can represent the same family of functions of the input as the old parametrization, but the new parametrization
+ has different learning dynamics. In the old parametrization, the mean of H was determined by a complicated interaction between the parameters
+ in the layers below H. In the new parametrization, the mean of $y=\gamma x + \beta$ is determined solely by $\gamma$. The new parametrization
+ is much easier to learn with gradient descent.    &amp;ndash; Deep Learning Book&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;span class=&#34;markup-quote&#34;&gt;At test time, we need the mean and variance directly. So, the method is using an exponentially weighted average across mini-batches. &lt;/span&gt;
+We have $ x_1, x_2, &amp;hellip; ,x_i $ outputs from different mini-batches. What we do is put expotential
+weight on previous processed mini-batches. The calculation is quite simple:
+$$Mean_{running} = \mu * Mean_{running} + (1.0 - \mu) * Mean_{sample}$$
+$$Var_{running} = \mu * Var_{running} + (1.0 - \mu) * Var_{sample}$$
+And we use running mean and var to calculate batchnorm.&lt;br /&gt;
+Alternatively, we can first calculate the total mean and variance of total test dataset. But
+this exponential weighted method are more popular in practice.&lt;/p&gt;
+
+&lt;p&gt;And last but not least, the code for forward and backward pass(from my cs231n homework):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def batchnorm_forward(x, gamma, beta, bn_param):
+    &amp;quot;&amp;quot;&amp;quot;
+    Forward pass for batch normalization.
+    During training the sample mean and (uncorrected) sample variance are
+    computed from minibatch statistics and used to normalize the incoming data.
+    During training we also keep an exponentially decaying running mean of the
+    mean and variance of each feature, and these averages are used to normalize
+    data at test-time.
+    At each timestep we update the running averages for mean and variance using
+    an exponential decay based on the momentum parameter:
+    running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+    running_var = momentum * running_var + (1 - momentum) * sample_var
+    Note that the batch normalization paper suggests a different test-time
+    behavior: they compute sample mean and variance for each feature using a
+    large number of training images rather than using a running average. For
+    this implementation we have chosen to use running averages instead since
+    they do not require an additional estimation step; the torch7
+    implementation of batch normalization also uses running averages.
+    Input:
+    - x: Data of shape (N, D)
+    - gamma: Scale parameter of shape (D,)
+    - beta: Shift paremeter of shape (D,)
+    - bn_param: Dictionary with the following keys:
+      - mode: &#39;train&#39; or &#39;test&#39;; required
+      - eps: Constant for numeric stability
+      - momentum: Constant for running mean / variance.
+      - running_mean: Array of shape (D,) giving running mean of features
+      - running_var Array of shape (D,) giving running variance of features
+    Returns a tuple of:
+    - out: of shape (N, D)
+    - cache: A tuple of values needed in the backward pass
+    &amp;quot;&amp;quot;&amp;quot;
+    mode = bn_param[&#39;mode&#39;]
+    eps = bn_param.get(&#39;eps&#39;, 1e-5)
+    momentum = bn_param.get(&#39;momentum&#39;, 0.9)
+
+    N, D = x.shape
+    running_mean = bn_param.get(&#39;running_mean&#39;, np.zeros(D, dtype=x.dtype))
+    running_var = bn_param.get(&#39;running_var&#39;, np.zeros(D, dtype=x.dtype))
+
+    out, cache = None, None
+    if mode == &#39;train&#39;:
+       
+        sample_mean = np.mean(x, axis=0)
+        sample_var = np.var(x, axis=0)
+        x_stand = (x - sample_mean.T) / np.sqrt(sample_var.T + eps)
+
+        out = x_stand * gamma + beta
+
+        running_mean = momentum * running_mean + (1.0 - momentum) * sample_mean
+        running_var = momentum * running_var + (1.0 - momentum) * sample_var
+
+        cache = (sample_mean, sample_var, x_stand, x, gamma, beta, eps)
+
+       
+    elif mode == &#39;test&#39;:
+        
+
+        x_stand = (x - running_mean) / np.sqrt(running_var)
+        out = x_stand * gamma + beta
+
+        
+    else:
+        raise ValueError(&#39;Invalid forward batchnorm mode &amp;quot;%s&amp;quot;&#39; % mode)
+
+    # Store the updated running means back into bn_param
+    bn_param[&#39;running_mean&#39;] = running_mean
+    bn_param[&#39;running_var&#39;] = running_var
+
+    return out, cache
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def batchnorm_backward(dout, cache):
+    &amp;quot;&amp;quot;&amp;quot;
+    Backward pass for batch normalization.
+    For this implementation, you should write out a computation graph for
+    batch normalization on paper and propagate gradients backward through
+    intermediate nodes.
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, D)
+    - cache: Variable of intermediates from batchnorm_forward.
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs x, of shape (N, D)
+    - dgamma: Gradient with respect to scale parameter gamma, of shape (D,)
+    - dbeta: Gradient with respect to shift parameter beta, of shape (D,)
+    &amp;quot;&amp;quot;&amp;quot;
+    dx, dgamma, dbeta = None, None, None
+    
+
+    sample_mean, sample_var, x_stand, x, gamma, beta, eps = cache
+    N, D = dout.shape
+
+    dbeta = np.sum(dout, axis=0)
+    dgamma = np.sum(x_stand * dout, axis=0)
+    dx = (1. / N) * gamma * (sample_var + eps)**(-1. / 2.) * (
+         N * dout - np.sum(dout, axis=0) - (x - sample_mean) * (
+         sample_var + eps)**(-1.0) * np.sum(dout * (x - sample_mean), axis=0))
+
+
+    return dx, dgamma, dbeta
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;During training, the moving_mean and moving_variance need to be updated.
+By default the update ops are placed in tf.GraphKeys.UPDATE_OPS, so they need to be added as a dependency to the train_op.
+So, the template is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+with tf.control_dependencies(update_ops):
+    train_op = optimizer.minimize(loss)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And also tensorflow official evaluate function (classification model zoo):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, first_clone_scope)
+with tf.control_dependencies([update_op]):
+      train_tensor = tf.identity(total_loss, name=&#39;train_op&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;improvements-and-alternatives&#34;&gt;Improvements and Alternatives&lt;/h3&gt;
+
+&lt;h4 id=&#34;batch-norm-fused-with-convolution&#34;&gt;Batch norm fused with Convolution&lt;/h4&gt;
+
+&lt;p&gt;This is the question makes me fail the interview. Actually, there is no magic stuff about fused batch normalization. Just mathematically
+calculate two layers together and treat them as one layer in forward and backward pass:&lt;/p&gt;
+
+&lt;p&gt;Conv:
+$$convout(N_i,C_{out})=bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)$$
+Batch Norm:
+$$bnout(N_i,C_{out})=(convout(N_i,C_{out})-\mu)/\sqrt{((\epsilon + \sigma)^2)}$$
+$$bnout(N_i,C_{out})=\gamma*bnout(N_i,C_{out})+\beta$$
+Here, $convout(N_i,C_{out})$ means the $N_ith$ sample in the $C_{out}$ channel. Same notation applies to input and bnout.
+$weight(C_{out},k)$ is the conv kernel corresponding to $C_{out}$. And $\epsilon, \sigma, \mu, \gamma, \beta$ are the same as above.&lt;br /&gt;
+After fusion, the total calculation becomes:&lt;/p&gt;
+
+&lt;p&gt;$$out(N_i,C_{out})=\gamma*(bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$
+In this way, the weight and bias of fused conv layer is:&lt;/p&gt;
+
+&lt;p&gt;$$bias = \gamma*(bias(C_{out})$$
+$$weight = weight(C_{out},k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$&lt;/p&gt;
+
+&lt;p&gt;We can use the fused bias and weight in previous conv layers. We can drop the intermediate result between conv and batch norm using this method,
+which can save up to 50% memory and a minor increase of training time.&lt;/p&gt;
+
+&lt;h4 id=&#34;layer-normalization&#34;&gt;Layer normalization&lt;/h4&gt;
+
+&lt;p&gt;Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu and \sigma$ at every location,
+It uses all the neuron activations in one layer to produce $\mu and \sigma$.
+This method is especially useful when not using mini-batch like RNN, where batch norm cannot be used. But its performance in convs layers are not as good
+as batch norm.&lt;/p&gt;
+
+&lt;h4 id=&#34;instance-normalization&#34;&gt;Instance Normalization&lt;/h4&gt;
+
+&lt;h4 id=&#34;group-normalization&#34;&gt;Group Normalization&lt;/h4&gt;
+
+&lt;h4 id=&#34;other-normalization-techniques&#34;&gt;Other normalization techniques*&lt;/h4&gt;
+
+&lt;p&gt;Recurrent Batch Normalization (BN) (Cooijmans, 2016; also proposed concurrently by Qianli Liao &amp;amp; Tomaso Poggio, but tested on Recurrent ConvNets,
+instead of RNN/LSTM): Same as batch normalization. Use different normalization statistics for each time step. You need to store a set of mean and
+standard deviation for each time step.&lt;/p&gt;
+
+&lt;p&gt;Batch Normalized Recurrent Neural Networks (Laurent, 2015): batch normalization is only applied between the input and hidden state, but not between
+hidden states. i.e., normalization is not applied over time.&lt;/p&gt;
+
+&lt;p&gt;Streaming Normalization (Liao et al. 2016) : it summarizes existing normalizations and overcomes most issues mentioned above. It works well with
+ConvNets, recurrent learning and online learning (i.e., small mini-batch or one sample at a time):&lt;/p&gt;
+
+&lt;p&gt;Weight Normalization (Salimans and Kingma 2016): whenever a weight is used, it is divided by its L2 norm first, such that the resulting weight has
+L2 norm 1. That is, output y=x*(w/|w|), where x and w denote the input and weight respectively. A scalar scaling factor g is then multiplied to the
+output y=y*g. But in my experience g seems not essential for performance (also downstream learnable layers can learn this anyway).&lt;/p&gt;
+
+&lt;p&gt;Cosine Normalization (Luo et al. 2017): weight normalization is very similar to cosine normalization, where the same L2 normalization is applied
+to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differentiation can compute appropriate gradients of x and w.&lt;/p&gt;
+
+&lt;p&gt;Here are some great reference materials:&lt;br /&gt;
+1. &lt;a href=&#34;http://www.deeplearningbook.org/contents/optimization.html&#34; target=&#34;_blank&#34;&gt;Deep Learning Book, Chapter 8.7.1&lt;/a&gt;&lt;br /&gt;
+2. &lt;a href=&#34;https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow&#34; target=&#34;_blank&#34;&gt;Stackoverflow: How could I use Batch Normalization in TensorFlow?&lt;/a&gt;&lt;br /&gt;
+3. &lt;a href=&#34;http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html&#34; target=&#34;_blank&#34;&gt;Explaination on Covariance Shift&lt;/a&gt;&lt;br /&gt;
+4. &lt;a href=&#34;https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization&#34; target=&#34;_blank&#34;&gt;Tensorflow batch normalization docs&lt;/a&gt;&lt;br /&gt;
+5. &lt;a href=&#34;https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal&#34; target=&#34;_blank&#34;&gt;Various Normalization Techniques in Deep Learning&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Example Talk</title>
+      <link>/talk/example-talk/</link>
+      <pubDate>Sun, 01 Jan 2017 00:00:00 -0500</pubDate>
+      
+      <guid>/talk/example-talk/</guid>
+      <description>&lt;p&gt;Embed your slides or video here using &lt;a href=&#34;https://sourcethemes.com/academic/post/writing-markdown-latex/&#34; target=&#34;_blank&#34;&gt;shortcodes&lt;/a&gt;. Further details can easily be added using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Deep Learning</title>
+      <link>/project/deep-learning/</link>
+      <pubDate>Wed, 27 Apr 2016 00:00:00 -0400</pubDate>
+      
+      <guid>/project/deep-learning/</guid>
+      <description>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis posuere tellus ac convallis placerat. Proin tincidunt magna sed ex sollicitudin condimentum. Sed ac faucibus dolor, scelerisque sollicitudin nisi. Cras purus urna, suscipit quis sapien eu, pulvinar tempor diam. Quisque risus orci, mollis id ante sit amet, gravida egestas nisl. Sed ac tempus magna. Proin in dui enim. Donec condimentum, sem id dapibus fringilla, tellus enim condimentum arcu, nec volutpat est felis vel metus. Vestibulum sit amet erat at nulla eleifend gravida.&lt;/p&gt;
+
+&lt;p&gt;Nullam vel molestie justo. Curabitur vitae efficitur leo. In hac habitasse platea dictumst. Sed pulvinar mauris dui, eget varius purus congue ac. Nulla euismod, lorem vel elementum dapibus, nunc justo porta mi, sed tempus est est vel tellus. Nam et enim eleifend, laoreet sem sit amet, elementum sem. Morbi ut leo congue, maximus velit ut, finibus arcu. In et libero cursus, rutrum risus non, molestie leo. Nullam congue quam et volutpat malesuada. Sed risus tortor, pulvinar et dictum nec, sodales non mi. Phasellus lacinia commodo laoreet. Nam mollis, erat in feugiat consectetur, purus eros egestas tellus, in auctor urna odio at nibh. Mauris imperdiet nisi ac magna convallis, at rhoncus ligula cursus.&lt;/p&gt;
+
+&lt;p&gt;Cras aliquam rhoncus ipsum, in hendrerit nunc mattis vitae. Duis vitae efficitur metus, ac tempus leo. Cras nec fringilla lacus. Quisque sit amet risus at ipsum pharetra commodo. Sed aliquam mauris at consequat eleifend. Praesent porta, augue sed viverra bibendum, neque ante euismod ante, in vehicula justo lorem ac eros. Suspendisse augue libero, venenatis eget tincidunt ut, malesuada at lorem. Donec vitae bibendum arcu. Aenean maximus nulla non pretium iaculis. Quisque imperdiet, nulla in pulvinar aliquet, velit quam ultrices quam, sit amet fringilla leo sem vel nunc. Mauris in lacinia lacus.&lt;/p&gt;
+
+&lt;p&gt;Suspendisse a tincidunt lacus. Curabitur at urna sagittis, dictum ante sit amet, euismod magna. Sed rutrum massa id tortor commodo, vitae elementum turpis tempus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean purus turpis, venenatis a ullamcorper nec, tincidunt et massa. Integer posuere quam rutrum arcu vehicula imperdiet. Mauris ullamcorper quam vitae purus congue, quis euismod magna eleifend. Vestibulum semper vel augue eget tincidunt. Fusce eget justo sodales, dapibus odio eu, ultrices lorem. Duis condimentum lorem id eros commodo, in facilisis mauris scelerisque. Morbi sed auctor leo. Nullam volutpat a lacus quis pharetra. Nulla congue rutrum magna a ornare.&lt;/p&gt;
+
+&lt;p&gt;Aliquam in turpis accumsan, malesuada nibh ut, hendrerit justo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque sed erat nec justo posuere suscipit. Donec ut efficitur arcu, in malesuada neque. Nunc dignissim nisl massa, id vulputate nunc pretium nec. Quisque eget urna in risus suscipit ultricies. Pellentesque odio odio, tincidunt in eleifend sed, posuere a diam. Nam gravida nisl convallis semper elementum. Morbi vitae felis faucibus, vulputate orci placerat, aliquet nisi. Aliquam erat volutpat. Maecenas sagittis pulvinar purus, sed porta quam laoreet at.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>External Project</title>
+      <link>/project/example-external-project/</link>
+      <pubDate>Wed, 27 Apr 2016 00:00:00 -0400</pubDate>
+      
+      <guid>/project/example-external-project/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Academic: the website designer for Hugo</title>
+      <link>/post/getting-started/</link>
+      <pubDate>Wed, 20 Apr 2016 00:00:00 -0400</pubDate>
+      
+      <guid>/post/getting-started/</guid>
+      <description>
+
+&lt;p&gt;&lt;strong&gt;Academic&lt;/strong&gt; is a framework to help you create a beautiful website quickly. Perfect for personal sites, blogs, or business/project sites. &lt;a href=&#34;https://themes.gohugo.io/theme/academic/&#34; target=&#34;_blank&#34;&gt;Check out the latest demo&lt;/a&gt; of what you&amp;rsquo;ll get in less than 10 minutes. Then head on over to the &lt;a href=&#34;https://sourcethemes.com/academic/docs/&#34; target=&#34;_blank&#34;&gt;Quick Start guide&lt;/a&gt; or take a look at the &lt;a href=&#34;https://sourcethemes.com/academic/updates/&#34; target=&#34;_blank&#34;&gt;Release Notes&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/gcushen/hugo-academic/&#34; target=&#34;_blank&#34;&gt;&lt;img src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/academic.png&#34; alt=&#34;Screenshot&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Key features:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Easily manage various content including homepage, blog posts, publications, talks, and projects&lt;/li&gt;
+&lt;li&gt;Extensible via &lt;strong&gt;color themes&lt;/strong&gt; and &lt;strong&gt;widgets/plugins&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Write in &lt;a href=&#34;https://sourcethemes.com/academic/docs/writing-markdown-latex/&#34; target=&#34;_blank&#34;&gt;Markdown&lt;/a&gt; for easy formatting and code highlighting, with &lt;a href=&#34;https://en.wikibooks.org/wiki/LaTeX/Mathematics&#34; target=&#34;_blank&#34;&gt;LaTeX&lt;/a&gt; for mathematical expressions&lt;/li&gt;
+&lt;li&gt;Social/academic network linking, &lt;a href=&#34;https://analytics.google.com&#34; target=&#34;_blank&#34;&gt;Google Analytics&lt;/a&gt;, and &lt;a href=&#34;https://disqus.com&#34; target=&#34;_blank&#34;&gt;Disqus&lt;/a&gt; comments&lt;/li&gt;
+&lt;li&gt;Responsive and mobile friendly&lt;/li&gt;
+&lt;li&gt;Simple and refreshing one page design&lt;/li&gt;
+&lt;li&gt;Multilingual and easy to customize&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;color-themes&#34;&gt;Color Themes&lt;/h2&gt;
+
+&lt;p&gt;Academic is available in different color themes and font themes.&lt;/p&gt;
+
+
+
+&lt;div class=&#34;gallery&#34;&gt;
+  
+  
+  
+  
+    
+  
+  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Default&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-default.png&#34;&gt;
+    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-default.png&#34;&gt;
+  &lt;/a&gt;
+  
+  
+  
+  
+    
+  
+  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Ocean&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-ocean.png&#34;&gt;
+    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-ocean.png&#34;&gt;
+  &lt;/a&gt;
+  
+  
+  
+  
+    
+  
+  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Dark&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-dark.png&#34;&gt;
+    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-dark.png&#34;&gt;
+  &lt;/a&gt;
+  
+  
+  
+  
+    
+  
+  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Default&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-forest.png&#34;&gt;
+    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-forest.png&#34;&gt;
+  &lt;/a&gt;
+  
+  
+  
+  
+    
+  
+  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Coffee theme with Playfair font&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-coffee-playfair.png&#34;&gt;
+    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-coffee-playfair.png&#34;&gt;
+  &lt;/a&gt;
+  
+  
+  
+  
+    
+  
+  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;1950s&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-1950s.png&#34;&gt;
+    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-1950s.png&#34;&gt;
+  &lt;/a&gt;
+  
+&lt;/div&gt;
+
+&lt;h2 id=&#34;install&#34;&gt;Install&lt;/h2&gt;
+
+&lt;p&gt;You can choose from one of the following four methods to install:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;one-click install using your web browser (recommended)&lt;/li&gt;
+&lt;li&gt;install on your computer using Git with the Command Prompt/Terminal app&lt;/li&gt;
+&lt;li&gt;install on your computer by downloading the ZIP files&lt;/li&gt;
+&lt;li&gt;install on your computer with RStudio&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;quick-install-using-your-web-browser&#34;&gt;Quick install using your web browser&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://app.netlify.com/start/deploy?repository=https://github.com/sourcethemes/academic-kickstart&#34; target=&#34;_blank&#34;&gt;Install Academic with Netlify&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Netlify will provide you with a customizable URL to access your new site&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;On GitHub, go to your newly created &lt;code&gt;academic-kickstart&lt;/code&gt; repository and edit &lt;code&gt;config.toml&lt;/code&gt; to personalize your site. Shortly after saving the file, your site will automatically update&lt;/li&gt;
+&lt;li&gt;Read the &lt;a href=&#34;https://sourcethemes.com/academic/docs/&#34; target=&#34;_blank&#34;&gt;Quick Start Guide&lt;/a&gt; to learn how to add Markdown content. For inspiration, refer to the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/tree/master/exampleSite&#34; target=&#34;_blank&#34;&gt;Markdown content&lt;/a&gt; which powers the &lt;a href=&#34;https://themes.gohugo.io/theme/academic/&#34; target=&#34;_blank&#34;&gt;Demo&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;install-with-git&#34;&gt;Install with Git&lt;/h3&gt;
+
+&lt;p&gt;Prerequisites:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://git-scm.com/downloads&#34; target=&#34;_blank&#34;&gt;Download and install Git&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://gohugo.io/getting-started/installing/#quick-install&#34; target=&#34;_blank&#34;&gt;Download and install Hugo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/sourcethemes/academic-kickstart#fork-destination-box&#34; target=&#34;_blank&#34;&gt;Fork&lt;/a&gt; the &lt;em&gt;Academic Kickstart&lt;/em&gt; repository and clone your fork with Git:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/sourcethemes/academic-kickstart.git My_Website
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;em&gt;Note that if you forked Academic Kickstart, the above command should be edited to clone your fork, i.e. replace &lt;code&gt;sourcethemes&lt;/code&gt; with your GitHub username.&lt;/em&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Initialize the theme:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd My_Website
+git submodule update --init --recursive
+&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;install-with-zip&#34;&gt;Install with ZIP&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/sourcethemes/academic-kickstart/archive/master.zip&#34; target=&#34;_blank&#34;&gt;Download&lt;/a&gt; and extract &lt;em&gt;Academic Kickstart&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/gcushen/hugo-academic/archive/master.zip&#34; target=&#34;_blank&#34;&gt;Download&lt;/a&gt; and extract the &lt;em&gt;Academic theme&lt;/em&gt; to the &lt;code&gt;themes/academic/&lt;/code&gt; folder from the above step&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;install-with-rstudio&#34;&gt;Install with RStudio&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://sourcethemes.com/academic/docs/install/#install-with-rstudio&#34; target=&#34;_blank&#34;&gt;View the guide to installing Academic with RStudio&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;quick-start&#34;&gt;Quick start&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;If you installed on your computer, view your new website by running the following command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;hugo server
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now visit &lt;a href=&#34;http://localhost:1313&#34; target=&#34;_blank&#34;&gt;localhost:1313&lt;/a&gt; and your new Academic powered website will appear. Otherwise, if using Netlify, they will provide you with your URL.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Read the &lt;a href=&#34;https://sourcethemes.com/academic/docs/&#34; target=&#34;_blank&#34;&gt;Quick Start Guide&lt;/a&gt; to learn how to add Markdown content, customize your site, and deploy it. For inspiration, refer to the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/tree/master/exampleSite&#34; target=&#34;_blank&#34;&gt;Markdown content&lt;/a&gt; which powers the &lt;a href=&#34;https://themes.gohugo.io/theme/academic/&#34; target=&#34;_blank&#34;&gt;Demo&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Build your site by running the &lt;code&gt;hugo&lt;/code&gt; command. Then &lt;a href=&#34;https://georgecushen.com/create-your-website-with-hugo/&#34; target=&#34;_blank&#34;&gt;host it for free using Github Pages&lt;/a&gt; or Netlify (refer to the first installation method). Alternatively, copy the generated &lt;code&gt;public/&lt;/code&gt; directory (by FTP, Rsync, etc.) to your production web server (such as a university&amp;rsquo;s hosting service).&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;updating&#34;&gt;Updating&lt;/h2&gt;
+
+&lt;p&gt;Feel free to &lt;em&gt;star&lt;/em&gt; the project on &lt;a href=&#34;https://github.com/gcushen/hugo-academic/&#34; target=&#34;_blank&#34;&gt;Github&lt;/a&gt; to help keep track of updates and check out the &lt;a href=&#34;https://sourcethemes.com/academic/updates&#34; target=&#34;_blank&#34;&gt;release notes&lt;/a&gt; prior to updating your site.&lt;/p&gt;
+
+&lt;p&gt;Before updating the framework, it is recommended to make a backup of your entire website directory (or at least your &lt;code&gt;themes/academic&lt;/code&gt; directory) and record your current version number.&lt;/p&gt;
+
+&lt;p&gt;By default, Academic is installed as a Git submodule which can be updated by running the following command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;git submodule update --remote --merge
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://sourcethemes.com/academic/docs/update/&#34; target=&#34;_blank&#34;&gt;Check out the update guide&lt;/a&gt; for full instructions and alternative methods.&lt;/p&gt;
+
+&lt;h2 id=&#34;feedback-contributing&#34;&gt;Feedback &amp;amp; Contributing&lt;/h2&gt;
+
+&lt;p&gt;Please use the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/issues&#34; target=&#34;_blank&#34;&gt;issue tracker&lt;/a&gt; to let me know about any bugs or feature requests, or alternatively make a pull request.&lt;/p&gt;
+
+&lt;p&gt;For support, head over to the &lt;a href=&#34;http://discuss.gohugo.io&#34; target=&#34;_blank&#34;&gt;Hugo discussion forum&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;license&#34;&gt;License&lt;/h2&gt;
+
+&lt;p&gt;Copyright 2016-present &lt;a href=&#34;https://georgecushen.com&#34; target=&#34;_blank&#34;&gt;George Cushen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Released under the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/blob/master/LICENSE.md&#34; target=&#34;_blank&#34;&gt;MIT&lt;/a&gt; license.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>A Person Re-Identification System For Mobile Devices</title>
+      <link>/publication/person-re-identification/</link>
+      <pubDate>Tue, 01 Sep 2015 00:00:00 -0400</pubDate>
+      
+      <guid>/publication/person-re-identification/</guid>
+      <description>&lt;p&gt;More detail can easily be written here using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Mobile visual clothing search</title>
+      <link>/publication/clothing-search/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 -0400</pubDate>
+      
+      <guid>/publication/clothing-search/</guid>
+      <description>&lt;p&gt;More detail can easily be written here using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -80,7 +80,7 @@ Batch Normalization: Accelerating Deep Network Training by Reducing Internal Cov
   <meta property="og:title" content="Going Deeper in Batch Normalization | Tong Shen">
   <meta property="og:description" content="This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.
 Here is the original paper about batch normalization on Arxiv:
-Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.">
+Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift."><meta property="og:image" content="/img/batchnorm.jpg">
   <meta property="og:locale" content="en-us">
   
   <meta property="article:published_time" content="2018-05-17T21:00:00-04:00">
@@ -187,9 +187,9 @@ Batch Normalization: Accelerating Deep Network Training by Reducing Internal Cov
         
 
         <li class="nav-item">
-          <a href="/#publications_selected">
+          <a href="/#posts">
             
-            <span>Publications</span>
+            <span>Posts</span>
             
           </a>
         </li>
@@ -206,9 +206,9 @@ Batch Normalization: Accelerating Deep Network Training by Reducing Internal Cov
         
 
         <li class="nav-item">
-          <a href="/#posts">
+          <a href="/#publications_selected">
             
-            <span>Posts</span>
+            <span>Publications</span>
             
           </a>
         </li>
@@ -247,6 +247,15 @@ Batch Normalization: Accelerating Deep Network Training by Reducing Internal Cov
 <article class="article" itemscope itemtype="http://schema.org/Article">
 
   
+<div class="article-header">
+  
+  
+    <img src="/img/batchnorm.jpg" class="article-banner" itemprop="image">
+  
+
+  
+</div>
+
 
 
   <div class="article-container">
@@ -501,7 +510,8 @@ this exponential weighted method are more popular in practice.</p>
 By default the update ops are placed in tf.GraphKeys.UPDATE_OPS, so they need to be added as a dependency to the train_op.
 So, the template is:</p>
 
-<pre><code class="language-python">update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+<pre><code class="language-python">batchnorm = tf.layers.batch_normalization(x, training=training)
+update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 with tf.control_dependencies(update_ops):
     train_op = optimizer.minimize(loss)
 </code></pre>
@@ -595,6 +605,18 @@ to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differen
 
     
     
+    <div class="article-widget">
+      <div class="hr-light"></div>
+      <h3>Related</h3>
+      <ul>
+        
+        <li><a href="/post/amazing-gan---wasserstein-gan/">Amazing GAN - Wasserstein GAN</a></li>
+        
+        <li><a href="/project/obfuscatedblurred-human-face-reconstruction/">Obfuscated/Blurred Human Face Reconstruction</a></li>
+        
+      </ul>
+    </div>
+    
 
     
 
@@ -612,7 +634,7 @@ to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differen
 
       Powered by
       
-      <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>. 
+      <a href="https://shen338.github.io/" target="_blank" rel="noopener">Tong Shen</a>. 
 	  
 	  All rights reserved.
 

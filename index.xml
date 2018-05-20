@@ -11,6 +11,64 @@
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Spatial Transform Network</title>
+      <link>/post/spatial-transform-network/</link>
+      <pubDate>Sat, 19 May 2018 21:00:00 -0400</pubDate>
+      
+      <guid>/post/spatial-transform-network/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Amazing GAN - Wasserstein GAN</title>
+      <link>/post/amazing-gan---wasserstein-gan/</link>
+      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
+      
+      <guid>/post/amazing-gan---wasserstein-gan/</guid>
+      <description>
+
+&lt;h1 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;#example&#34;&gt;Example&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#example2&#34;&gt;Example2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#third-example&#34;&gt;Third Example&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;example&#34;&gt;Example&lt;/h2&gt;
+
+&lt;p&gt;.
+.
+.
+.
+.
+.
+.&lt;/p&gt;
+
+&lt;h2 id=&#34;example2&#34;&gt;Example2&lt;/h2&gt;
+
+&lt;p&gt;.
+.&lt;/p&gt;
+
+&lt;p&gt;.
+..
+.
+..
+.
+.
+..
+.
+..
+.
+.
+..
+..&lt;/p&gt;
+
+&lt;h2 id=&#34;third-example&#34;&gt;Third Example&lt;/h2&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Going Deeper in Batch Normalization</title>
       <link>/post/going-deeper-into-batch-normalization/</link>
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
@@ -191,7 +249,8 @@ this exponential weighted method are more popular in practice.&lt;/p&gt;
 By default the update ops are placed in tf.GraphKeys.UPDATE_OPS, so they need to be added as a dependency to the train_op.
 So, the template is:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;batchnorm = tf.layers.batch_normalization(x, training=training)
+update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 with tf.control_dependencies(update_ops):
     train_op = optimizer.minimize(loss)
 &lt;/code&gt;&lt;/pre&gt;
@@ -268,246 +327,328 @@ to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differen
     </item>
     
     <item>
-      <title>Example Talk</title>
-      <link>/talk/example-talk/</link>
-      <pubDate>Sun, 01 Jan 2017 00:00:00 -0500</pubDate>
+      <title>Microscale two-dimensional (2D) temperature mapping by ratiometric fluorescence imaging under orthogonal excitations</title>
+      <link>/publication/temperature_mapping/</link>
+      <pubDate>Thu, 15 Feb 2018 00:00:00 -0500</pubDate>
       
-      <guid>/talk/example-talk/</guid>
-      <description>&lt;p&gt;Embed your slides or video here using &lt;a href=&#34;https://sourcethemes.com/academic/post/writing-markdown-latex/&#34; target=&#34;_blank&#34;&gt;shortcodes&lt;/a&gt;. Further details can easily be added using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Deep Learning</title>
-      <link>/project/deep-learning/</link>
-      <pubDate>Wed, 27 Apr 2016 00:00:00 -0400</pubDate>
-      
-      <guid>/project/deep-learning/</guid>
-      <description>&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis posuere tellus ac convallis placerat. Proin tincidunt magna sed ex sollicitudin condimentum. Sed ac faucibus dolor, scelerisque sollicitudin nisi. Cras purus urna, suscipit quis sapien eu, pulvinar tempor diam. Quisque risus orci, mollis id ante sit amet, gravida egestas nisl. Sed ac tempus magna. Proin in dui enim. Donec condimentum, sem id dapibus fringilla, tellus enim condimentum arcu, nec volutpat est felis vel metus. Vestibulum sit amet erat at nulla eleifend gravida.&lt;/p&gt;
-
-&lt;p&gt;Nullam vel molestie justo. Curabitur vitae efficitur leo. In hac habitasse platea dictumst. Sed pulvinar mauris dui, eget varius purus congue ac. Nulla euismod, lorem vel elementum dapibus, nunc justo porta mi, sed tempus est est vel tellus. Nam et enim eleifend, laoreet sem sit amet, elementum sem. Morbi ut leo congue, maximus velit ut, finibus arcu. In et libero cursus, rutrum risus non, molestie leo. Nullam congue quam et volutpat malesuada. Sed risus tortor, pulvinar et dictum nec, sodales non mi. Phasellus lacinia commodo laoreet. Nam mollis, erat in feugiat consectetur, purus eros egestas tellus, in auctor urna odio at nibh. Mauris imperdiet nisi ac magna convallis, at rhoncus ligula cursus.&lt;/p&gt;
-
-&lt;p&gt;Cras aliquam rhoncus ipsum, in hendrerit nunc mattis vitae. Duis vitae efficitur metus, ac tempus leo. Cras nec fringilla lacus. Quisque sit amet risus at ipsum pharetra commodo. Sed aliquam mauris at consequat eleifend. Praesent porta, augue sed viverra bibendum, neque ante euismod ante, in vehicula justo lorem ac eros. Suspendisse augue libero, venenatis eget tincidunt ut, malesuada at lorem. Donec vitae bibendum arcu. Aenean maximus nulla non pretium iaculis. Quisque imperdiet, nulla in pulvinar aliquet, velit quam ultrices quam, sit amet fringilla leo sem vel nunc. Mauris in lacinia lacus.&lt;/p&gt;
-
-&lt;p&gt;Suspendisse a tincidunt lacus. Curabitur at urna sagittis, dictum ante sit amet, euismod magna. Sed rutrum massa id tortor commodo, vitae elementum turpis tempus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean purus turpis, venenatis a ullamcorper nec, tincidunt et massa. Integer posuere quam rutrum arcu vehicula imperdiet. Mauris ullamcorper quam vitae purus congue, quis euismod magna eleifend. Vestibulum semper vel augue eget tincidunt. Fusce eget justo sodales, dapibus odio eu, ultrices lorem. Duis condimentum lorem id eros commodo, in facilisis mauris scelerisque. Morbi sed auctor leo. Nullam volutpat a lacus quis pharetra. Nulla congue rutrum magna a ornare.&lt;/p&gt;
-
-&lt;p&gt;Aliquam in turpis accumsan, malesuada nibh ut, hendrerit justo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque sed erat nec justo posuere suscipit. Donec ut efficitur arcu, in malesuada neque. Nunc dignissim nisl massa, id vulputate nunc pretium nec. Quisque eget urna in risus suscipit ultricies. Pellentesque odio odio, tincidunt in eleifend sed, posuere a diam. Nam gravida nisl convallis semper elementum. Morbi vitae felis faucibus, vulputate orci placerat, aliquet nisi. Aliquam erat volutpat. Maecenas sagittis pulvinar purus, sed porta quam laoreet at.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>External Project</title>
-      <link>/project/example-external-project/</link>
-      <pubDate>Wed, 27 Apr 2016 00:00:00 -0400</pubDate>
-      
-      <guid>/project/example-external-project/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Academic: the website designer for Hugo</title>
-      <link>/post/getting-started/</link>
-      <pubDate>Wed, 20 Apr 2016 00:00:00 -0400</pubDate>
-      
-      <guid>/post/getting-started/</guid>
-      <description>
-
-&lt;p&gt;&lt;strong&gt;Academic&lt;/strong&gt; is a framework to help you create a beautiful website quickly. Perfect for personal sites, blogs, or business/project sites. &lt;a href=&#34;https://themes.gohugo.io/theme/academic/&#34; target=&#34;_blank&#34;&gt;Check out the latest demo&lt;/a&gt; of what you&amp;rsquo;ll get in less than 10 minutes. Then head on over to the &lt;a href=&#34;https://sourcethemes.com/academic/docs/&#34; target=&#34;_blank&#34;&gt;Quick Start guide&lt;/a&gt; or take a look at the &lt;a href=&#34;https://sourcethemes.com/academic/updates/&#34; target=&#34;_blank&#34;&gt;Release Notes&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/gcushen/hugo-academic/&#34; target=&#34;_blank&#34;&gt;&lt;img src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/academic.png&#34; alt=&#34;Screenshot&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Key features:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Easily manage various content including homepage, blog posts, publications, talks, and projects&lt;/li&gt;
-&lt;li&gt;Extensible via &lt;strong&gt;color themes&lt;/strong&gt; and &lt;strong&gt;widgets/plugins&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;Write in &lt;a href=&#34;https://sourcethemes.com/academic/docs/writing-markdown-latex/&#34; target=&#34;_blank&#34;&gt;Markdown&lt;/a&gt; for easy formatting and code highlighting, with &lt;a href=&#34;https://en.wikibooks.org/wiki/LaTeX/Mathematics&#34; target=&#34;_blank&#34;&gt;LaTeX&lt;/a&gt; for mathematical expressions&lt;/li&gt;
-&lt;li&gt;Social/academic network linking, &lt;a href=&#34;https://analytics.google.com&#34; target=&#34;_blank&#34;&gt;Google Analytics&lt;/a&gt;, and &lt;a href=&#34;https://disqus.com&#34; target=&#34;_blank&#34;&gt;Disqus&lt;/a&gt; comments&lt;/li&gt;
-&lt;li&gt;Responsive and mobile friendly&lt;/li&gt;
-&lt;li&gt;Simple and refreshing one page design&lt;/li&gt;
-&lt;li&gt;Multilingual and easy to customize&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;color-themes&#34;&gt;Color Themes&lt;/h2&gt;
-
-&lt;p&gt;Academic is available in different color themes and font themes.&lt;/p&gt;
-
-
-
-&lt;div class=&#34;gallery&#34;&gt;
-  
-  
-  
-  
-    
-  
-  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Default&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-default.png&#34;&gt;
-    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-default.png&#34;&gt;
-  &lt;/a&gt;
-  
-  
-  
-  
-    
-  
-  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Ocean&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-ocean.png&#34;&gt;
-    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-ocean.png&#34;&gt;
-  &lt;/a&gt;
-  
-  
-  
-  
-    
-  
-  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Dark&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-dark.png&#34;&gt;
-    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-dark.png&#34;&gt;
-  &lt;/a&gt;
-  
-  
-  
-  
-    
-  
-  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Default&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-forest.png&#34;&gt;
-    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-forest.png&#34;&gt;
-  &lt;/a&gt;
-  
-  
-  
-  
-    
-  
-  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;Coffee theme with Playfair font&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-coffee-playfair.png&#34;&gt;
-    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-coffee-playfair.png&#34;&gt;
-  &lt;/a&gt;
-  
-  
-  
-  
-    
-  
-  &lt;a data-fancybox=&#34;gallery-1&#34; data-caption=&#34;1950s&#34; href=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-1950s.png&#34;&gt;
-    &lt;img alt=&#34;&#34; src=&#34;https://raw.githubusercontent.com/gcushen/hugo-academic/master/images/theme-1950s.png&#34;&gt;
-  &lt;/a&gt;
-  
-&lt;/div&gt;
-
-&lt;h2 id=&#34;install&#34;&gt;Install&lt;/h2&gt;
-
-&lt;p&gt;You can choose from one of the following four methods to install:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;one-click install using your web browser (recommended)&lt;/li&gt;
-&lt;li&gt;install on your computer using Git with the Command Prompt/Terminal app&lt;/li&gt;
-&lt;li&gt;install on your computer by downloading the ZIP files&lt;/li&gt;
-&lt;li&gt;install on your computer with RStudio&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;quick-install-using-your-web-browser&#34;&gt;Quick install using your web browser&lt;/h3&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;a href=&#34;https://app.netlify.com/start/deploy?repository=https://github.com/sourcethemes/academic-kickstart&#34; target=&#34;_blank&#34;&gt;Install Academic with Netlify&lt;/a&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Netlify will provide you with a customizable URL to access your new site&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;On GitHub, go to your newly created &lt;code&gt;academic-kickstart&lt;/code&gt; repository and edit &lt;code&gt;config.toml&lt;/code&gt; to personalize your site. Shortly after saving the file, your site will automatically update&lt;/li&gt;
-&lt;li&gt;Read the &lt;a href=&#34;https://sourcethemes.com/academic/docs/&#34; target=&#34;_blank&#34;&gt;Quick Start Guide&lt;/a&gt; to learn how to add Markdown content. For inspiration, refer to the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/tree/master/exampleSite&#34; target=&#34;_blank&#34;&gt;Markdown content&lt;/a&gt; which powers the &lt;a href=&#34;https://themes.gohugo.io/theme/academic/&#34; target=&#34;_blank&#34;&gt;Demo&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&#34;install-with-git&#34;&gt;Install with Git&lt;/h3&gt;
-
-&lt;p&gt;Prerequisites:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://git-scm.com/downloads&#34; target=&#34;_blank&#34;&gt;Download and install Git&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://gohugo.io/getting-started/installing/#quick-install&#34; target=&#34;_blank&#34;&gt;Download and install Hugo&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://github.com/sourcethemes/academic-kickstart#fork-destination-box&#34; target=&#34;_blank&#34;&gt;Fork&lt;/a&gt; the &lt;em&gt;Academic Kickstart&lt;/em&gt; repository and clone your fork with Git:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/sourcethemes/academic-kickstart.git My_Website
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;em&gt;Note that if you forked Academic Kickstart, the above command should be edited to clone your fork, i.e. replace &lt;code&gt;sourcethemes&lt;/code&gt; with your GitHub username.&lt;/em&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Initialize the theme:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;cd My_Website
-git submodule update --init --recursive
-&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&#34;install-with-zip&#34;&gt;Install with ZIP&lt;/h3&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/sourcethemes/academic-kickstart/archive/master.zip&#34; target=&#34;_blank&#34;&gt;Download&lt;/a&gt; and extract &lt;em&gt;Academic Kickstart&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/gcushen/hugo-academic/archive/master.zip&#34; target=&#34;_blank&#34;&gt;Download&lt;/a&gt; and extract the &lt;em&gt;Academic theme&lt;/em&gt; to the &lt;code&gt;themes/academic/&lt;/code&gt; folder from the above step&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&#34;install-with-rstudio&#34;&gt;Install with RStudio&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://sourcethemes.com/academic/docs/install/#install-with-rstudio&#34; target=&#34;_blank&#34;&gt;View the guide to installing Academic with RStudio&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;quick-start&#34;&gt;Quick start&lt;/h2&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;If you installed on your computer, view your new website by running the following command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;hugo server
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now visit &lt;a href=&#34;http://localhost:1313&#34; target=&#34;_blank&#34;&gt;localhost:1313&lt;/a&gt; and your new Academic powered website will appear. Otherwise, if using Netlify, they will provide you with your URL.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Read the &lt;a href=&#34;https://sourcethemes.com/academic/docs/&#34; target=&#34;_blank&#34;&gt;Quick Start Guide&lt;/a&gt; to learn how to add Markdown content, customize your site, and deploy it. For inspiration, refer to the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/tree/master/exampleSite&#34; target=&#34;_blank&#34;&gt;Markdown content&lt;/a&gt; which powers the &lt;a href=&#34;https://themes.gohugo.io/theme/academic/&#34; target=&#34;_blank&#34;&gt;Demo&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Build your site by running the &lt;code&gt;hugo&lt;/code&gt; command. Then &lt;a href=&#34;https://georgecushen.com/create-your-website-with-hugo/&#34; target=&#34;_blank&#34;&gt;host it for free using Github Pages&lt;/a&gt; or Netlify (refer to the first installation method). Alternatively, copy the generated &lt;code&gt;public/&lt;/code&gt; directory (by FTP, Rsync, etc.) to your production web server (such as a university&amp;rsquo;s hosting service).&lt;/p&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&#34;updating&#34;&gt;Updating&lt;/h2&gt;
-
-&lt;p&gt;Feel free to &lt;em&gt;star&lt;/em&gt; the project on &lt;a href=&#34;https://github.com/gcushen/hugo-academic/&#34; target=&#34;_blank&#34;&gt;Github&lt;/a&gt; to help keep track of updates and check out the &lt;a href=&#34;https://sourcethemes.com/academic/updates&#34; target=&#34;_blank&#34;&gt;release notes&lt;/a&gt; prior to updating your site.&lt;/p&gt;
-
-&lt;p&gt;Before updating the framework, it is recommended to make a backup of your entire website directory (or at least your &lt;code&gt;themes/academic&lt;/code&gt; directory) and record your current version number.&lt;/p&gt;
-
-&lt;p&gt;By default, Academic is installed as a Git submodule which can be updated by running the following command:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;git submodule update --remote --merge
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://sourcethemes.com/academic/docs/update/&#34; target=&#34;_blank&#34;&gt;Check out the update guide&lt;/a&gt; for full instructions and alternative methods.&lt;/p&gt;
-
-&lt;h2 id=&#34;feedback-contributing&#34;&gt;Feedback &amp;amp; Contributing&lt;/h2&gt;
-
-&lt;p&gt;Please use the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/issues&#34; target=&#34;_blank&#34;&gt;issue tracker&lt;/a&gt; to let me know about any bugs or feature requests, or alternatively make a pull request.&lt;/p&gt;
-
-&lt;p&gt;For support, head over to the &lt;a href=&#34;http://discuss.gohugo.io&#34; target=&#34;_blank&#34;&gt;Hugo discussion forum&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;license&#34;&gt;License&lt;/h2&gt;
-
-&lt;p&gt;Copyright 2016-present &lt;a href=&#34;https://georgecushen.com&#34; target=&#34;_blank&#34;&gt;George Cushen&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Released under the &lt;a href=&#34;https://github.com/gcushen/hugo-academic/blob/master/LICENSE.md&#34; target=&#34;_blank&#34;&gt;MIT&lt;/a&gt; license.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>A Person Re-Identification System For Mobile Devices</title>
-      <link>/publication/person-re-identification/</link>
-      <pubDate>Tue, 01 Sep 2015 00:00:00 -0400</pubDate>
-      
-      <guid>/publication/person-re-identification/</guid>
+      <guid>/publication/temperature_mapping/</guid>
       <description>&lt;p&gt;More detail can easily be written here using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
 </description>
     </item>
     
     <item>
-      <title>Mobile visual clothing search</title>
-      <link>/publication/clothing-search/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 -0400</pubDate>
+      <title>Obfuscated/Blurred Human Face Reconstruction</title>
+      <link>/project/obfuscatedblurred-human-face-reconstruction/</link>
+      <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
       
-      <guid>/publication/clothing-search/</guid>
+      <guid>/project/obfuscatedblurred-human-face-reconstruction/</guid>
+      <description>
+
+&lt;h1 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;#data-preparation&#34;&gt;Data preparation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#super-resolution-resnet&#34;&gt;Super Resolution ResNet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#generative-adversarial-network-model&#34;&gt;Generative Adversarial Network Model&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Nowadays, a lot of images on the Internet are intentionally blurred or mosaiced due to various reasons. The main objective of this project is to
+reconstruct these images, especially heavily blurred ones, to their original high-resolution counterpart. This problem is an ill-posed problems, we need to
+predict fine-grained details only based on little information on degenerated images. Exploring and enforcing strong prior information
+about the high-resolution image are necessary to guarantee the stability of
+this reconstruction process. Many traditional example-based methods have been devoted to resolving this problem via probabilistic
+graphical model, neighbor embedding, sparse coding, linear or nonlinear regression, and random forest.&lt;br /&gt;
+Our approach is utilizing deep networks for image reconstruction to learn the mapping between low and high-resolution image pairs, automatically take the prior
+information into account. Check out the code &lt;a href=&#34;https://github.com/shen338/Obfuscated-Face-Reconstruction&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Our experiment consists of three steps.&lt;/p&gt;
+
+&lt;h2 id=&#34;data-preparation&#34;&gt;Data preparation&lt;/h2&gt;
+
+&lt;p&gt;In 2017, the most popular dataset about human face is the &lt;a href=&#34;http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html&#34; target=&#34;_blank&#34;&gt;CelebA dataset&lt;/a&gt; from CUHK, which has
+ 10,177 number of identities, 202,599 number of face images.&lt;br /&gt;
+ What we do first is detecting and cropping human face from the image and resize it into 128x128 in convenience. We use OpenCV&amp;rsquo;s module named &amp;ldquo;haarcascade_frontalface&amp;rdquo;
+ to detect faces and use bicubic interpolation to resize images. The code are as below:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;facedata = &amp;quot;haarcascade_frontalface_default.xml&amp;quot;
+cascade = cv2.CascadeClassifier(facedata)
+img = cv2.imread(image_directory)
+minisize = (img.shape[1], img.shape[0])
+miniframe = cv2.resize(img, minisize)
+
+faces = cascade.detectMultiScale(miniframe)
+if(len(faces) == 0): continue
+x, y, w, h = [v for v in faces[0]]  # only need the first detected face image
+
+img_raw = img[y:y + h, x:x + w]
+img_raw = cv2.resize(img_raw, (128, 128), interpolation=cv2.INTER_LANCZOS4)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then we manually downsample these high-resolution images using gaussian and average pooling. After write both low and high-resolution image pairs into binary files
+using TFRecord for multi-threading read in the future. Code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import tensorflow as tf
+import numpy as np
+import cv2
+import glob
+import random
+import sys
+
+
+def load_image(addr):
+    # read an image and resize to (224, 224)
+    # cv2 load images as BGR, convert it to RGB
+    img = cv2.imread(addr)
+    #img = cv2.resize(img, (128, 128), interpolation=cv2.INTER_CUBIC)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = img.astype(np.uint8)
+    return img
+
+def _int64_feature(value):
+  return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
+def _bytes_feature(value):
+  return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+
+shuffle_data = True
+image_path_small = &#39;./origin/small/*.png&#39;
+address_small = glob.glob(image_path_small)
+print(len(address_small))
+image_path_origin = &#39;./origin/origin/*.png&#39;
+address_origin = glob.glob(image_path_origin)
+
+if shuffle_data:
+    c = list(zip(address_small, address_origin))
+    random.shuffle(c)
+    address_small,  address_origin= zip(*c)
+
+train_filename = &#39;train_espcn.tfrecords&#39;
+
+# create new TFrecord file
+writer = tf.python_io.TFRecordWriter(train_filename)
+
+for i in range(len(address_small)):
+
+    if not i % 1000:
+        print(&#39;Train data: {}/{}&#39;.format(i, len(address_small)))
+        sys.stdout.flush()
+
+    img_small = load_image(address_small[i])
+    img_origin = load_image(address_origin[i])
+
+    feature = {&#39;train/image_small&#39;: _bytes_feature(tf.compat.as_bytes(img_small.tostring())),
+               &#39;train/image_origin&#39;: _bytes_feature(tf.compat.as_bytes(img_origin.tostring()))}
+
+    # Create an example protocol buffer
+    example = tf.train.Example(features=tf.train.Features(feature=feature))
+
+    # Serialize to string and write on the file
+    writer.write(example.SerializeToString())
+
+writer.close()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;super-resolution-resnet&#34;&gt;Super Resolution ResNet&lt;/h2&gt;
+
+&lt;p&gt;My first trail was using convolution neural network to do end-to-end super-resolution. The intuition is quite simple,
+just feed the low resolution images to the network, do downsampling and upsampling, in the end, use
+high resolution images as ground truth to train this network. In this way, the neural network will learn how to map from
+low-resolution image directly to high-resolution images. One thing worth to mention, In that time, I didn&amp;rsquo;t have a good GPU,
+so I have to so every I can to save computational resources.
+We replaced the upsampling layers with Pixel Shuffle layers, which directly map the feature map into
+high resolution output instead of doing transposed convolution to upsample the feature map.&lt;/p&gt;
+
+&lt;p&gt;Next, we use skip connection from &lt;a href=&#34;https://arxiv.org/abs/1512.03385&#34; target=&#34;_blank&#34;&gt;ResNet paper&lt;/a&gt; to enhance our model&amp;rsquo;s  expression capacity. We put 15 residual
+block module in our network before Pixel Shuffle layers. The enhancing is quite obvious in the result comparasion.
+We also use pretrained VGG net to build the preceptual loss. Instead of using
+vanilla MSE loss to compare the network output and ground truth, we feed the network output and ground truth
+into ImageNet pretrained VGG net and compare their feature map difference using MSE. Using direct MSE loss function also works here, but it may
+not agree with human observers, because human visual system is not sentitive to color and edgee. While perceptual loss simulates human visual system, making the
+loss value more related to human percetion. The architecture of our network is shown as follows:
+&lt;img src=&#34;https://raw.githubusercontent.com/shen338/Obfuscated-Face-Reconstruction/master/SRResNet_model.PNG&#34; alt=&#34;SRResnet&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This model works well for 4 times mosaiced/blurred images, even though there is still some smoothing effect in human face detailes. I think our model even makes
+these celebrities more beautiful/handsome 😄. After smoothing out their wrinkles and little flaws, they all look younger than before! The result is shown as follows:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/shen338/Obfuscated-Face-Reconstruction/master/result/SRResNet_result.PNG&#34; alt=&#34;SRResnet_result&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;generative-adversarial-network-model&#34;&gt;Generative Adversarial Network Model&lt;/h2&gt;
+
+&lt;p&gt;Although our ResNet model works well in 4 times mosaiced/blurred images, it terribly failed in more than 8 times mosaiced/blurred images. Maybe there is not enough
+prior information for our network to reconstruct high-resolution images. To deal with this problem, we incorporate GAN model into our project, and expect GANs can
+generate the fine details to the reconstruction process and improve our result. We brought this idea from &lt;a href=&#34;https://arxiv.org/abs/1609.04802&#34; target=&#34;_blank&#34;&gt;SRGAN paper&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Different from original GAN model to generate unique images based on image dataset, instead of feeding random noise to generator, we feed low-resolution
+image to the generator and expect it to produce high-resolution images. And the discriminator is still responsible to determine whether the image is from
+generator or from dataset. And the training loss also consist of two parts, the super-resolution(SR) loss, and the GAN loss. The SR loss is the perceptual loss (mentioned above)
+between ground truth high-resolution image and the generator output, while GAN loss is the loss function for the generator and discriminator combined.&lt;/p&gt;
+
+&lt;p&gt;First, we tried vanilla deep convolution GAN(DCGAN) on our GAN model. After a few days of hyperparamete tunning, we find this model is not that stable.
+The whole model can easily crash due to a small shift of a single hyperparameter. But there are better alternatives for DCGAN: the &lt;a href=&#34;https://arxiv.org/abs/1701.07875&#34; target=&#34;_blank&#34;&gt;Wasserstein GAN&lt;/a&gt;.
+Although still have imperfections, WGAN almost totally solve issues like training instability, failure to converge or model collapse.&lt;/p&gt;
+
+&lt;p&gt;Here is the algorithm of WGAN:
+&lt;img src=&#34;/img/WGAN.jpg&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Just minor modification from original GAN algorithm, how amazing is that! In Wasserstein GAN paper, the author thoroughly analyzed the weakness and holes on
+original GANs. For details of the mathematics and implementation about WGAN, see my another blog. Here I will only list the modification from original GAN to WGAN:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Remove the sigmoid function at the end of Discriminator&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Remove the log function in generator and discriminator loss function&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;clip the gradient norm into an interval $[-c, c]$&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Use optimizers without momentum term, like RMSprop, not Adam.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The core code are as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def train():
+
+    image_lr = tf.placeholder(dtype=tf.float32, shape=(None, 16, 16, 3), name=&#39;lr&#39;)
+    image_hr = tf.placeholder(dtype=tf.float32, shape=(None, 128, 128, 3), name=&#39;hr&#39;)
+
+    net = WGAN(gamma)
+
+    gen = net.generator(image_lr, bottleneck_num=2)
+
+    real_score = net.discrimintor(gen)
+    fake_score = net.discrimintor(image_hr, reuse=True)
+
+    with tf.name_scope(&#39;SR_loss&#39;):
+
+        residual = image_hr - gen
+        square = tf.abs(residual)
+        SR_loss = tf.reduce_mean(square)
+
+        tf.summary.scalar(&#39;SR_loss&#39;, SR_loss)
+
+    with tf.name_scope(&#39;gan_loss&#39;):
+
+        D_loss = tf.reduce_mean(fake_score) - tf.reduce_mean(real_score)
+
+        G_loss = -tf.reduce_mean(fake_score)
+
+        tf.summary.scalar(&#39;G_loss&#39;, G_loss)
+        tf.summary.scalar(&#39;D_loss&#39;, D_loss)
+
+        G_overall_loss = gan_ratio*G_loss + SR_loss 
+
+    # get variable from G and D
+    var_g = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, &#39;generator&#39;)
+    var_d = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, &#39;discriminator&#39;)
+
+    with tf.name_scope(&#39;optim&#39;):
+
+        optim_g = tf.train.RMSPropOptimizer(learning_rate=LEARNING_RATE)\
+            .minimize(G_overall_loss, var_list=var_g)
+        optim_d = tf.train.RMSPropOptimizer(learning_rate=LEARNING_RATE) \
+            .minimize(-D_loss, var_list=var_d)
+
+    clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in var_d]
+
+    # set up logging for tensorboard
+    writer = tf.summary.FileWriter(filewriter_path)
+    writer.add_graph(tf.get_default_graph())
+    summaries = tf.summary.merge_all()
+	
+	config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    with tf.Session() as sess:
+
+        init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+        sess.run(init_op)
+
+        steps, start_average, end_average = 0, 0, 0
+        start_time = time.clock()
+
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(coord=coord)
+
+        for ii in range(NUM_EPOCHS):
+
+            batch_average = 0
+            batch_num = int(np.floor(192794 / BATCH_SIZE / 6.0))
+
+            for jj in range(batch_num):
+
+                g_ops = [optim_g, G_loss, summaries]
+                d_ops = [optim_d, D_loss]
+
+                for kk in range(critic):
+
+                    steps += 1
+                    img_lr, img_hr = load_batch_date()
+                    img_lr = (img_lr.astype(np.float32) - 127.5) / 127.5
+                    img_hr = (img_hr.astype(np.float32) - 127.5) / 127.5
+
+                    _, loss_d = sess.run(d_ops, feed_dict=
+                                  {image_lr: img_lr, image_hr: img_hr})
+
+                    sess.run(clip_D)
+
+                steps += 1
+                img_lr, img_hr = sess.run([images, labels])
+                img_lr = (img_lr.astype(np.float32) - 127.5) / 127.5
+                img_hr = (img_hr.astype(np.float32) - 127.5) / 127.5
+
+                _, loss_g, summary = sess.run(g_ops,
+                                feed_dict={image_lr: img_lr, image_hr: img_hr})
+
+                # update W_loss and Kt
+
+                writer.add_summary(summary, steps)
+                batch_average += loss_g
+
+                if (steps % 100 == 0):
+                    print(&#39;step: {:d}, G_loss: {:.9f}, D_loss: {:.9f}&#39;.format(steps, loss_g, loss_d))
+                    print(&#39;time:&#39;, time.clock())
+
+            batch_average = float(batch_average) / batch_num
+
+            duration = time.time() - start_time
+            print(&#39;Epoch: {}, step: {:d}, loss: {:.9f}, &#39;
+                  &#39;({:.3f} sec/epoch)&#39;.format(ii, steps, batch_average, duration))
+
+            start_time = time.time()
+            net.save(sess, saver, checkpoint_path, steps)
+        coord.request_stop()
+
+        # Wait for threads to stop
+        coord.join(threads)
+        sess.close()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also, we implement WGAN-GP method, instead of directly clipping gradient, it put penalty on gradient&amp;rsquo;s L2 norm. This method is even better
+compared to original Wasserstein GAN.&lt;/p&gt;
+
+&lt;p&gt;And the result is pretty good compared to SRResNet model:
+&lt;img src=&#34;https://raw.githubusercontent.com/shen338/Obfuscated-Face-Reconstruction/master/result/SRGAN_result.PNG&#34; alt=&#34;SRGAN_result&#34; /&gt;&lt;br /&gt;
+The smoothing effect is quite significant in this case. But the SRGAN result is totally acceptable considering our model is reconstruct the
+high-resolution image only using &lt;sup&gt;1&lt;/sup&gt;&amp;frasl;&lt;sub&gt;64&lt;/sub&gt; of original information. I believe our result should be better with a faster GPU and deep network. I finished this
+project on a Nivida Quadro K1000 GPU, which takes 6 hours to run one epoch.&lt;/p&gt;
+
+&lt;p&gt;There are always some failure case using GAN model:
+&lt;img src=&#34;https://raw.githubusercontent.com/shen338/Obfuscated-Face-Reconstruction/master/result/failure_case.PNG&#34; alt=&#34;failure case&#34; /&gt;
+Some of them are funny and some of them are just scary&amp;hellip;&lt;/p&gt;
+
+&lt;p&gt;Reference Materials:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html&#34; target=&#34;_blank&#34;&gt;CelebA Dataset from CUHK&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1501.00092.pdf&#34; target=&#34;_blank&#34;&gt;Image Super-Resolution Using Deep Convolutional Networks&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1701.07875&#34; target=&#34;_blank&#34;&gt;Wasserstein GAN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html&#34; target=&#34;_blank&#34;&gt;A great blog on GAN and WGAN&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Subwavelength focusing by binary multi-annular plates: design theory and experiment</title>
+      <link>/publication/map/</link>
+      <pubDate>Sun, 15 Feb 2015 00:00:00 -0500</pubDate>
+      
+      <guid>/publication/map/</guid>
       <description>&lt;p&gt;More detail can easily be written here using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
 </description>
     </item>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GAN on Tong Shen</title>
+    <link>/tags/gan/</link>
+    <description>Recent content in GAN on Tong Shen</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy; 2018</copyright>
+    <lastBuildDate>Thu, 17 May 2018 21:00:00 -0400</lastBuildDate>
+    
+	<atom:link href="/tags/gan/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Amazing GAN - Wasserstein GAN</title>
+      <link>/post/amazing-gan---wasserstein-gan/</link>
+      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
+      
+      <guid>/post/amazing-gan---wasserstein-gan/</guid>
+      <description> Table of Contents  Example Example2 Third Example  Example . . . . . . .
+Example2 . .
+. .. . .. . . .. . .. . . .. ..
+Third Example </description>
+    </item>
+    
+    <item>
+      <title>Obfuscated/Blurred Human Face Reconstruction</title>
+      <link>/project/obfuscatedblurred-human-face-reconstruction/</link>
+      <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
+      
+      <guid>/project/obfuscatedblurred-human-face-reconstruction/</guid>
+      <description>Table of Contents  Data preparation Super Resolution ResNet Generative Adversarial Network Model  Nowadays, a lot of images on the Internet are intentionally blurred or mosaiced due to various reasons. The main objective of this project is to reconstruct these images, especially heavily blurred ones, to their original high-resolution counterpart. This problem is an ill-posed problems, we need to predict fine-grained details only based on little information on degenerated images.</description>
+    </item>
+    
+  </channel>
+</rss>

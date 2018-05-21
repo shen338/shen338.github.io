@@ -41,6 +41,15 @@
     
     <url>
     
+      <loc>/project/fine-grained-visual-categorization-inaturalist/</loc>
+      <lastmod>2017-11-27T00:00:00-05:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
       <loc>/project/obfuscatedblurred-human-face-reconstruction/</loc>
       <lastmod>2017-11-27T00:00:00-05:00</lastmod>
     </url>
@@ -134,8 +143,28 @@
     
     <url>
     
+      <loc>/tags/deep-learning/</loc>
+      <lastmod>2017-11-27T00:00:00-05:00</lastmod>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
       <loc>/tags/gan/</loc>
       <lastmod>2018-05-17T21:00:00-04:00</lastmod>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/tags/image-classification/</loc>
+      <lastmod>2017-11-27T00:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
     

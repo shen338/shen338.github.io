@@ -332,7 +332,283 @@ to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differen
       <pubDate>Thu, 15 Feb 2018 00:00:00 -0500</pubDate>
       
       <guid>/publication/temperature_mapping/</guid>
-      <description>&lt;p&gt;More detail can easily be written here using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
+      <description></description>
+    </item>
+    
+    <item>
+      <title> Fine-Grained Visual Categorization on iNaturalist dataset</title>
+      <link>/project/fine-grained-visual-categorization-inaturalist/</link>
+      <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
+      
+      <guid>/project/fine-grained-visual-categorization-inaturalist/</guid>
+      <description>
+
+&lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#main-difficulties&#34;&gt;Main Difficulties&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#data-imbalance&#34;&gt;Data Imbalance&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#weakly-supervised-label&#34;&gt;Weakly supervised label&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#data-insufficiency&#34;&gt;Data insufficiency&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#fine-tuned-model-on-imagenet-pretrained-model&#34;&gt;Fine-tuned model on ImageNet pretrained model.&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#fine-grained-classification&#34;&gt;Fine-grained Classification&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#super-category-classification&#34;&gt;Super-category classification&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#fine-grained-classification-in-single-super-category&#34;&gt;Fine-grained classification in single super-category&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#bilinear-model&#34;&gt;Bilinear model&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#attention-model-class-activation-map-&#34;&gt;Attention model(Class Activation Map)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#reference-materials&#34;&gt;Reference materials&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+
+&lt;p&gt;I run into this challenge at early April. This dataset contains about 0.4 million images spanning over 8142 categories. Without expert knowledge, many of these species are extremely difficult to accurately classify due to their visual similarity. This classification task require us to features a large number of fine-grained
+categories over class imbalance.&lt;/p&gt;
+
+&lt;h2 id=&#34;main-difficulties&#34;&gt;Main Difficulties&lt;/h2&gt;
+
+&lt;h3 id=&#34;data-imbalance&#34;&gt;Data Imbalance&lt;/h3&gt;
+
+&lt;p&gt;The dataset is quite imbalance, some classes have more than 1000 images, while other classes only have less than 10 images. Here is a table of class image
+number distribution.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;image number range&lt;/th&gt;
+&lt;th&gt;class number&lt;/th&gt;
+&lt;th&gt;percentage&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;0&amp;lt;n&amp;lt;=10&lt;/td&gt;
+&lt;td&gt;472&lt;/td&gt;
+&lt;td&gt;5.78%&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;10&amp;lt;n&amp;lt;=25&lt;/td&gt;
+&lt;td&gt;4675&lt;/td&gt;
+&lt;td&gt;57.4%&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;25&amp;lt;n&amp;lt;=50&lt;/td&gt;
+&lt;td&gt;1599&lt;/td&gt;
+&lt;td&gt;19.6%&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;50&amp;lt;n&amp;lt;=100&lt;/td&gt;
+&lt;td&gt;554&lt;/td&gt;
+&lt;td&gt;6.80%&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;100&amp;lt;n&amp;lt;=200&lt;/td&gt;
+&lt;td&gt;399&lt;/td&gt;
+&lt;td&gt;4.90%&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;200&amp;lt;n&amp;lt;=1000&lt;/td&gt;
+&lt;td&gt;443&lt;/td&gt;
+&lt;td&gt;5.44%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Over one half classes have image number in range $[10, 25]$, while the other classes are ranged in $[0, 1000]$. Some method or tricks to compensate classs imbalance is necessary here. Otherwise our model would easily get crashed. The majority class image number range is $[10, 25]$, while some other classes can easily get 1000, which can totally destory the training for the majority class.&lt;/p&gt;
+
+&lt;p&gt;First, we just abandon the excessive images in class with more than 200 images. Second, oversample the minority class and put more aggressive image augmentation
+to these classes. For example, affine transformation like random rotate, crop, shear, flap, blurring like gaussian blur, random dropout and so on. Image augmentation is implemented with Augmentor. Finally, we utilize weighted cross entropy loss function, further compensate the remaining
+imbalance effect in our dataset. Here is the code for Multiprocessing Augmentor Pipeline:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;
+# Multiprocessing Augmentor Pipeline
+def pipeline():
+
+    P1 = Augmentor.Pipeline()
+    P1.flip_left_right(probability=0.3)
+    P1.flip_top_bottom(probability=0.05)
+    P1.rotate90(probability=0.1)
+    P1.rotate_without_crop(probability=0.1, max_left_rotation=15, max_right_rotation=15)
+    P1.random_distortion(probability=0.1, grid_width=10, grid_height=10, magnitude=1)
+    P1.skew_corner(probability=0.1)
+    P1.shear(probability=0.1, max_shear_left=10, max_shear_right=10)
+    P1.crop_centre(probability=1.0, percentage_area=0.9)
+    P1.crop_random(probability=1.0, percentage_area=0.9)
+
+    return P1
+
+
+def aug_func(imgs, label, q):
+
+    P = pipeline()
+    imgs = np.uint8(imgs)
+    g = P.keras_generator_from_array(imgs, label, batch_size=imgs.shape[0]
+                                     , image_data_format=&#39;WTF&#39;)
+    i, l = next(g)
+    q.put([i, l])
+
+
+def aug_parallel(imgs, labels):
+
+    queue = Queue()
+    cpus = multiprocessing.cpu_count()
+    step = int(imgs.shape[0] / cpus)
+    processes = []
+    for ii in range(cpus):
+
+        p = Process(target=aug_func,
+                    args=(imgs[ii * step:(ii + 1) * step, :, :, :],
+                          labels[ii * step:(ii + 1) * step],
+                          queue))
+        processes.append(p)
+        p.start()
+
+    rets = []
+    labels = []
+
+    for p in processes:
+        ret, l = queue.get() 
+        rets.append(ret)
+        labels.append(l)
+    for p in processes:
+        p.join()
+
+    if step == 1:
+        rets = np.squeeze(np.array(rets))
+        labels = np.squeeze(np.array(labels), axis=1)
+    else:
+        rets = np.concatenate(rets, axis=0)
+        labels = np.concatenate(labels, axis=0)
+
+    return rets, labels
+
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;weakly-supervised-label&#34;&gt;Weakly supervised label&lt;/h3&gt;
+
+&lt;p&gt;After looking into some image samples in the dataset, we find the the image labels are just weakly supervised labels. In other words, usually only
+a small area in the image contains the target object. For example, one image is labeled as sunflowers, but the sunflower only appear at one corner,
+and the background is grass and woods.&lt;/p&gt;
+
+&lt;p&gt;This kind of labeling will apparently increase the difficulty of precise image classification because we have to do something to localize the object in the
+image and prevent the background from affecting the classification result. That&amp;rsquo;s the main reason we incorporate attention model afterwards.&lt;/p&gt;
+
+&lt;p&gt;Here are some cases of weakly supervised labels:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Image&lt;/th&gt;
+&lt;th&gt;Image&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;img src=&#34;/img/Weak1.jpg&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src=&#34;/img/weak2.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&#34;data-insufficiency&#34;&gt;Data insufficiency&lt;/h3&gt;
+
+&lt;p&gt;Although we have about 450,000 images in total, when averaged to every class, we only have 50 images left. And the majority class image number range is $[10, 25]$.
+With so few images, it would be impossible to train a model from scratch. The most popular solution would be adopt a ImageNet pretrained model and fine-tuned on our dataset.&lt;/p&gt;
+
+&lt;p&gt;Our first choice is the &lt;a href=&#34;https://arxiv.org/abs/1602.07261&#34; target=&#34;_blank&#34;&gt;Inception Resnet V2&lt;/a&gt; network from google. This network is well designed to save parameters and achieve
+good performance at the same time. The same with previous Inception module, Inception resnet v2 also implements nx1 and 1xn convolution to replace nxn convolution, also bottleneck architecture to reduce computation. Besides, Inception Resnet V2 introduces residual connection from ResNet architecture to
+eases the gradient vanishing problem when training deep neural nets. And the total layer number of the network goes to 467.&lt;/p&gt;
+
+&lt;h2 id=&#34;fine-tuned-model-on-imagenet-pretrained-model&#34;&gt;Fine-tuned model on ImageNet pretrained model.&lt;/h2&gt;
+
+&lt;p&gt;The first trail is directly classification over 8142 categories. Here is an architecture diagram of Inception Resnet V2:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/InceptionResnetv2.jpg&#34; alt=&#34;InceptionResnetv2.jpg&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We first freeze the CNN feature extraction part, and train our own classifier - the final layers
+of the network. Note that we have to training two classifier, one at the end of network, the auxiliary one at the middle. The middle one is used to provide additional
+gradient to help the network to avoid gradient vanishing.
+After 5 epoches of training, the accurarcy goes up to 40%.&lt;/p&gt;
+
+&lt;p&gt;And after that, we use a relatively low learning rate to fine-tune the network to avoid too much modification on the original network. After about 15 epoches, the training accuracy goes up to about 80% and the validation accuracy is about 60%, the top3 accuracy on test set is about 80%. Apparently there are some kinds of overfit, but this is inevitable with so little data. We will further try to freeze the starting layers throughtout the traiing process to add some regulate the expression capacity of the network. Hope that works.&lt;/p&gt;
+
+&lt;h2 id=&#34;fine-grained-classification&#34;&gt;Fine-grained Classification&lt;/h2&gt;
+
+&lt;h3 id=&#34;super-category-classification&#34;&gt;Super-category classification&lt;/h3&gt;
+
+&lt;p&gt;After finishing the previous model with InceptionResnetv2, we carefully examined our result. We found that our model often predicted three very similar classes, like three different sunflowers with very subtle difference. This means our model may have a hard time to classify images over similar classes. So, the next step is fine grained classification over these sub species. First, we divide our dataset into 11 super categories, like plants, insects, birds and so on. We consider this problem in a high dimensional space, and treat the image classes as clusters. The cluster distance of classes in the same super-category should be signaficantly smaller than cluster distance of classes in different super-categories. But the our image labelling cannot represent this property. After one-hot encoding, we treat every image class equivalently and assume the distance between them are the same.&lt;/p&gt;
+
+&lt;p&gt;According to these analysis, we decided to classify images into their super-categories and do fine-grained classification in every single super-category. In this way, our model would concentrate more on the fine details of similar objects in the same super-category, without wasting resources on the easy cross super-category classification.&lt;/p&gt;
+
+&lt;p&gt;Here is a diagram of image space:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/Figure_1.png&#34; alt=&#34;Diagram of image space&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It would be more efficient to classify ABC and DE first. In this way, the class distance variance would be much less, we can use relatively less resource to achieve comparable performance to direct classification.&lt;/p&gt;
+
+&lt;h3 id=&#34;fine-grained-classification-in-single-super-category&#34;&gt;Fine-grained classification in single super-category&lt;/h3&gt;
+
+&lt;h4 id=&#34;bilinear-model&#34;&gt;Bilinear model&lt;/h4&gt;
+
+&lt;p&gt;The first model is &lt;a href=&#34;http://vis-www.cs.umass.edu/bcnn/docs/bcnn_iccv15.pdf&#34; target=&#34;_blank&#34;&gt;bilinear model&lt;/a&gt;. This method considers the interaction between different feature map channels. If the feature map has the size $[H, W, C]$, treat every pixel in feature map as a feature vector, feature vectors has the size $[1,C]$. And the bilinear model takes the outer product of every feature vector and forms a $[H, W, C, C]$ feature map. After taking global pooling, we get a feature map [C, C]. In this process, bilinear model utilizes higher order information of the feature map. According to our test, its performance is pretty good. It achieves nearly 90% accuracy in single super-category classification. But when applying it to bigger super-category, our GPU memory is not enough. The reason is after bilinear operation, the feature map size becomes so big $(C^2)$, so the paremeters in following fully connected layers become overwhelming. For example, if the feature map has 512 channels, and our biggest super-category has more than 3000 classes, the parameters in FC layer is $512^2*3000 = 78 million$, which is more than all the CNN layers combined.&lt;/p&gt;
+
+&lt;h4 id=&#34;attention-model-class-activation-map&#34;&gt;Attention model(Class Activation Map)&lt;/h4&gt;
+
+&lt;p&gt;Due to the weakly supervised nature of the dataset (discussed &lt;a href=&#34;#weakly-supervised-label&#34;&gt;above&lt;/a&gt;), we want to first roughly localize the target object in the image before fine-grained classification.
+Here attention model comes to the rescue. With attention model, we can determine which part of images matters for the network to make predictions, which should be the object we want to localize. Since we already have the network of super-category classification, its feature map can be utilized to generate class activation map &lt;a href=&#34;http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf&#34; target=&#34;_blank&#34;&gt;(CAM)&lt;/a&gt; to represent the attention level of input images.
+Here is a diagram of CAM:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/CAM.png&#34; alt=&#34;CAM&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;As shown in the diagram, we can use the feature map and fc layer weight to generate the attention map for images with super-category network. Put an image into the network, we can get a feature map $[H, W, C]$ and a prediction. In order to map the global pooling layers
+to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the output class number. If the prediction is $j$, CAM is calculated as follows:&lt;/p&gt;
+
+&lt;p&gt;$$CAM = \sum_{k=0}^C F(k)*W_{k,j}$$&lt;/p&gt;
+
+&lt;p&gt;where F(k) represent kth feature map channel. Alternatively, we can use top N prediction if top 1 prediction is not confident. Afterwards, we upsample CAM to fit input image size.&lt;/p&gt;
+
+&lt;p&gt;After this, we used OSTU algorithm to make the CAM into binary image and extract the biggest contour and generate bounding box via OpenCV. Here are some results:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Input Image&lt;/th&gt;
+&lt;th&gt;CAM heatmap&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;img src=&#34;/img/Weak1.jpg&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src=&#34;/img/weak2.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&#34;reference-materials&#34;&gt;Reference materials&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1602.07261&#34; target=&#34;_blank&#34;&gt;Inception ResNet V2 Paper&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://vis-www.cs.umass.edu/bcnn/docs/bcnn_iccv15.pdf&#34; target=&#34;_blank&#34;&gt;Bilinear Model&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf&#34; target=&#34;_blank&#34;&gt;Class Activation Map Paper&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
 </description>
     </item>
     
@@ -649,8 +925,7 @@ Some of them are funny and some of them are just scary&amp;hellip;&lt;/p&gt;
       <pubDate>Sun, 15 Feb 2015 00:00:00 -0500</pubDate>
       
       <guid>/publication/map/</guid>
-      <description>&lt;p&gt;More detail can easily be written here using &lt;em&gt;Markdown&lt;/em&gt; and $\rm \LaTeX$ math code.&lt;/p&gt;
-</description>
+      <description></description>
     </item>
     
   </channel>

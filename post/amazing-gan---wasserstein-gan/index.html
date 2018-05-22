@@ -269,7 +269,7 @@ KL divergence is widely used as a metrics to measure the similarity between two 
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    3 min read
+    8 min read
   </span>
   
 
@@ -401,6 +401,126 @@ $$ = -log(4) + 2* JS(p_{data} || p_g)$$</p>
 <p>So, the loss function of GAN quantify the JS divergence of $p_{data}$ and $p_g$. The optimal value is $- log(4)$ when $p_{data} = p_g$.</p>
 
 <h2 id="problem-with-vanilla-gans">Problem with Vanilla GANs</h2>
+
+<h3 id="gradient-vanishing">Gradient Vanishing</h3>
+
+<p>The loss function for training G is: $\mathbb{E}_{z \sim p(z)}[log(1-D(G(z)))]$. But in the early stage of training, discriminator can be very confident in detecting results from G, $D(G(z))$ is always 0. In this way, the gradient to update G vanishes.</p>
+
+<p><img src="/img/GAN_gradient_vanishing.png" alt="gradient vanishing" /></p>
+
+<p>With the generator fixed we
+train a discriminator from scratch and measure the gradients with the original cost function. We see
+the gradient norms decay quickly, in the best case 5 orders of magnitude after 4000 discriminator
+iterations. Note the logarithmic scale.</p>
+
+<p>We can use an alternative loss function for G: $\mathbb{E}_{z \sim p(z)}[-log(D(G(z)))]$. Instead of minimizing, let G maximizing the logprobability of the discriminator being mistaken. It is heuristically motivated that generator can still
+learn even when discriminator successfully rejects
+all generator samples, but not theoretically
+guaranteed.</p>
+
+<p>But this will result in gradient unstable issue because the nature of logrithm function.</p>
+
+<p>So, the training of GAN faces a dilemma:</p>
+
+<ol>
+<li>If discriminator is trained badly, it fails to provide correct gradient to update generator.</li>
+<li>If discriminator is trained well, it will be too confident and give near 0 score to generator result, which kills the gradient
+in the generator.<br /></li>
+</ol>
+
+<p>To sum up, the difficulty to train a GAN is how to keep G and D in the same pace. This is quite hard to control in practice without a metrics to quantify it.</p>
+
+<h3 id="mode-collapse">Mode Collapse</h3>
+
+<p>Mode collapse is when the generator generates a limited diversity of samples, or even the same sample, regardless of the input. The main reason also comes from the nature of loss function.  It
+is not equally treated when G generates a unreal
+sample and when G fails to generate real sample.</p>
+
+<p>Without any guidance to ensure the diversity of generator, G only care about how to fool discriminator. Once get a good sample that successfully fools discriminator, it will produce this kind of samples as many as possible to optimize the loss function. When discriminator finally realized the mistake during its training, the generator can easily find another perfect example to fool the discriminator and produce a lot of similar samples. This becomes an endless circle between G and D updates. And the loss function value in this process  will have unnecessary oscillations.</p>
+
+<p>One method to compensate this is putting regularization on the diversity of generator, forcing it to produce various samples. In practice, this method is still not good enough.</p>
+
+<p>Here is some result of GAN mode collapse in LSUN dataset:
+<img src="/img/mode_collapse.png" alt="mode collapse" /></p>
+
+<h2 id="improved-training-of-gans">Improved Training of GANs</h2>
+
+<p>The following improvement are proposed to help stabilize and improve the training of GANs. These comes from this paper:
+<a href="http://papers.nips.cc/paper/6125-improved-techniques-for-training-gans.pdf" target="_blank">Improved Techniques for Training GANs</a></p>
+
+<ol>
+<li><p>Feature Matching<br />
+Feature matching addresses the instability of GANs by specifying a new objective for the generator
+that prevents it from overtraining on the current discriminator. Specifically, we train the generator to match the expected value of the
+features on an intermediate layer of the discriminator.<br />
+Our new objective for the generator is defined as: $| \mathbb{E}_{x \sim p_r} f(x) - \mathbb{E}_{z \sim p_z(z)}f(G(z)) |_2^2 $, where $f(x)$ denote activations on an intermediate layer of the discriminator.</p></li>
+
+<li><p>Mini-batch Discrimination<br />
+The concept of minibatch discrimination is quite general: any discriminator model that looks
+at multiple examples in combination, rather than in isolation, could potentially help avoid collapse
+of the generator.<br />
+In one minibatch, we approximate the closeness between every pair of samples, $c(x_i, x_j)$, and get the overall status of one data point by summing up how close it is to other samples in the same batch, $o(x_i) = \sum_{j} c(x_i, x_j)$. Then $o(x_i)$ is explicitly added to the input of the model.</p></li>
+
+<li><p>Historical averaging<br />
+When applying this technique, we modify each player&rsquo;s cost to include a term $||\theta - \frac{1}{t} \sum_{i=1}^t \theta[i]||^2$
+where $\theta[i]$ is the value of the parameters at past time i. The historical average of the parameters can
+be updated in an online fashion so this learning rule scales well to long time series.</p></li>
+
+<li><p>One-sided label smoothing<br />
+Replaces the 0 and 1 targets for a classifier with smoothed values, like .9 or .1, and was
+recently shown to reduce the vulnerability of neural networks to adversarial examples</p></li>
+
+<li><p>Virtual batch normalization<br />
+Each example x is normalized based on
+the statistics collected on a reference batch of examples that are chosen once and fixed at the start
+of training. The reference batch is normalized using only its own statistics.<br />
+VBN is
+computationally expensive because it requires running forward propagation on two minibatches of
+data, so we use it only in the generator network.</p></li>
+</ol>
+
+<h2 id="wasserstein-gan">Wasserstein GAN</h2>
+
+<h3 id="earth-mover-distance">Earth Mover distance</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Earth_mover%27s_distance" target="_blank">Earth Mover distance(EM distance, Wasserstein distance)</a> is another metrics on the similarity:
+$$ W(p_r, p_g) = \inf_{\gamma \sim \Pi(p_r, p_g)} \mathbb{E}_{(x, y) \sim \gamma}[| x-y |] $$</p>
+
+<p>Looks like a very complex formula, but actually quite simple. Intuitively, $\gamma(x, y)$ indicates how much &lsquo;mass&rsquo;
+must be transported from x to y in order to transform the distributions $p_g$
+into the distribution $p_r$. The EM distance then is the &lsquo;cost&rsquo; of the optimal
+transport plan. PS. Notice it is the expection over $| x-y |$</p>
+
+<p>For example, we get two distributions:</p>
+
+<p>$$p_r : p_r(0) = \frac{1}{4}, p_r(1) = \frac{1}{4}, p_r(2) = \frac{1}{2}$$</p>
+
+<p>And:</p>
+
+<p>$$p_g : p_g(0) = \frac{1}{2}, p_g(1) = \frac{1}{2}, p_g(2) = 0$$</p>
+
+<p>The optimal plan to move from $p_r$ to $p_g$ should be move $\frac{1}{4}$ from $p_r(2)$ to $p_r(1)$ and $p_r(0)$. So, the EM distance of this two distribution is $\frac{1}{4} * |2-0| + \frac{1}{4} * |2-1| = \frac{3}{4}$.</p>
+
+<h3 id="comparasion-between-em-distance-and-kl-js-divergence">Comparasion between EM distance and KL/JS divergence</h3>
+
+<h3 id="lipschitz-continuity">Lipschitz continuity</h3>
+
+<h3 id="modified-algorithm">Modified Algorithm</h3>
+
+<h3 id="wasserstein-gan-with-gradient-penalty">Wasserstein GAN with gradient penalty</h3>
+
+<h2 id="examples">Examples</h2>
+
+<h2 id="reference-materials">Reference Materials</h2>
+
+<ol>
+<li><a href="https://arxiv.org/abs/1406.2661" target="_blank">Original Paper of GAN: Generative Adversarial Nets</a></li>
+<li><a href="https://arxiv.org/pdf/1611.02163.pdf" target="_blank">Unrolled Generative Adversarial Networks</a></li>
+<li><a href="https://arxiv.org/pdf/1701.04862.pdf" target="_blank">Towards Principled Methods for Training Generative Adversarial Networks</a></li>
+<li><a href="https://arxiv.org/pdf/1701.07875.pdf" target="_blank">Wasserstein GAN</a></li>
+<li><a href="http://papers.nips.cc/paper/6125-improved-techniques-for-training-gans.pdf" target="_blank">Improved Techniques for Training GANs</a></li>
+<li><a href="https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html" target="_blank">Another great blog of WGAN</a></li>
+</ol>
 
     </div>
 

@@ -17,9 +17,7 @@
       
     
   
-  <meta name="description" content="This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.
-Here is the original paper about batch normalization on Arxiv:
-Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.">
+  <meta name="description" content="Table of contents/optimization  Interpretation and Advantage of Batch Norm Algorithm and implementation Improvements and Alternatives  Batch norm fused with Convolution Layer normalization Instance Normalization Group Normalization Other normalization techniques*  Reference Materials:  This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.">
 
   
   <link rel="alternate" hreflang="en-us" href="/post/going-deeper-into-batch-normalization/">
@@ -78,9 +76,7 @@ Batch Normalization: Accelerating Deep Network Training by Reducing Internal Cov
   <meta property="og:site_name" content="Tong Shen">
   <meta property="og:url" content="/post/going-deeper-into-batch-normalization/">
   <meta property="og:title" content="Going Deeper in Batch Normalization | Tong Shen">
-  <meta property="og:description" content="This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.
-Here is the original paper about batch normalization on Arxiv:
-Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.">
+  <meta property="og:description" content="Table of contents/optimization  Interpretation and Advantage of Batch Norm Algorithm and implementation Improvements and Alternatives  Batch norm fused with Convolution Layer normalization Instance Normalization Group Normalization Other normalization techniques*  Reference Materials:  This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.">
   <meta property="og:locale" content="en-us">
   
   <meta property="article:published_time" content="2018-05-17T21:00:00-04:00">
@@ -269,7 +265,7 @@ Batch Normalization: Accelerating Deep Network Training by Reducing Internal Cov
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    9 min read
+    11 min read
   </span>
   
 
@@ -328,6 +324,23 @@ Batch Normalization: Accelerating Deep Network Training by Reducing Internal Cov
     <div class="article-style" itemprop="articleBody">
       
 
+<h3 id="table-of-contents-optimization">Table of contents/optimization</h3>
+
+<ul>
+<li><a href="#interpretation-and-advantage-of-batch-norm">Interpretation and Advantage of Batch Norm</a></li>
+<li><a href="#algorithm-and-implementation">Algorithm and implementation</a></li>
+<li><a href="#improvements-and-alternatives">Improvements and Alternatives</a>
+
+<ul>
+<li><a href="#batch-norm-fused-with-convolution">Batch norm fused with Convolution</a></li>
+<li><a href="#layer-normalization">Layer normalization</a></li>
+<li><a href="#instance-normalization">Instance Normalization</a></li>
+<li><a href="#group-normalization">Group Normalization</a></li>
+<li><a href="#other-normalization-techniques-">Other normalization techniques*</a></li>
+</ul></li>
+<li><a href="#reference-materials-">Reference Materials:</a></li>
+</ul>
+
 <p>This article will thoroughly explain batch normalization in a simple way.
 I wrote this article after getting failed an interview because of detailed batchnorm related question.
 I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.</p>
@@ -373,7 +386,7 @@ from this. But this effect is quite minor.<br /></li>
 $\gamma$ and $\beta$. The deep learning book gives clear explaination about this</span>. Normalizing the mean and deviation of a unit can
 reduce the expressive power of a neural network. In this way, it is common to multiply the normalized result with $\gamma$ and add $\beta$. For exmaple,
 if we have sigmoid activation afterwards, the network may don&rsquo;t want the output lies in the near linear part of sigmoid. With $\gamma$ and $\beta$,
-the network has the freedom to shift whatever it wants.</p>
+the network has the freedom to shift whatever it wants. Another thing to note is that batch norm in CNN is different. Instead of calculate mean and variance in size $[H, W, C]$, it also averages over H and W, and the mean and variance has C dimensions, because CNN weight are shared cross H and W.</p>
 
 <blockquote>
 <p>This is a new parametrization can represent the same family of functions of the input as the old parametrization, but the new parametrization
@@ -541,14 +554,27 @@ which can save up to 50% memory and a minor increase of training time.</p>
 
 <h4 id="layer-normalization">Layer normalization</h4>
 
-<p>Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu and \sigma$ at every location,
-It uses all the neuron activations in one layer to produce $\mu and \sigma$.
+<p>Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu $ and $\sigma$ at every location,
+It uses all the neuron activations in one layer to produce $\mu$ and $\sigma$.
 This method is especially useful when not using mini-batch like RNN, where batch norm cannot be used. But its performance in convs layers are not as good
 as batch norm.</p>
 
 <h4 id="instance-normalization">Instance Normalization</h4>
 
+<p>Just simply replace all batch normalization layers with instance normalization layers. Batch normalization normalizes using the information from the whole batch, while instance normalization normalizes each feature map on its own.<br />
+Formula comparasion:<br />
+<img src="/img/instancenorm.jpg" alt="instance norm" /></p>
+
 <h4 id="group-normalization">Group Normalization</h4>
+
+<p>While batch-norm demonstrates it effectiveness in a variety of fields including computer vision, natural language processing, speech processing, robotics, etc., batch-norm&rsquo;s performance substantially decrease when the training batch size become smaller, which limits the gain of utilizing batch-norm in a task requiring small batches constrained by memory consumption.</p>
+
+<p>Instead of normalizing along the batch dimension, GN divides the channels into groups and computes within each group the mean and variance. Therefore, GN&rsquo;s computation is independent of batch sizes, and so does its accuracy.</p>
+
+<p>Here is a diagram for all these Group techniques:<br />
+<img src="/img/GN.jpg" alt="GN" /></p>
+
+<p>The difference is obvious. Batch norm uses data in the same batch to calculate $\mu $ and $\sigma$; Layer norm uses all the neurons in single layer; Instance norm uses all in data in the same batch and channel; Group norm uses only a small piece of batch.</p>
 
 <h4 id="other-normalization-techniques">Other normalization techniques*</h4>
 
@@ -569,12 +595,16 @@ output y=y*g. But in my experience g seems not essential for performance (also d
 <p>Cosine Normalization (Luo et al. 2017): weight normalization is very similar to cosine normalization, where the same L2 normalization is applied
 to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differentiation can compute appropriate gradients of x and w.</p>
 
-<p>Here are some great reference materials:<br />
-1. <a href="http://www.deeplearningbook.org/contents/optimization.html" target="_blank">Deep Learning Book, Chapter 8.7.1</a><br />
-2. <a href="https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow" target="_blank">Stackoverflow: How could I use Batch Normalization in TensorFlow?</a><br />
-3. <a href="http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html" target="_blank">Explaination on Covariance Shift</a><br />
-4. <a href="https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization" target="_blank">Tensorflow batch normalization docs</a><br />
-5. <a href="https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal" target="_blank">Various Normalization Techniques in Deep Learning</a></p>
+<h3 id="reference-materials">Reference Materials:</h3>
+
+<ol>
+<li><a href="http://www.deeplearningbook.org/contents/optimization.html" target="_blank">Deep Learning Book, Chapter 8.7.1</a><br /></li>
+<li><a href="https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow" target="_blank">Stackoverflow: How could I use Batch Normalization in TensorFlow?</a><br /></li>
+<li><a href="http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html" target="_blank">Explaination on Covariance Shift</a><br /></li>
+<li><a href="https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization" target="_blank">Tensorflow batch normalization docs</a><br /></li>
+<li><a href="https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal" target="_blank">Various Normalization Techniques in Deep Learning</a></li>
+<li><a href="https://arxiv.org/pdf/1607.08022.pdf" target="_blank">Instance Normalization</a></li>
+</ol>
 
     </div>
 

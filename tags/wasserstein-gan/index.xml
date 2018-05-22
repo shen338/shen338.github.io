@@ -18,10 +18,9 @@
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
       
       <guid>/post/amazing-gan---wasserstein-gan/</guid>
-      <description> Table of Contents  Example Example2 Third Example  Example . . . . . . .
-Example2 . .
-. .. . .. . . .. . .. . . .. ..
-Third Example </description>
+      <description>KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.
+ Kullback-Leibler Divergence measures the divergence of probability distribution p(x) to q(x): $$KL(P||Q) = \int_x P(x)log\frac{P(x)}{Q(x)}dx$$ KL(P||Q) achieves its minimum zero when P(x) and Q(x) are the same everywhere.
+KL divergence is widely used as a metrics to measure the similarity between two distributions.</description>
     </item>
     
   </channel>

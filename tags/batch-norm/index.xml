@@ -18,9 +18,7 @@
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
       
       <guid>/post/going-deeper-into-batch-normalization/</guid>
-      <description>This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.
-Here is the original paper about batch normalization on Arxiv:
-Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.</description>
+      <description>Table of contents/optimization  Interpretation and Advantage of Batch Norm Algorithm and implementation Improvements and Alternatives  Batch norm fused with Convolution Layer normalization Instance Normalization Group Normalization Other normalization techniques*  Reference Materials:  This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.</description>
     </item>
     
   </channel>

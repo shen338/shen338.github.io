@@ -27,44 +27,79 @@
       <guid>/post/amazing-gan---wasserstein-gan/</guid>
       <description>
 
-&lt;h1 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h1&gt;
+&lt;h2 id=&#34;kl-divergence-and-js-divergence&#34;&gt;KL divergence and JS divergence&lt;/h2&gt;
+
+&lt;p&gt;Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions:
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence&#34; target=&#34;_blank&#34;&gt;Kullback-Leibler Divergence&lt;/a&gt; and &lt;a href=&#34;https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence&#34; target=&#34;_blank&#34;&gt;Jensen-Shannon Divergence&lt;/a&gt;.&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;&lt;a href=&#34;#example&#34;&gt;Example&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#example2&#34;&gt;Example2&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#third-example&#34;&gt;Third Example&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Kullback-Leibler Divergence measures the divergence of probability distribution p(x) to q(x):
+$$KL(P||Q) = \int_x P(x)log\frac{P(x)}{Q(x)}dx$$
+KL(P||Q) achieves its minimum zero when P(x) and Q(x) are the same everywhere.&lt;br /&gt;
+KL divergence is widely used as a metrics to measure the similarity between two distributions. But according to its formula, its is asymmetric. Also, due to the rapid decreasing of logrithm function, KL divergence put to much weight when P(x) is near zero. This can cause some buggy result in real world measurement.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Jensen-Shannon Divergence. JS divergence is based on KL divergence and it is symmetric.&lt;br /&gt;
+$$JS(P||Q) = \frac{1}{2} KL(P||\frac{P+Q}{2}) + \frac{1}{2} KL(Q||\frac{P+Q}{2})$$&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h2 id=&#34;example&#34;&gt;Example&lt;/h2&gt;
+&lt;p&gt;Here is a plot of KL and JS divergence of two normal distributions: N(0, 1) and N(1, 1). Image resource &lt;a href=&#34;https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;
+&lt;img src=&#34;/img/KL_JS_divergence.png&#34; alt=&#34;KL-JS&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;.
-.
-.
-.
-.
-.
-.&lt;/p&gt;
+&lt;p&gt;As shown in the plot, JS divergence are symmetric while KL divergence is asymmetric. People believe the success of GANs comes from replacing the traditional maximum likelihood with symmetric similarity measure, JS divergence.&lt;/p&gt;
 
-&lt;h2 id=&#34;example2&#34;&gt;Example2&lt;/h2&gt;
+&lt;h2 id=&#34;generative-adversarial-networks&#34;&gt;Generative Adversarial Networks&lt;/h2&gt;
 
-&lt;p&gt;.
-.&lt;/p&gt;
+&lt;p&gt;Original GANs consists of two networks:&lt;/p&gt;
 
-&lt;p&gt;.
-..
-.
-..
-.
-.
-..
-.
-..
-.
-.
-..
-..&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Generator. It receive random samples and synthesize fake images feeding into discriminator. This random sample brings a potential output diversity.&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;Discriminator. It receive the real dataset images and the fake images from generator. It works as a critic to evaluate the probability of input image coming from dataset and from generator.&lt;/li&gt;
+&lt;/ol&gt;
 
-&lt;h2 id=&#34;third-example&#34;&gt;Third Example&lt;/h2&gt;
+&lt;p&gt;This is a diagram showing how GAN works:
+&lt;img src=&#34;/img/GANs.png&#34; alt=&#34;GAN&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In one hand, we want the discriminator&amp;rsquo;s output probability over real data to be higher by maximizing $\mathbb{E}_{x \sim p_{data}(x)}[logD(x)]$; In another hand, we want the discriminator&amp;rsquo;s output probability over fake data from generator to be lower by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.&lt;/p&gt;
+
+&lt;p&gt;And for the generator, we want it to fool the discriminator by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.&lt;/p&gt;
+
+&lt;p&gt;So, the overall process of GAN training is obvious:
+$$\min_{G} \max_{D} L(G, D) =  [\mathbb{E}_{x \sim p_{data}(x)}[logD(x)] + \mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]]$$&lt;/p&gt;
+
+&lt;p&gt;Overall, it is a minimax game between generator and discriminator. The main concern in training procedure is keeping the G and D evolving at the same speed.&lt;/p&gt;
+
+&lt;h3 id=&#34;global-optimal-loss&#34;&gt;Global optimal loss&lt;/h3&gt;
+
+&lt;p&gt;The global minimum of the training criterion $L(G, D)$ is achieved if and only if
+$p_g = p_{data}$. Proof of are in the original &lt;a href=&#34;https://arxiv.org/pdf/1406.2661.pdf&#34; target=&#34;_blank&#34;&gt;GAN paper&lt;/a&gt;.&lt;br /&gt;
+First, we need to find the optimal solution for D when G is fixed. (Sorry, there is a problem in my equation alignment)&lt;/p&gt;
+
+&lt;p&gt;$$L(G, D) = \int_x p_{data}(x)logD(x)dx +  \int_z p(z)log(1-D(G(z))dz $$
+         $$ = \int_x (p_{data}(x)logD(x) + p_g(x)log(1-D(x)))dx $$&lt;/p&gt;
+
+&lt;p&gt;Assume:
+$$F(x) = p_{data}(x)logD(x) + p_g(x)log(1-D(x))$$
+Take the derivative over $D(x)$:
+$$\frac{d f(x)}{dx} = \frac{p_{data}(x)}{D(x)} + \frac{p_g(x)}{1-D(x)} = 0$$
+Solve this equation, easily get :
+$$D^{\star}(x) = \frac{p_{data}(x)}{p_{data}(x)+p_g(x)}$$&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;When system is trained well, $p_{data}(x)$ and $p_g(x)$ should be similar, $D^{\star}(x) = \frac{1}{2}$.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;When discriminator is optimal, the loss function becomes:&lt;/p&gt;
+
+&lt;p&gt;$$L(G, D) = \int_x p_{data}(x)logD(x)dx +  \int_z p(z)log(1-D(G(z))dz $$&lt;/p&gt;
+
+&lt;p&gt;$$ = \int_x (p_{data}(x)logD(x) + p_g(x)log(1-D(x)))dx $$
+$$ = \int_x p_{data}(x)log(\frac{p_{data}(x)}{p_{data}(x)+p_g(x)}) + p_g(x)log(\frac{p_g(x)}{p_{data}(x)+p_g(x)})dx $$
+$$ = -log(4) + KL(p_{data} || \frac{p_{data}+p_g}{2}) + KL(p_g || \frac{p_{data}+p_g}{2})$$
+$$ = -log(4) + 2* JS(p_{data} || p_g)$$&lt;/p&gt;
+
+&lt;p&gt;So, the loss function of GAN quantify the JS divergence of $p_{data}$ and $p_g$. The optimal value is $- log(4)$ when $p_{data} = p_g$.&lt;/p&gt;
+
+&lt;h2 id=&#34;problem-with-vanilla-gans&#34;&gt;Problem with Vanilla GANs&lt;/h2&gt;
 </description>
     </item>
     
@@ -75,6 +110,23 @@
       
       <guid>/post/going-deeper-into-batch-normalization/</guid>
       <description>
+
+&lt;h3 id=&#34;table-of-contents-optimization&#34;&gt;Table of contents/optimization&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#interpretation-and-advantage-of-batch-norm&#34;&gt;Interpretation and Advantage of Batch Norm&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#algorithm-and-implementation&#34;&gt;Algorithm and implementation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#improvements-and-alternatives&#34;&gt;Improvements and Alternatives&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#batch-norm-fused-with-convolution&#34;&gt;Batch norm fused with Convolution&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#layer-normalization&#34;&gt;Layer normalization&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#instance-normalization&#34;&gt;Instance Normalization&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#group-normalization&#34;&gt;Group Normalization&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#other-normalization-techniques-&#34;&gt;Other normalization techniques*&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#reference-materials-&#34;&gt;Reference Materials:&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;This article will thoroughly explain batch normalization in a simple way.
 I wrote this article after getting failed an interview because of detailed batchnorm related question.
@@ -121,7 +173,7 @@ from this. But this effect is quite minor.&lt;br /&gt;&lt;/li&gt;
 $\gamma$ and $\beta$. The deep learning book gives clear explaination about this&lt;/span&gt;. Normalizing the mean and deviation of a unit can
 reduce the expressive power of a neural network. In this way, it is common to multiply the normalized result with $\gamma$ and add $\beta$. For exmaple,
 if we have sigmoid activation afterwards, the network may don&amp;rsquo;t want the output lies in the near linear part of sigmoid. With $\gamma$ and $\beta$,
-the network has the freedom to shift whatever it wants.&lt;/p&gt;
+the network has the freedom to shift whatever it wants. Another thing to note is that batch norm in CNN is different. Instead of calculate mean and variance in size $[H, W, C]$, it also averages over H and W, and the mean and variance has C dimensions, because CNN weight are shared cross H and W.&lt;/p&gt;
 
 &lt;blockquote&gt;
 &lt;p&gt;This is a new parametrization can represent the same family of functions of the input as the old parametrization, but the new parametrization
@@ -289,14 +341,27 @@ which can save up to 50% memory and a minor increase of training time.&lt;/p&gt;
 
 &lt;h4 id=&#34;layer-normalization&#34;&gt;Layer normalization&lt;/h4&gt;
 
-&lt;p&gt;Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu and \sigma$ at every location,
-It uses all the neuron activations in one layer to produce $\mu and \sigma$.
+&lt;p&gt;Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu $ and $\sigma$ at every location,
+It uses all the neuron activations in one layer to produce $\mu$ and $\sigma$.
 This method is especially useful when not using mini-batch like RNN, where batch norm cannot be used. But its performance in convs layers are not as good
 as batch norm.&lt;/p&gt;
 
 &lt;h4 id=&#34;instance-normalization&#34;&gt;Instance Normalization&lt;/h4&gt;
 
+&lt;p&gt;Just simply replace all batch normalization layers with instance normalization layers. Batch normalization normalizes using the information from the whole batch, while instance normalization normalizes each feature map on its own.&lt;br /&gt;
+Formula comparasion:&lt;br /&gt;
+&lt;img src=&#34;/img/instancenorm.jpg&#34; alt=&#34;instance norm&#34; /&gt;&lt;/p&gt;
+
 &lt;h4 id=&#34;group-normalization&#34;&gt;Group Normalization&lt;/h4&gt;
+
+&lt;p&gt;While batch-norm demonstrates it effectiveness in a variety of fields including computer vision, natural language processing, speech processing, robotics, etc., batch-norm&amp;rsquo;s performance substantially decrease when the training batch size become smaller, which limits the gain of utilizing batch-norm in a task requiring small batches constrained by memory consumption.&lt;/p&gt;
+
+&lt;p&gt;Instead of normalizing along the batch dimension, GN divides the channels into groups and computes within each group the mean and variance. Therefore, GN&amp;rsquo;s computation is independent of batch sizes, and so does its accuracy.&lt;/p&gt;
+
+&lt;p&gt;Here is a diagram for all these Group techniques:&lt;br /&gt;
+&lt;img src=&#34;/img/GN.jpg&#34; alt=&#34;GN&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The difference is obvious. Batch norm uses data in the same batch to calculate $\mu $ and $\sigma$; Layer norm uses all the neurons in single layer; Instance norm uses all in data in the same batch and channel; Group norm uses only a small piece of batch.&lt;/p&gt;
 
 &lt;h4 id=&#34;other-normalization-techniques&#34;&gt;Other normalization techniques*&lt;/h4&gt;
 
@@ -317,12 +382,16 @@ output y=y*g. But in my experience g seems not essential for performance (also d
 &lt;p&gt;Cosine Normalization (Luo et al. 2017): weight normalization is very similar to cosine normalization, where the same L2 normalization is applied
 to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differentiation can compute appropriate gradients of x and w.&lt;/p&gt;
 
-&lt;p&gt;Here are some great reference materials:&lt;br /&gt;
-1. &lt;a href=&#34;http://www.deeplearningbook.org/contents/optimization.html&#34; target=&#34;_blank&#34;&gt;Deep Learning Book, Chapter 8.7.1&lt;/a&gt;&lt;br /&gt;
-2. &lt;a href=&#34;https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow&#34; target=&#34;_blank&#34;&gt;Stackoverflow: How could I use Batch Normalization in TensorFlow?&lt;/a&gt;&lt;br /&gt;
-3. &lt;a href=&#34;http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html&#34; target=&#34;_blank&#34;&gt;Explaination on Covariance Shift&lt;/a&gt;&lt;br /&gt;
-4. &lt;a href=&#34;https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization&#34; target=&#34;_blank&#34;&gt;Tensorflow batch normalization docs&lt;/a&gt;&lt;br /&gt;
-5. &lt;a href=&#34;https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal&#34; target=&#34;_blank&#34;&gt;Various Normalization Techniques in Deep Learning&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;reference-materials&#34;&gt;Reference Materials:&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.deeplearningbook.org/contents/optimization.html&#34; target=&#34;_blank&#34;&gt;Deep Learning Book, Chapter 8.7.1&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow&#34; target=&#34;_blank&#34;&gt;Stackoverflow: How could I use Batch Normalization in TensorFlow?&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html&#34; target=&#34;_blank&#34;&gt;Explaination on Covariance Shift&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization&#34; target=&#34;_blank&#34;&gt;Tensorflow batch normalization docs&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal&#34; target=&#34;_blank&#34;&gt;Various Normalization Techniques in Deep Learning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1607.08022.pdf&#34; target=&#34;_blank&#34;&gt;Instance Normalization&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
 </description>
     </item>
     
@@ -768,7 +837,7 @@ Although still have imperfections, WGAN almost totally solve issues like trainin
 &lt;img src=&#34;/img/WGAN.jpg&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Just minor modification from original GAN algorithm, how amazing is that! In Wasserstein GAN paper, the author thoroughly analyzed the weakness and holes on
-original GANs. For details of the mathematics and implementation about WGAN, see my another blog. Here I will only list the modification from original GAN to WGAN:&lt;/p&gt;
+original GANs. For details of the mathematics and implementation about WGAN, see my &lt;a href=&#34;https://shen338.github.io/post/amazing-gan---wasserstein-gan/&#34; target=&#34;_blank&#34;&gt;another blog&lt;/a&gt;. Here I will only list the modification from original GAN to WGAN:&lt;/p&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Remove the sigmoid function at the end of Discriminator&lt;br /&gt;&lt;/li&gt;

@@ -17,10 +17,9 @@
       
     
   
-  <meta name="description" content=" Table of Contents  Example Example2 Third Example  Example . . . . . . .
-Example2 . .
-. .. . .. . . .. . .. . . .. ..
-Third Example ">
+  <meta name="description" content="KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.
+ Kullback-Leibler Divergence measures the divergence of probability distribution p(x) to q(x): $$KL(P||Q) = \int_x P(x)log\frac{P(x)}{Q(x)}dx$$ KL(P||Q) achieves its minimum zero when P(x) and Q(x) are the same everywhere.
+KL divergence is widely used as a metrics to measure the similarity between two distributions.">
 
   
   <link rel="alternate" hreflang="en-us" href="/post/amazing-gan---wasserstein-gan/">
@@ -79,10 +78,9 @@ Third Example ">
   <meta property="og:site_name" content="Tong Shen">
   <meta property="og:url" content="/post/amazing-gan---wasserstein-gan/">
   <meta property="og:title" content="Amazing GAN - Wasserstein GAN | Tong Shen">
-  <meta property="og:description" content=" Table of Contents  Example Example2 Third Example  Example . . . . . . .
-Example2 . .
-. .. . .. . . .. . .. . . .. ..
-Third Example ">
+  <meta property="og:description" content="KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.
+ Kullback-Leibler Divergence measures the divergence of probability distribution p(x) to q(x): $$KL(P||Q) = \int_x P(x)log\frac{P(x)}{Q(x)}dx$$ KL(P||Q) achieves its minimum zero when P(x) and Q(x) are the same everywhere.
+KL divergence is widely used as a metrics to measure the similarity between two distributions.">
   <meta property="og:locale" content="en-us">
   
   <meta property="article:published_time" content="2018-05-17T21:00:00-04:00">
@@ -271,7 +269,7 @@ Third Example ">
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    1 min read
+    3 min read
   </span>
   
 
@@ -330,44 +328,79 @@ Third Example ">
     <div class="article-style" itemprop="articleBody">
       
 
-<h1 id="table-of-contents">Table of Contents</h1>
+<h2 id="kl-divergence-and-js-divergence">KL divergence and JS divergence</h2>
+
+<p>Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions:
+<a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence" target="_blank">Kullback-Leibler Divergence</a> and <a href="https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence" target="_blank">Jensen-Shannon Divergence</a>.</p>
 
 <ol>
-<li><a href="#example">Example</a></li>
-<li><a href="#example2">Example2</a></li>
-<li><a href="#third-example">Third Example</a></li>
+<li><p>Kullback-Leibler Divergence measures the divergence of probability distribution p(x) to q(x):
+$$KL(P||Q) = \int_x P(x)log\frac{P(x)}{Q(x)}dx$$
+KL(P||Q) achieves its minimum zero when P(x) and Q(x) are the same everywhere.<br />
+KL divergence is widely used as a metrics to measure the similarity between two distributions. But according to its formula, its is asymmetric. Also, due to the rapid decreasing of logrithm function, KL divergence put to much weight when P(x) is near zero. This can cause some buggy result in real world measurement.</p></li>
+
+<li><p>Jensen-Shannon Divergence. JS divergence is based on KL divergence and it is symmetric.<br />
+$$JS(P||Q) = \frac{1}{2} KL(P||\frac{P+Q}{2}) + \frac{1}{2} KL(Q||\frac{P+Q}{2})$$</p></li>
 </ol>
 
-<h2 id="example">Example</h2>
+<p>Here is a plot of KL and JS divergence of two normal distributions: N(0, 1) and N(1, 1). Image resource <a href="https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html" target="_blank">here</a>
+<img src="/img/KL_JS_divergence.png" alt="KL-JS" /></p>
 
-<p>.
-.
-.
-.
-.
-.
-.</p>
+<p>As shown in the plot, JS divergence are symmetric while KL divergence is asymmetric. People believe the success of GANs comes from replacing the traditional maximum likelihood with symmetric similarity measure, JS divergence.</p>
 
-<h2 id="example2">Example2</h2>
+<h2 id="generative-adversarial-networks">Generative Adversarial Networks</h2>
 
-<p>.
-.</p>
+<p>Original GANs consists of two networks:</p>
 
-<p>.
-..
-.
-..
-.
-.
-..
-.
-..
-.
-.
-..
-..</p>
+<ol>
+<li>Generator. It receive random samples and synthesize fake images feeding into discriminator. This random sample brings a potential output diversity.<br /></li>
+<li>Discriminator. It receive the real dataset images and the fake images from generator. It works as a critic to evaluate the probability of input image coming from dataset and from generator.</li>
+</ol>
 
-<h2 id="third-example">Third Example</h2>
+<p>This is a diagram showing how GAN works:
+<img src="/img/GANs.png" alt="GAN" /></p>
+
+<p>In one hand, we want the discriminator&rsquo;s output probability over real data to be higher by maximizing $\mathbb{E}_{x \sim p_{data}(x)}[logD(x)]$; In another hand, we want the discriminator&rsquo;s output probability over fake data from generator to be lower by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.</p>
+
+<p>And for the generator, we want it to fool the discriminator by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.</p>
+
+<p>So, the overall process of GAN training is obvious:
+$$\min_{G} \max_{D} L(G, D) =  [\mathbb{E}_{x \sim p_{data}(x)}[logD(x)] + \mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]]$$</p>
+
+<p>Overall, it is a minimax game between generator and discriminator. The main concern in training procedure is keeping the G and D evolving at the same speed.</p>
+
+<h3 id="global-optimal-loss">Global optimal loss</h3>
+
+<p>The global minimum of the training criterion $L(G, D)$ is achieved if and only if
+$p_g = p_{data}$. Proof of are in the original <a href="https://arxiv.org/pdf/1406.2661.pdf" target="_blank">GAN paper</a>.<br />
+First, we need to find the optimal solution for D when G is fixed. (Sorry, there is a problem in my equation alignment)</p>
+
+<p>$$L(G, D) = \int_x p_{data}(x)logD(x)dx +  \int_z p(z)log(1-D(G(z))dz $$
+         $$ = \int_x (p_{data}(x)logD(x) + p_g(x)log(1-D(x)))dx $$</p>
+
+<p>Assume:
+$$F(x) = p_{data}(x)logD(x) + p_g(x)log(1-D(x))$$
+Take the derivative over $D(x)$:
+$$\frac{d f(x)}{dx} = \frac{p_{data}(x)}{D(x)} + \frac{p_g(x)}{1-D(x)} = 0$$
+Solve this equation, easily get :
+$$D^{\star}(x) = \frac{p_{data}(x)}{p_{data}(x)+p_g(x)}$$</p>
+
+<blockquote>
+<p>When system is trained well, $p_{data}(x)$ and $p_g(x)$ should be similar, $D^{\star}(x) = \frac{1}{2}$.</p>
+</blockquote>
+
+<p>When discriminator is optimal, the loss function becomes:</p>
+
+<p>$$L(G, D) = \int_x p_{data}(x)logD(x)dx +  \int_z p(z)log(1-D(G(z))dz $$</p>
+
+<p>$$ = \int_x (p_{data}(x)logD(x) + p_g(x)log(1-D(x)))dx $$
+$$ = \int_x p_{data}(x)log(\frac{p_{data}(x)}{p_{data}(x)+p_g(x)}) + p_g(x)log(\frac{p_g(x)}{p_{data}(x)+p_g(x)})dx $$
+$$ = -log(4) + KL(p_{data} || \frac{p_{data}+p_g}{2}) + KL(p_g || \frac{p_{data}+p_g}{2})$$
+$$ = -log(4) + 2* JS(p_{data} || p_g)$$</p>
+
+<p>So, the loss function of GAN quantify the JS divergence of $p_{data}$ and $p_g$. The optimal value is $- log(4)$ when $p_{data} = p_g$.</p>
+
+<h2 id="problem-with-vanilla-gans">Problem with Vanilla GANs</h2>
 
     </div>
 

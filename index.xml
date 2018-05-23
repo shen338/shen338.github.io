@@ -11,18 +11,301 @@
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Spatial Transform Network</title>
-      <link>/post/spatial-transform-network/</link>
-      <pubDate>Sat, 19 May 2018 21:00:00 -0400</pubDate>
+      <title>Going Deeper in Batch Normalization</title>
+      <link>/post/going-deeper-into-batch-normalization/</link>
+      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
       
-      <guid>/post/spatial-transform-network/</guid>
-      <description></description>
+      <guid>/post/going-deeper-into-batch-normalization/</guid>
+      <description>
+
+&lt;h3 id=&#34;table-of-contents-optimization&#34;&gt;Table of contents/optimization&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#interpretation-and-advantage-of-batch-norm&#34;&gt;Interpretation and Advantage of Batch Norm&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#algorithm-and-implementation&#34;&gt;Algorithm and implementation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#improvements-and-alternatives&#34;&gt;Improvements and Alternatives&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#batch-norm-fused-with-convolution&#34;&gt;Batch norm fused with Convolution&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#layer-normalization&#34;&gt;Layer normalization&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#instance-normalization&#34;&gt;Instance Normalization&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#group-normalization&#34;&gt;Group Normalization&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#other-normalization-techniques-&#34;&gt;Other normalization techniques*&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#reference-materials-&#34;&gt;Reference Materials:&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This article will thoroughly explain batch normalization in a simple way.
+I wrote this article after getting failed an interview because of detailed batchnorm related question.
+I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.&lt;/p&gt;
+
+&lt;p&gt;Here is the original paper about batch normalization on Arxiv:&lt;br /&gt;
+&lt;a href=&#34;https://arxiv.org/abs/1502.03167&#34; target=&#34;_blank&#34;&gt;Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;interpretation-and-advantage-of-batch-norm&#34;&gt;Interpretation and Advantage of Batch Norm&lt;/h3&gt;
+
+&lt;p&gt;Of course, batch norm is used to normalize the input for certain layer. We can think it in this way: if some of our input image have a scale between 0-1 while others are
+between 1-1000. It is better to normalize them before training. We can apply the same idea to the input of every layer input.
+There are several advantages to use batch norm:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm can reduce the covariance shift&lt;/span&gt;. For example, we train a model to classify cat and flowers.
+And the training data of cat are all black cats. In this way, the model won&amp;rsquo;t work because it can only
+classify the distribution of black cat and flowers. What batch norm does is to reduce this kind of error and make the
+input shift, like reduce the difference between black cat and other cats. And the same thing also applies to
+every layer in the neural network. Batch norm can reduce the shift around of previous output and make
+the training of next layers easier.&lt;/li&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm can remove the linear interactions in output&lt;/span&gt;. In this way, linear layers would be useless, because they cano only have effect on
+linear component.  In a deep neural network with nonlinearactivation functions, the lower layers can perform nonlinear transformations of the data, so they remain useful.
+Batch normalization acts to standardize only the mean and variance of each unit in order to stabilize learning, but it allows therelationships
+between units and the nonlinear statistics of a single unit to change.&lt;/li&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch normalization can greatly speed up training process&lt;/span&gt;. Batch normalization accelerates training by requiring less iterations to
+converge to a given loss value. This can be done by using higher learning rates, but with smaller learning rates you can still see an improvement.&lt;br /&gt;
+Batch normalization also makes the optimization problem &amp;ldquo;easier&amp;rdquo;, as minimizing the covariate shift avoid lots of plateaus where the loss stagnates
+or decreases slowly. It can still happen but it is much less frequent.&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm also has some regularization effect&lt;/span&gt;. Every mini-batch is a biased sample from the total dataset.
+When doing batch norm, we will subtract mean and divide it by variance. This can also be treated as add
+noise to data. Similar to regularization techniques like dropout, network can gain some regularization
+from this. But this effect is quite minor.&lt;br /&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;algorithm-and-implementation&#34;&gt;Algorithm and implementation&lt;/h3&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Here is the algorithm diagram batch norm.
+&lt;img src=&#34;/img/batch_norm_fp.png&#34; alt=&#34;Batch norm algorithm&#34; /&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Nothing fancy but extremely practical algorithm. One thing has to mention, &lt;span class=&#34;markup-quote&#34;&gt;the learnable variables
+$\gamma$ and $\beta$. The deep learning book gives clear explaination about this&lt;/span&gt;. Normalizing the mean and deviation of a unit can
+reduce the expressive power of a neural network. In this way, it is common to multiply the normalized result with $\gamma$ and add $\beta$. For exmaple,
+if we have sigmoid activation afterwards, the network may don&amp;rsquo;t want the output lies in the near linear part of sigmoid. With $\gamma$ and $\beta$,
+the network has the freedom to shift whatever it wants. Another thing to note is that batch norm in CNN is different. Instead of calculate mean and variance in size $[H, W, C]$, it also averages over H and W, and the mean and variance has C dimensions, because CNN weight are shared cross H and W.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;This is a new parametrization can represent the same family of functions of the input as the old parametrization, but the new parametrization
+ has different learning dynamics. In the old parametrization, the mean of H was determined by a complicated interaction between the parameters
+ in the layers below H. In the new parametrization, the mean of $y=\gamma x + \beta$ is determined solely by $\gamma$. The new parametrization
+ is much easier to learn with gradient descent.    &amp;ndash; Deep Learning Book&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;span class=&#34;markup-quote&#34;&gt;At test time, we need the mean and variance directly. So, the method is using an exponentially weighted average across mini-batches. &lt;/span&gt;
+We have $ x_1, x_2, &amp;hellip; ,x_i $ outputs from different mini-batches. What we do is put expotential
+weight on previous processed mini-batches. The calculation is quite simple:
+$$Mean_{running} = \mu * Mean_{running} + (1.0 - \mu) * Mean_{sample}$$
+$$Var_{running} = \mu * Var_{running} + (1.0 - \mu) * Var_{sample}$$
+And we use running mean and var to calculate batchnorm.&lt;br /&gt;
+Alternatively, we can first calculate the total mean and variance of total test dataset. But
+this exponential weighted method are more popular in practice.&lt;/p&gt;
+
+&lt;p&gt;And last but not least, the code for forward and backward pass(from my cs231n homework):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def batchnorm_forward(x, gamma, beta, bn_param):
+    &amp;quot;&amp;quot;&amp;quot;
+    Forward pass for batch normalization.
+    During training the sample mean and (uncorrected) sample variance are
+    computed from minibatch statistics and used to normalize the incoming data.
+    During training we also keep an exponentially decaying running mean of the
+    mean and variance of each feature, and these averages are used to normalize
+    data at test-time.
+    At each timestep we update the running averages for mean and variance using
+    an exponential decay based on the momentum parameter:
+    running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+    running_var = momentum * running_var + (1 - momentum) * sample_var
+    Note that the batch normalization paper suggests a different test-time
+    behavior: they compute sample mean and variance for each feature using a
+    large number of training images rather than using a running average. For
+    this implementation we have chosen to use running averages instead since
+    they do not require an additional estimation step; the torch7
+    implementation of batch normalization also uses running averages.
+    Input:
+    - x: Data of shape (N, D)
+    - gamma: Scale parameter of shape (D,)
+    - beta: Shift paremeter of shape (D,)
+    - bn_param: Dictionary with the following keys:
+      - mode: &#39;train&#39; or &#39;test&#39;; required
+      - eps: Constant for numeric stability
+      - momentum: Constant for running mean / variance.
+      - running_mean: Array of shape (D,) giving running mean of features
+      - running_var Array of shape (D,) giving running variance of features
+    Returns a tuple of:
+    - out: of shape (N, D)
+    - cache: A tuple of values needed in the backward pass
+    &amp;quot;&amp;quot;&amp;quot;
+    mode = bn_param[&#39;mode&#39;]
+    eps = bn_param.get(&#39;eps&#39;, 1e-5)
+    momentum = bn_param.get(&#39;momentum&#39;, 0.9)
+
+    N, D = x.shape
+    running_mean = bn_param.get(&#39;running_mean&#39;, np.zeros(D, dtype=x.dtype))
+    running_var = bn_param.get(&#39;running_var&#39;, np.zeros(D, dtype=x.dtype))
+
+    out, cache = None, None
+    if mode == &#39;train&#39;:
+       
+        sample_mean = np.mean(x, axis=0)
+        sample_var = np.var(x, axis=0)
+        x_stand = (x - sample_mean.T) / np.sqrt(sample_var.T + eps)
+
+        out = x_stand * gamma + beta
+
+        running_mean = momentum * running_mean + (1.0 - momentum) * sample_mean
+        running_var = momentum * running_var + (1.0 - momentum) * sample_var
+
+        cache = (sample_mean, sample_var, x_stand, x, gamma, beta, eps)
+
+       
+    elif mode == &#39;test&#39;:
+        
+
+        x_stand = (x - running_mean) / np.sqrt(running_var)
+        out = x_stand * gamma + beta
+
+        
+    else:
+        raise ValueError(&#39;Invalid forward batchnorm mode &amp;quot;%s&amp;quot;&#39; % mode)
+
+    # Store the updated running means back into bn_param
+    bn_param[&#39;running_mean&#39;] = running_mean
+    bn_param[&#39;running_var&#39;] = running_var
+
+    return out, cache
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def batchnorm_backward(dout, cache):
+    &amp;quot;&amp;quot;&amp;quot;
+    Backward pass for batch normalization.
+    For this implementation, you should write out a computation graph for
+    batch normalization on paper and propagate gradients backward through
+    intermediate nodes.
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, D)
+    - cache: Variable of intermediates from batchnorm_forward.
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs x, of shape (N, D)
+    - dgamma: Gradient with respect to scale parameter gamma, of shape (D,)
+    - dbeta: Gradient with respect to shift parameter beta, of shape (D,)
+    &amp;quot;&amp;quot;&amp;quot;
+    dx, dgamma, dbeta = None, None, None
+    
+
+    sample_mean, sample_var, x_stand, x, gamma, beta, eps = cache
+    N, D = dout.shape
+
+    dbeta = np.sum(dout, axis=0)
+    dgamma = np.sum(x_stand * dout, axis=0)
+    dx = (1. / N) * gamma * (sample_var + eps)**(-1. / 2.) * (
+         N * dout - np.sum(dout, axis=0) - (x - sample_mean) * (
+         sample_var + eps)**(-1.0) * np.sum(dout * (x - sample_mean), axis=0))
+
+
+    return dx, dgamma, dbeta
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;During training, the moving_mean and moving_variance need to be updated.
+By default the update ops are placed in tf.GraphKeys.UPDATE_OPS, so they need to be added as a dependency to the train_op.
+So, the template is:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;batchnorm = tf.layers.batch_normalization(x, training=training)
+update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+with tf.control_dependencies(update_ops):
+    train_op = optimizer.minimize(loss)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And also tensorflow official evaluate function (classification model zoo):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, first_clone_scope)
+with tf.control_dependencies([update_op]):
+      train_tensor = tf.identity(total_loss, name=&#39;train_op&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;improvements-and-alternatives&#34;&gt;Improvements and Alternatives&lt;/h3&gt;
+
+&lt;h4 id=&#34;batch-norm-fused-with-convolution&#34;&gt;Batch norm fused with Convolution&lt;/h4&gt;
+
+&lt;p&gt;This is the question makes me fail the interview. Actually, there is no magic stuff about fused batch normalization. Just mathematically
+calculate two layers together and treat them as one layer in forward and backward pass:&lt;/p&gt;
+
+&lt;p&gt;Conv:
+$$convout(N_i,C_{out})=bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)$$
+Batch Norm:
+$$bnout(N_i,C_{out})=(convout(N_i,C_{out})-\mu)/\sqrt{((\epsilon + \sigma)^2)}$$
+$$bnout(N_i,C_{out})=\gamma*bnout(N_i,C_{out})+\beta$$
+Here, $convout(N_i,C_{out})$ means the $N_ith$ sample in the $C_{out}$ channel. Same notation applies to input and bnout.
+$weight(C_{out},k)$ is the conv kernel corresponding to $C_{out}$. And $\epsilon, \sigma, \mu, \gamma, \beta$ are the same as above.&lt;br /&gt;
+After fusion, the total calculation becomes:&lt;/p&gt;
+
+&lt;p&gt;$$out(N_i,C_{out})=\gamma*(bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$
+In this way, the weight and bias of fused conv layer is:&lt;/p&gt;
+
+&lt;p&gt;$$bias = \gamma*(bias(C_{out})$$
+$$weight = weight(C_{out},k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$&lt;/p&gt;
+
+&lt;p&gt;We can use the fused bias and weight in previous conv layers. We can drop the intermediate result between conv and batch norm using this method,
+which can save up to 50% memory and a minor increase of training time.&lt;/p&gt;
+
+&lt;h4 id=&#34;layer-normalization&#34;&gt;Layer normalization&lt;/h4&gt;
+
+&lt;p&gt;Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu $ and $\sigma$ at every location,
+It uses all the neuron activations in one layer to produce $\mu$ and $\sigma$.
+This method is especially useful when not using mini-batch like RNN, where batch norm cannot be used. But its performance in convs layers are not as good
+as batch norm.&lt;/p&gt;
+
+&lt;h4 id=&#34;instance-normalization&#34;&gt;Instance Normalization&lt;/h4&gt;
+
+&lt;p&gt;Just simply replace all batch normalization layers with instance normalization layers. Batch normalization normalizes using the information from the whole batch, while instance normalization normalizes each feature map on its own.&lt;br /&gt;
+Formula comparasion:&lt;br /&gt;
+&lt;img src=&#34;/img/instancenorm.jpg&#34; alt=&#34;instance norm&#34; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;group-normalization&#34;&gt;Group Normalization&lt;/h4&gt;
+
+&lt;p&gt;While batch-norm demonstrates it effectiveness in a variety of fields including computer vision, natural language processing, speech processing, robotics, etc., batch-norm&amp;rsquo;s performance substantially decrease when the training batch size become smaller, which limits the gain of utilizing batch-norm in a task requiring small batches constrained by memory consumption.&lt;/p&gt;
+
+&lt;p&gt;Instead of normalizing along the batch dimension, GN divides the channels into groups and computes within each group the mean and variance. Therefore, GN&amp;rsquo;s computation is independent of batch sizes, and so does its accuracy.&lt;/p&gt;
+
+&lt;p&gt;Here is a diagram for all these Group techniques:&lt;br /&gt;
+&lt;img src=&#34;/img/GN.jpg&#34; alt=&#34;GN&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The difference is obvious. Batch norm uses data in the same batch to calculate $\mu $ and $\sigma$; Layer norm uses all the neurons in single layer; Instance norm uses all in data in the same batch and channel; Group norm uses only a small piece of batch.&lt;/p&gt;
+
+&lt;h4 id=&#34;other-normalization-techniques&#34;&gt;Other normalization techniques*&lt;/h4&gt;
+
+&lt;p&gt;Recurrent Batch Normalization (BN) (Cooijmans, 2016; also proposed concurrently by Qianli Liao &amp;amp; Tomaso Poggio, but tested on Recurrent ConvNets,
+instead of RNN/LSTM): Same as batch normalization. Use different normalization statistics for each time step. You need to store a set of mean and
+standard deviation for each time step.&lt;/p&gt;
+
+&lt;p&gt;Batch Normalized Recurrent Neural Networks (Laurent, 2015): batch normalization is only applied between the input and hidden state, but not between
+hidden states. i.e., normalization is not applied over time.&lt;/p&gt;
+
+&lt;p&gt;Streaming Normalization (Liao et al. 2016) : it summarizes existing normalizations and overcomes most issues mentioned above. It works well with
+ConvNets, recurrent learning and online learning (i.e., small mini-batch or one sample at a time):&lt;/p&gt;
+
+&lt;p&gt;Weight Normalization (Salimans and Kingma 2016): whenever a weight is used, it is divided by its L2 norm first, such that the resulting weight has
+L2 norm 1. That is, output y=x*(w/|w|), where x and w denote the input and weight respectively. A scalar scaling factor g is then multiplied to the
+output y=y*g. But in my experience g seems not essential for performance (also downstream learnable layers can learn this anyway).&lt;/p&gt;
+
+&lt;p&gt;Cosine Normalization (Luo et al. 2017): weight normalization is very similar to cosine normalization, where the same L2 normalization is applied
+to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differentiation can compute appropriate gradients of x and w.&lt;/p&gt;
+
+&lt;h3 id=&#34;reference-materials&#34;&gt;Reference Materials:&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.deeplearningbook.org/contents/optimization.html&#34; target=&#34;_blank&#34;&gt;Deep Learning Book, Chapter 8.7.1&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow&#34; target=&#34;_blank&#34;&gt;Stackoverflow: How could I use Batch Normalization in TensorFlow?&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html&#34; target=&#34;_blank&#34;&gt;Explaination on Covariance Shift&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization&#34; target=&#34;_blank&#34;&gt;Tensorflow batch normalization docs&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal&#34; target=&#34;_blank&#34;&gt;Various Normalization Techniques in Deep Learning&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1607.08022.pdf&#34; target=&#34;_blank&#34;&gt;Instance Normalization&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
     </item>
     
     <item>
       <title>Amazing GAN - Wasserstein GAN</title>
       <link>/post/amazing-gan---wasserstein-gan/</link>
-      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
+      <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
       
       <guid>/post/amazing-gan---wasserstein-gan/</guid>
       <description>
@@ -337,7 +620,42 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 
 &lt;p&gt;The main reason they do this is that enforcing the unit gradient norm constraint everywhere is intractable, enforcing it only along these straight lines seems sufficient and experimentally results in good performance.&lt;/p&gt;
 
-&lt;p&gt;Also, the batch norm layer can make this penalty invalid, so WGAN-GP simply remove the batch norm layers. And WGAN-GP takes two side penalty. Instead of forcing the gradient norm smaller than 1, it encourage gradient norm closer to 1 according to their proof. In practice, this works slightly better.&lt;/p&gt;
+&lt;p&gt;Also, the batch norm layer can make this penalty invalid, so WGAN-GP simply remove the batch norm layers. And WGAN-GP takes two side penalty. Instead of forcing the gradient norm smaller than 1, it encourage gradient norm closer to 1 according to their proof. In practice, this works slightly better. Here is the algorithm of WGAN-GP:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/WGANGP.jpg&#34; alt=&#34;WGAN-GP&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And the implementation on tensorflow is quite simple with tf.gradient function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt; 
+ with tf.name_scope(&#39;gan_loss&#39;):
+
+    D_loss = tf.reduce_mean(fake_score) - tf.reduce_mean(real_score)
+
+    G_loss = -tf.reduce_mean(fake_score)
+
+    def interpolate(a, b):
+        shape = tf.concat((tf.shape(a)[0:1], tf.tile([1], [a.shape.ndims - 1])), axis=0)
+        alpha = tf.random_uniform(shape=shape, minval=0., maxval=1.)
+        inter = a + alpha * (b - a)
+        inter.set_shape(a.get_shape().as_list())
+        return inter
+
+    gp_sample = interpolate(gen, image_hr)
+
+    gp_gradient = tf.gradients(net.discrimintor(gp_sample, reuse=True), gp_sample)
+
+    grad_norm = tf.sqrt(tf.reduce_sum(tf.square(gp_gradient[0]), reduction_indices=[-1]))
+
+    gp_loss = tf.reduce_mean(tf.square(grad_norm-1.))
+
+    D_overall_loss = D_loss + gp_rate*gp_loss
+
+    tf.summary.scalar(&#39;G_loss&#39;, (G_loss))
+    tf.summary.scalar(&#39;D_loss&#39;, (D_loss))
+    tf.summary.scalar(&#39;GP_loss&#39;, gp_loss)
+
+    G_overall_loss = gan_ratio*G_loss + SR_loss 
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&#34;reference-materials&#34;&gt;Reference Materials&lt;/h2&gt;
 
@@ -349,298 +667,6 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 &lt;li&gt;&lt;a href=&#34;http://papers.nips.cc/paper/6125-improved-techniques-for-training-gans.pdf&#34; target=&#34;_blank&#34;&gt;Improved Techniques for Training GANs&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html&#34; target=&#34;_blank&#34;&gt;Another great blog of WGAN&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1704.00028.pdf&#34; target=&#34;_blank&#34;&gt;WGAN-GP: Improved Training of Wasserstein GANs&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Going Deeper in Batch Normalization</title>
-      <link>/post/going-deeper-into-batch-normalization/</link>
-      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
-      
-      <guid>/post/going-deeper-into-batch-normalization/</guid>
-      <description>
-
-&lt;h3 id=&#34;table-of-contents-optimization&#34;&gt;Table of contents/optimization&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#interpretation-and-advantage-of-batch-norm&#34;&gt;Interpretation and Advantage of Batch Norm&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#algorithm-and-implementation&#34;&gt;Algorithm and implementation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#improvements-and-alternatives&#34;&gt;Improvements and Alternatives&lt;/a&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#batch-norm-fused-with-convolution&#34;&gt;Batch norm fused with Convolution&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#layer-normalization&#34;&gt;Layer normalization&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#instance-normalization&#34;&gt;Instance Normalization&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#group-normalization&#34;&gt;Group Normalization&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#other-normalization-techniques-&#34;&gt;Other normalization techniques*&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#reference-materials-&#34;&gt;Reference Materials:&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;This article will thoroughly explain batch normalization in a simple way.
-I wrote this article after getting failed an interview because of detailed batchnorm related question.
-I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.&lt;/p&gt;
-
-&lt;p&gt;Here is the original paper about batch normalization on Arxiv:&lt;br /&gt;
-&lt;a href=&#34;https://arxiv.org/abs/1502.03167&#34; target=&#34;_blank&#34;&gt;Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;interpretation-and-advantage-of-batch-norm&#34;&gt;Interpretation and Advantage of Batch Norm&lt;/h3&gt;
-
-&lt;p&gt;Of course, batch norm is used to normalize the input for certain layer. We can think it in this way: if some of our input image have a scale between 0-1 while others are
-between 1-1000. It is better to normalize them before training. We can apply the same idea to the input of every layer input.
-There are several advantages to use batch norm:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm can reduce the covariance shift&lt;/span&gt;. For example, we train a model to classify cat and flowers.
-And the training data of cat are all black cats. In this way, the model won&amp;rsquo;t work because it can only
-classify the distribution of black cat and flowers. What batch norm does is to reduce this kind of error and make the
-input shift, like reduce the difference between black cat and other cats. And the same thing also applies to
-every layer in the neural network. Batch norm can reduce the shift around of previous output and make
-the training of next layers easier.&lt;/li&gt;
-&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm can remove the linear interactions in output&lt;/span&gt;. In this way, linear layers would be useless, because they cano only have effect on
-linear component.  In a deep neural network with nonlinearactivation functions, the lower layers can perform nonlinear transformations of the data, so they remain useful.
-Batch normalization acts to standardize only the mean and variance of each unit in order to stabilize learning, but it allows therelationships
-between units and the nonlinear statistics of a single unit to change.&lt;/li&gt;
-&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch normalization can greatly speed up training process&lt;/span&gt;. Batch normalization accelerates training by requiring less iterations to
-converge to a given loss value. This can be done by using higher learning rates, but with smaller learning rates you can still see an improvement.&lt;br /&gt;
-Batch normalization also makes the optimization problem &amp;ldquo;easier&amp;rdquo;, as minimizing the covariate shift avoid lots of plateaus where the loss stagnates
-or decreases slowly. It can still happen but it is much less frequent.&lt;br /&gt;&lt;/li&gt;
-&lt;li&gt;&lt;span class=&#34;markup-quote&#34;&gt;Batch norm also has some regularization effect&lt;/span&gt;. Every mini-batch is a biased sample from the total dataset.
-When doing batch norm, we will subtract mean and divide it by variance. This can also be treated as add
-noise to data. Similar to regularization techniques like dropout, network can gain some regularization
-from this. But this effect is quite minor.&lt;br /&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h3 id=&#34;algorithm-and-implementation&#34;&gt;Algorithm and implementation&lt;/h3&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Here is the algorithm diagram batch norm.
-&lt;img src=&#34;/img/batch_norm_fp.png&#34; alt=&#34;Batch norm algorithm&#34; /&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Nothing fancy but extremely practical algorithm. One thing has to mention, &lt;span class=&#34;markup-quote&#34;&gt;the learnable variables
-$\gamma$ and $\beta$. The deep learning book gives clear explaination about this&lt;/span&gt;. Normalizing the mean and deviation of a unit can
-reduce the expressive power of a neural network. In this way, it is common to multiply the normalized result with $\gamma$ and add $\beta$. For exmaple,
-if we have sigmoid activation afterwards, the network may don&amp;rsquo;t want the output lies in the near linear part of sigmoid. With $\gamma$ and $\beta$,
-the network has the freedom to shift whatever it wants. Another thing to note is that batch norm in CNN is different. Instead of calculate mean and variance in size $[H, W, C]$, it also averages over H and W, and the mean and variance has C dimensions, because CNN weight are shared cross H and W.&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;This is a new parametrization can represent the same family of functions of the input as the old parametrization, but the new parametrization
- has different learning dynamics. In the old parametrization, the mean of H was determined by a complicated interaction between the parameters
- in the layers below H. In the new parametrization, the mean of $y=\gamma x + \beta$ is determined solely by $\gamma$. The new parametrization
- is much easier to learn with gradient descent.    &amp;ndash; Deep Learning Book&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;span class=&#34;markup-quote&#34;&gt;At test time, we need the mean and variance directly. So, the method is using an exponentially weighted average across mini-batches. &lt;/span&gt;
-We have $ x_1, x_2, &amp;hellip; ,x_i $ outputs from different mini-batches. What we do is put expotential
-weight on previous processed mini-batches. The calculation is quite simple:
-$$Mean_{running} = \mu * Mean_{running} + (1.0 - \mu) * Mean_{sample}$$
-$$Var_{running} = \mu * Var_{running} + (1.0 - \mu) * Var_{sample}$$
-And we use running mean and var to calculate batchnorm.&lt;br /&gt;
-Alternatively, we can first calculate the total mean and variance of total test dataset. But
-this exponential weighted method are more popular in practice.&lt;/p&gt;
-
-&lt;p&gt;And last but not least, the code for forward and backward pass(from my cs231n homework):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def batchnorm_forward(x, gamma, beta, bn_param):
-    &amp;quot;&amp;quot;&amp;quot;
-    Forward pass for batch normalization.
-    During training the sample mean and (uncorrected) sample variance are
-    computed from minibatch statistics and used to normalize the incoming data.
-    During training we also keep an exponentially decaying running mean of the
-    mean and variance of each feature, and these averages are used to normalize
-    data at test-time.
-    At each timestep we update the running averages for mean and variance using
-    an exponential decay based on the momentum parameter:
-    running_mean = momentum * running_mean + (1 - momentum) * sample_mean
-    running_var = momentum * running_var + (1 - momentum) * sample_var
-    Note that the batch normalization paper suggests a different test-time
-    behavior: they compute sample mean and variance for each feature using a
-    large number of training images rather than using a running average. For
-    this implementation we have chosen to use running averages instead since
-    they do not require an additional estimation step; the torch7
-    implementation of batch normalization also uses running averages.
-    Input:
-    - x: Data of shape (N, D)
-    - gamma: Scale parameter of shape (D,)
-    - beta: Shift paremeter of shape (D,)
-    - bn_param: Dictionary with the following keys:
-      - mode: &#39;train&#39; or &#39;test&#39;; required
-      - eps: Constant for numeric stability
-      - momentum: Constant for running mean / variance.
-      - running_mean: Array of shape (D,) giving running mean of features
-      - running_var Array of shape (D,) giving running variance of features
-    Returns a tuple of:
-    - out: of shape (N, D)
-    - cache: A tuple of values needed in the backward pass
-    &amp;quot;&amp;quot;&amp;quot;
-    mode = bn_param[&#39;mode&#39;]
-    eps = bn_param.get(&#39;eps&#39;, 1e-5)
-    momentum = bn_param.get(&#39;momentum&#39;, 0.9)
-
-    N, D = x.shape
-    running_mean = bn_param.get(&#39;running_mean&#39;, np.zeros(D, dtype=x.dtype))
-    running_var = bn_param.get(&#39;running_var&#39;, np.zeros(D, dtype=x.dtype))
-
-    out, cache = None, None
-    if mode == &#39;train&#39;:
-       
-        sample_mean = np.mean(x, axis=0)
-        sample_var = np.var(x, axis=0)
-        x_stand = (x - sample_mean.T) / np.sqrt(sample_var.T + eps)
-
-        out = x_stand * gamma + beta
-
-        running_mean = momentum * running_mean + (1.0 - momentum) * sample_mean
-        running_var = momentum * running_var + (1.0 - momentum) * sample_var
-
-        cache = (sample_mean, sample_var, x_stand, x, gamma, beta, eps)
-
-       
-    elif mode == &#39;test&#39;:
-        
-
-        x_stand = (x - running_mean) / np.sqrt(running_var)
-        out = x_stand * gamma + beta
-
-        
-    else:
-        raise ValueError(&#39;Invalid forward batchnorm mode &amp;quot;%s&amp;quot;&#39; % mode)
-
-    # Store the updated running means back into bn_param
-    bn_param[&#39;running_mean&#39;] = running_mean
-    bn_param[&#39;running_var&#39;] = running_var
-
-    return out, cache
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def batchnorm_backward(dout, cache):
-    &amp;quot;&amp;quot;&amp;quot;
-    Backward pass for batch normalization.
-    For this implementation, you should write out a computation graph for
-    batch normalization on paper and propagate gradients backward through
-    intermediate nodes.
-    Inputs:
-    - dout: Upstream derivatives, of shape (N, D)
-    - cache: Variable of intermediates from batchnorm_forward.
-    Returns a tuple of:
-    - dx: Gradient with respect to inputs x, of shape (N, D)
-    - dgamma: Gradient with respect to scale parameter gamma, of shape (D,)
-    - dbeta: Gradient with respect to shift parameter beta, of shape (D,)
-    &amp;quot;&amp;quot;&amp;quot;
-    dx, dgamma, dbeta = None, None, None
-    
-
-    sample_mean, sample_var, x_stand, x, gamma, beta, eps = cache
-    N, D = dout.shape
-
-    dbeta = np.sum(dout, axis=0)
-    dgamma = np.sum(x_stand * dout, axis=0)
-    dx = (1. / N) * gamma * (sample_var + eps)**(-1. / 2.) * (
-         N * dout - np.sum(dout, axis=0) - (x - sample_mean) * (
-         sample_var + eps)**(-1.0) * np.sum(dout * (x - sample_mean), axis=0))
-
-
-    return dx, dgamma, dbeta
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;During training, the moving_mean and moving_variance need to be updated.
-By default the update ops are placed in tf.GraphKeys.UPDATE_OPS, so they need to be added as a dependency to the train_op.
-So, the template is:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;batchnorm = tf.layers.batch_normalization(x, training=training)
-update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-with tf.control_dependencies(update_ops):
-    train_op = optimizer.minimize(loss)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And also tensorflow official evaluate function (classification model zoo):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, first_clone_scope)
-with tf.control_dependencies([update_op]):
-      train_tensor = tf.identity(total_loss, name=&#39;train_op&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;improvements-and-alternatives&#34;&gt;Improvements and Alternatives&lt;/h3&gt;
-
-&lt;h4 id=&#34;batch-norm-fused-with-convolution&#34;&gt;Batch norm fused with Convolution&lt;/h4&gt;
-
-&lt;p&gt;This is the question makes me fail the interview. Actually, there is no magic stuff about fused batch normalization. Just mathematically
-calculate two layers together and treat them as one layer in forward and backward pass:&lt;/p&gt;
-
-&lt;p&gt;Conv:
-$$convout(N_i,C_{out})=bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)$$
-Batch Norm:
-$$bnout(N_i,C_{out})=(convout(N_i,C_{out})-\mu)/\sqrt{((\epsilon + \sigma)^2)}$$
-$$bnout(N_i,C_{out})=\gamma*bnout(N_i,C_{out})+\beta$$
-Here, $convout(N_i,C_{out})$ means the $N_ith$ sample in the $C_{out}$ channel. Same notation applies to input and bnout.
-$weight(C_{out},k)$ is the conv kernel corresponding to $C_{out}$. And $\epsilon, \sigma, \mu, \gamma, \beta$ are the same as above.&lt;br /&gt;
-After fusion, the total calculation becomes:&lt;/p&gt;
-
-&lt;p&gt;$$out(N_i,C_{out})=\gamma*(bias(C_{out})+\sum_{k=1}^{C} weight(C_{out},k)*input(N_i,k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$
-In this way, the weight and bias of fused conv layer is:&lt;/p&gt;
-
-&lt;p&gt;$$bias = \gamma*(bias(C_{out})$$
-$$weight = weight(C_{out},k)/\sqrt{((\epsilon + \sigma)^2)}+\beta$$&lt;/p&gt;
-
-&lt;p&gt;We can use the fused bias and weight in previous conv layers. We can drop the intermediate result between conv and batch norm using this method,
-which can save up to 50% memory and a minor increase of training time.&lt;/p&gt;
-
-&lt;h4 id=&#34;layer-normalization&#34;&gt;Layer normalization&lt;/h4&gt;
-
-&lt;p&gt;Just understand from its name, layer normalization. Instead of using a batch of data to produce $\mu $ and $\sigma$ at every location,
-It uses all the neuron activations in one layer to produce $\mu$ and $\sigma$.
-This method is especially useful when not using mini-batch like RNN, where batch norm cannot be used. But its performance in convs layers are not as good
-as batch norm.&lt;/p&gt;
-
-&lt;h4 id=&#34;instance-normalization&#34;&gt;Instance Normalization&lt;/h4&gt;
-
-&lt;p&gt;Just simply replace all batch normalization layers with instance normalization layers. Batch normalization normalizes using the information from the whole batch, while instance normalization normalizes each feature map on its own.&lt;br /&gt;
-Formula comparasion:&lt;br /&gt;
-&lt;img src=&#34;/img/instancenorm.jpg&#34; alt=&#34;instance norm&#34; /&gt;&lt;/p&gt;
-
-&lt;h4 id=&#34;group-normalization&#34;&gt;Group Normalization&lt;/h4&gt;
-
-&lt;p&gt;While batch-norm demonstrates it effectiveness in a variety of fields including computer vision, natural language processing, speech processing, robotics, etc., batch-norm&amp;rsquo;s performance substantially decrease when the training batch size become smaller, which limits the gain of utilizing batch-norm in a task requiring small batches constrained by memory consumption.&lt;/p&gt;
-
-&lt;p&gt;Instead of normalizing along the batch dimension, GN divides the channels into groups and computes within each group the mean and variance. Therefore, GN&amp;rsquo;s computation is independent of batch sizes, and so does its accuracy.&lt;/p&gt;
-
-&lt;p&gt;Here is a diagram for all these Group techniques:&lt;br /&gt;
-&lt;img src=&#34;/img/GN.jpg&#34; alt=&#34;GN&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The difference is obvious. Batch norm uses data in the same batch to calculate $\mu $ and $\sigma$; Layer norm uses all the neurons in single layer; Instance norm uses all in data in the same batch and channel; Group norm uses only a small piece of batch.&lt;/p&gt;
-
-&lt;h4 id=&#34;other-normalization-techniques&#34;&gt;Other normalization techniques*&lt;/h4&gt;
-
-&lt;p&gt;Recurrent Batch Normalization (BN) (Cooijmans, 2016; also proposed concurrently by Qianli Liao &amp;amp; Tomaso Poggio, but tested on Recurrent ConvNets,
-instead of RNN/LSTM): Same as batch normalization. Use different normalization statistics for each time step. You need to store a set of mean and
-standard deviation for each time step.&lt;/p&gt;
-
-&lt;p&gt;Batch Normalized Recurrent Neural Networks (Laurent, 2015): batch normalization is only applied between the input and hidden state, but not between
-hidden states. i.e., normalization is not applied over time.&lt;/p&gt;
-
-&lt;p&gt;Streaming Normalization (Liao et al. 2016) : it summarizes existing normalizations and overcomes most issues mentioned above. It works well with
-ConvNets, recurrent learning and online learning (i.e., small mini-batch or one sample at a time):&lt;/p&gt;
-
-&lt;p&gt;Weight Normalization (Salimans and Kingma 2016): whenever a weight is used, it is divided by its L2 norm first, such that the resulting weight has
-L2 norm 1. That is, output y=x*(w/|w|), where x and w denote the input and weight respectively. A scalar scaling factor g is then multiplied to the
-output y=y*g. But in my experience g seems not essential for performance (also downstream learnable layers can learn this anyway).&lt;/p&gt;
-
-&lt;p&gt;Cosine Normalization (Luo et al. 2017): weight normalization is very similar to cosine normalization, where the same L2 normalization is applied
-to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differentiation can compute appropriate gradients of x and w.&lt;/p&gt;
-
-&lt;h3 id=&#34;reference-materials&#34;&gt;Reference Materials:&lt;/h3&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.deeplearningbook.org/contents/optimization.html&#34; target=&#34;_blank&#34;&gt;Deep Learning Book, Chapter 8.7.1&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow&#34; target=&#34;_blank&#34;&gt;Stackoverflow: How could I use Batch Normalization in TensorFlow?&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html&#34; target=&#34;_blank&#34;&gt;Explaination on Covariance Shift&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.tensorflow.org/api_docs/python/tf/nn/batch_normalization&#34; target=&#34;_blank&#34;&gt;Tensorflow batch normalization docs&lt;/a&gt;&lt;br /&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://datascience.stackexchange.com/questions/12956/paper-whats-the-difference-between-layer-normalization-recurrent-batch-normal&#34; target=&#34;_blank&#34;&gt;Various Normalization Techniques in Deep Learning&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1607.08022.pdf&#34; target=&#34;_blank&#34;&gt;Instance Normalization&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 </description>
     </item>
@@ -1236,6 +1262,15 @@ Some of them are funny and some of them are just scary&amp;hellip;&lt;/p&gt;
 &lt;li&gt;&lt;a href=&#34;https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html&#34; target=&#34;_blank&#34;&gt;A great blog on GAN and WGAN&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 </description>
+    </item>
+    
+    <item>
+      <title>Spatial Transform Network</title>
+      <link>/post/spatial-transform-network/</link>
+      <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
+      
+      <guid>/post/spatial-transform-network/</guid>
+      <description></description>
     </item>
     
     <item>

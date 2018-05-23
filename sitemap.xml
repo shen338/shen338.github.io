@@ -5,8 +5,8 @@
     
     <url>
     
-      <loc>/post/spatial-transform-network/</loc>
-      <lastmod>2018-05-19T21:00:00-04:00</lastmod>
+      <loc>/post/going-deeper-into-batch-normalization/</loc>
+      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
     </url>
     
   
@@ -15,16 +15,7 @@
     <url>
     
       <loc>/post/amazing-gan---wasserstein-gan/</loc>
-      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
-    </url>
-    
-  
-    
-    
-    <url>
-    
-      <loc>/post/going-deeper-into-batch-normalization/</loc>
-      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
+      <lastmod>2018-02-17T21:00:00-05:00</lastmod>
     </url>
     
   
@@ -52,6 +43,15 @@
     
       <loc>/project/obfuscatedblurred-human-face-reconstruction/</loc>
       <lastmod>2017-11-27T00:00:00-05:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/post/spatial-transform-network/</loc>
+      <lastmod>2017-11-19T21:00:00-05:00</lastmod>
     </url>
     
   
@@ -134,7 +134,7 @@
     <url>
     
       <loc>/tags/deep-learning/</loc>
-      <lastmod>2018-05-19T21:00:00-04:00</lastmod>
+      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -144,7 +144,7 @@
     <url>
     
       <loc>/tags/deep-learning/</loc>
-      <lastmod>2017-11-27T00:00:00-05:00</lastmod>
+      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -154,7 +154,7 @@
     <url>
     
       <loc>/tags/gan/</loc>
-      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
+      <lastmod>2018-02-17T21:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -194,7 +194,7 @@
     <url>
     
       <loc>/tags/spatial-transformer/</loc>
-      <lastmod>2018-05-19T21:00:00-04:00</lastmod>
+      <lastmod>2017-11-19T21:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -214,7 +214,7 @@
     <url>
     
       <loc>/tags/tensorflow/</loc>
-      <lastmod>2018-05-19T21:00:00-04:00</lastmod>
+      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -234,7 +234,7 @@
     <url>
     
       <loc>/tags/wasserstein-gan/</loc>
-      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
+      <lastmod>2018-02-17T21:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
     

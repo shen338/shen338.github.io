@@ -79,9 +79,9 @@
   <meta property="og:description" content="Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.">
   <meta property="og:locale" content="en-us">
   
-  <meta property="article:published_time" content="2018-05-17T21:00:00-04:00">
+  <meta property="article:published_time" content="2018-02-17T21:00:00-05:00">
   
-  <meta property="article:modified_time" content="2018-05-17T21:00:00-04:00">
+  <meta property="article:modified_time" content="2018-02-17T21:00:00-05:00">
   
 
   
@@ -254,8 +254,8 @@
 
   <span class="article-date">
     
-    <time datetime="2018-05-17 21:00:00 -0400 EDT" itemprop="datePublished dateModified">
-      May 17, 2018
+    <time datetime="2018-02-17 21:00:00 -0500 EST" itemprop="datePublished dateModified">
+      Feb 17, 2018
     </time>
   </span>
   <span itemscope itemprop="author publisher" itemtype="http://schema.org/Person">
@@ -634,7 +634,42 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 
 <p>The main reason they do this is that enforcing the unit gradient norm constraint everywhere is intractable, enforcing it only along these straight lines seems sufficient and experimentally results in good performance.</p>
 
-<p>Also, the batch norm layer can make this penalty invalid, so WGAN-GP simply remove the batch norm layers. And WGAN-GP takes two side penalty. Instead of forcing the gradient norm smaller than 1, it encourage gradient norm closer to 1 according to their proof. In practice, this works slightly better.</p>
+<p>Also, the batch norm layer can make this penalty invalid, so WGAN-GP simply remove the batch norm layers. And WGAN-GP takes two side penalty. Instead of forcing the gradient norm smaller than 1, it encourage gradient norm closer to 1 according to their proof. In practice, this works slightly better. Here is the algorithm of WGAN-GP:</p>
+
+<p><img src="/img/WGANGP.jpg" alt="WGAN-GP" /></p>
+
+<p>And the implementation on tensorflow is quite simple with tf.gradient function.</p>
+
+<pre><code class="language-python"> 
+ with tf.name_scope('gan_loss'):
+
+    D_loss = tf.reduce_mean(fake_score) - tf.reduce_mean(real_score)
+
+    G_loss = -tf.reduce_mean(fake_score)
+
+    def interpolate(a, b):
+        shape = tf.concat((tf.shape(a)[0:1], tf.tile([1], [a.shape.ndims - 1])), axis=0)
+        alpha = tf.random_uniform(shape=shape, minval=0., maxval=1.)
+        inter = a + alpha * (b - a)
+        inter.set_shape(a.get_shape().as_list())
+        return inter
+
+    gp_sample = interpolate(gen, image_hr)
+
+    gp_gradient = tf.gradients(net.discrimintor(gp_sample, reuse=True), gp_sample)
+
+    grad_norm = tf.sqrt(tf.reduce_sum(tf.square(gp_gradient[0]), reduction_indices=[-1]))
+
+    gp_loss = tf.reduce_mean(tf.square(grad_norm-1.))
+
+    D_overall_loss = D_loss + gp_rate*gp_loss
+
+    tf.summary.scalar('G_loss', (G_loss))
+    tf.summary.scalar('D_loss', (D_loss))
+    tf.summary.scalar('GP_loss', gp_loss)
+
+    G_overall_loss = gan_ratio*G_loss + SR_loss 
+</code></pre>
 
 <h2 id="reference-materials">Reference Materials</h2>
 
@@ -675,7 +710,7 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
       <h3>Related</h3>
       <ul>
         
-        <li><a href="/post/going-deeper-into-batch-normalization/">Going Deeper in Batch Normalization</a></li>
+        <li><a href="/post/spatial-transform-network/">Spatial Transform Network</a></li>
         
         <li><a href="/project/obfuscatedblurred-human-face-reconstruction/">Obfuscated/Blurred Human Face Reconstruction</a></li>
         

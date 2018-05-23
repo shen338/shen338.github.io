@@ -13,30 +13,30 @@
     
     
     <item>
-      <title>Spatial Transform Network</title>
-      <link>/post/spatial-transform-network/</link>
-      <pubDate>Sat, 19 May 2018 21:00:00 -0400</pubDate>
-      
-      <guid>/post/spatial-transform-network/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Amazing GAN - Wasserstein GAN</title>
-      <link>/post/amazing-gan---wasserstein-gan/</link>
-      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
-      
-      <guid>/post/amazing-gan---wasserstein-gan/</guid>
-      <description>Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.</description>
-    </item>
-    
-    <item>
       <title>Going Deeper in Batch Normalization</title>
       <link>/post/going-deeper-into-batch-normalization/</link>
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
       
       <guid>/post/going-deeper-into-batch-normalization/</guid>
       <description>Table of contents/optimization  Interpretation and Advantage of Batch Norm Algorithm and implementation Improvements and Alternatives  Batch norm fused with Convolution Layer normalization Instance Normalization Group Normalization Other normalization techniques*  Reference Materials:  This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.</description>
+    </item>
+    
+    <item>
+      <title>Amazing GAN - Wasserstein GAN</title>
+      <link>/post/amazing-gan---wasserstein-gan/</link>
+      <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
+      
+      <guid>/post/amazing-gan---wasserstein-gan/</guid>
+      <description>Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.</description>
+    </item>
+    
+    <item>
+      <title>Spatial Transform Network</title>
+      <link>/post/spatial-transform-network/</link>
+      <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
+      
+      <guid>/post/spatial-transform-network/</guid>
+      <description></description>
     </item>
     
   </channel>

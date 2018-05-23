@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Deep-learning on Tong Shen</title>
+    <title>Deep learning on Tong Shen</title>
     <link>/tags/deep-learning/</link>
-    <description>Recent content in Deep-learning on Tong Shen</description>
+    <description>Recent content in Deep learning on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
@@ -31,12 +31,13 @@
     </item>
     
     <item>
-      <title>Spatial Transform Network</title>
+      <title>Spatial Transform Network (STN)</title>
       <link>/post/spatial-transform-network/</link>
       <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
       
       <guid>/post/spatial-transform-network/</guid>
-      <description></description>
+      <description> Spatial Transformer Before diving into STNs, we need to concrete our knowledge about image transformer.
+Image Transformation Bilinear Interpolation Tensorflow Implement Result Spatial Transform Network Motivation Fun work with STNs </description>
     </item>
     
   </channel>

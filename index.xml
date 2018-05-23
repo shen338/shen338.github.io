@@ -1265,12 +1265,31 @@ Some of them are funny and some of them are just scary&amp;hellip;&lt;/p&gt;
     </item>
     
     <item>
-      <title>Spatial Transform Network</title>
+      <title>Spatial Transform Network (STN)</title>
       <link>/post/spatial-transform-network/</link>
       <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
       
       <guid>/post/spatial-transform-network/</guid>
-      <description></description>
+      <description>
+
+&lt;h2 id=&#34;spatial-transformer&#34;&gt;Spatial Transformer&lt;/h2&gt;
+
+&lt;p&gt;Before diving into STNs, we need to concrete our knowledge about image transformer.&lt;/p&gt;
+
+&lt;h3 id=&#34;image-transformation&#34;&gt;Image Transformation&lt;/h3&gt;
+
+&lt;h3 id=&#34;bilinear-interpolation&#34;&gt;Bilinear Interpolation&lt;/h3&gt;
+
+&lt;h3 id=&#34;tensorflow-implement&#34;&gt;Tensorflow Implement&lt;/h3&gt;
+
+&lt;h3 id=&#34;result&#34;&gt;Result&lt;/h3&gt;
+
+&lt;h2 id=&#34;spatial-transform-network&#34;&gt;Spatial Transform Network&lt;/h2&gt;
+
+&lt;h3 id=&#34;motivation&#34;&gt;Motivation&lt;/h3&gt;
+
+&lt;h3 id=&#34;fun-work-with-stns&#34;&gt;Fun work with STNs&lt;/h3&gt;
+</description>
     </item>
     
     <item>

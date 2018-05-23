@@ -31,12 +31,13 @@
     </item>
     
     <item>
-      <title>Spatial Transform Network</title>
+      <title>Spatial Transform Network (STN)</title>
       <link>/post/spatial-transform-network/</link>
       <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
       
       <guid>/post/spatial-transform-network/</guid>
-      <description></description>
+      <description> Spatial Transformer Before diving into STNs, we need to concrete our knowledge about image transformer.
+Image Transformation Bilinear Interpolation Tensorflow Implement Result Spatial Transform Network Motivation Fun work with STNs </description>
     </item>
     
   </channel>

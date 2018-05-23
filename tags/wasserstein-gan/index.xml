@@ -18,9 +18,7 @@
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
       
       <guid>/post/amazing-gan---wasserstein-gan/</guid>
-      <description>KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.
- Kullback-Leibler Divergence measures the divergence of probability distribution p(x) to q(x): $$KL(P||Q) = \int_x P(x)log\frac{P(x)}{Q(x)}dx$$ KL(P||Q) achieves its minimum zero when P(x) and Q(x) are the same everywhere.
-KL divergence is widely used as a metrics to measure the similarity between two distributions.</description>
+      <description>Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.</description>
     </item>
     
   </channel>

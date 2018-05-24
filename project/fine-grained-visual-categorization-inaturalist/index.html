@@ -541,23 +541,17 @@ to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the ou
 
 <p>where F(k) represent kth feature map channel. Alternatively, we can use top N prediction if top 1 prediction is not confident. Afterwards, we upsample CAM to fit input image size.</p>
 
-<p>After this, we used OSTU algorithm to make the CAM into binary image and extract the biggest contour and generate bounding box via OpenCV. Here are some results:</p>
+<p>After this, we used OSTU algorithm to make the CAM into binary image and extract the biggest contour and generate bounding box via OpenCV. Here are some results without any cherry picking:</p>
 
-<table>
-<thead>
-<tr>
-<th>Input Image</th>
-<th>CAM heatmap</th>
-</tr>
-</thead>
+<p>First column is original images and generated bounding box; second column is CAM heatmap; third column is the binary image after OSTU algorithm and the biggest contour.</p>
 
-<tbody>
-<tr>
-<td><img src="/img/Weak1.jpg" alt="" /></td>
-<td><img src="/img/weak2.png" alt="" /></td>
-</tr>
-</tbody>
-</table>
+<p><img src="/img/CAM_result.png" alt="drawing" style="width: 500px;"/></p>
+
+<p>The result is pretty amazing. Regardless of the type of objects, like plants, birds, insects, we can accurately locate them.</p>
+
+<h4 id="classification-after-localization">Classification after Localization</h4>
+
+<p>Still in process.</p>
 
 <h2 id="reference-materials">Reference materials</h2>
 

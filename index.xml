@@ -1050,6 +1050,8 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;And according to the paper, four fixed points in a cell works best, but only use one fixed point in a cell merely hurt the performance. Bilinear interpolation is totally differentiable, so back propogation is also straight forward.&lt;/p&gt;
 
+&lt;p&gt;The training process is quite similar with faster RCNN, except for an extra predicting head for segmentation.&lt;/p&gt;
+
 &lt;h3 id=&#34;key-point-detection&#34;&gt;Key Point Detection&lt;/h3&gt;
 
 &lt;p&gt;In addition, mask RCNN can handle human pose key point detection. We just need to replace the segmentation mask with one-hot key point mask. In mask RCNN, human pose has 17 key points. The result of Mask RCNN is pretty good:&lt;/p&gt;
@@ -1064,15 +1066,148 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;h2 id=&#34;single-shot-multibox-detector-ssd&#34;&gt;Single Shot MultiBox Detector(SSD)&lt;/h2&gt;
 
+&lt;p&gt;&lt;a href=&#34;https://arxiv.org/abs/1512.02325&#34; target=&#34;_blank&#34;&gt;Single Shot MultiBox Detector(SSD)&lt;/a&gt; (by C. Szegedy et al.) was released at the end of 2016 and reaches the state-of-the-art performance of object recognition task in real time (58 FPS on a Nvidia Titan X).&lt;/p&gt;
+
+&lt;p&gt;The name of SSD describes itself very well. Single Shot mean this method only need to run CNN forward pass once; Multibox means this method uses multiple boxes (different shape, on multiple CNN feature map scales) to detect object; detector means emm&amp;hellip;. Let&amp;rsquo;s dive into the details of SSD:&lt;/p&gt;
+
+&lt;h3 id=&#34;architecture&#34;&gt;Architecture&lt;/h3&gt;
+
+&lt;p&gt;Here is a diagram of SSD architecture:(image &lt;a href=&#34;https://www.slideshare.net/xavigiro/ssd-single-shot-multibox-detector&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/SSDarchitecture.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The main property of SSD is that it uses feature map from different CNN layers with different scale. SSD is built on VGG net and has six feature maps in total, each responsible for a different scale of objects, allowing it to identify objects across a large range of scales.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/ssdwork.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;The figure above shows how SSD works. In a convolutional fashion, we evaluate a small set
+of default boxes (like &lt;a href=&#34;#region-proposal-network&#34;&gt;RPN anchor boxes&lt;/a&gt; of different aspect ratios at each location in several feature maps with
+different scales (e.g. 8 $\times$ 8 and 4 $\times$ 4 in b and c). For each default box, we predict
+both the shape offsets and the confidences for all object categories $((c_1, c_2, · · · , c_p))$.
+At training time, we first match these default boxes to the ground truth boxes. For
+example, we have matched two default boxes with the cat and one with the dog, which
+are treated as positives and the rest as negatives. Any default box with an IOU of 0.5 or greater with a ground truth box is considered a match.&lt;/p&gt;
+
+&lt;p&gt;For each default boxes of each cell, SSD predict two things:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Confident scores for all object categories $((c_1, c_2, · · · , c_p))$ (the same to RCNN, an extra background class indicating no object in this box)&lt;/li&gt;
+&lt;li&gt;An offset vector with 4 entries $(C_x, C_y, C_w, C_h)$ to refine the matched default boxes to ground truth boxes.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;And the model loss is a weighted sum
+between localization loss (e.g. Smooth L1) and confidence loss (e.g. Softmax). In the figure above, only three default get matched. All other default boxes need to predict a background class.&lt;/p&gt;
+
+&lt;p&gt;SSD is quite similar to a [RPN]() with multi scale boxes. The default boxes are called prior here. Note that the prior can be customed according to our specific task. For example, if you want to detect pedestrian, you may need default boxes with large height and small width.&lt;/p&gt;
+
+&lt;h3 id=&#34;implementation-details&#34;&gt;Implementation Details&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Start from pretrained ImageNet model (VGG), get multiple-scale convolutional feature map.&lt;/li&gt;
+&lt;li&gt;Hard negative Mining: during training, as most of the bounding boxes will have low IoU, interpreted as negative training examples. We may have disproportionate amount of negative examples. The paper suggests keeping a ratio of negative to positive examples of around 3:1.&lt;/li&gt;
+&lt;li&gt;Data Augmentation: Sample patches with 0.1, 0.3, 0.5, 0.7, or 0.9 overlap to the ground truth; Random sample patches; 0.5 probability horizonal flip.&lt;/li&gt;
+&lt;/ol&gt;
+
 &lt;h2 id=&#34;you-only-look-once-yolo&#34;&gt;You Only Look Once(YOLO)&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://pjreddie.com/darknet/yolo/&#34; target=&#34;_blank&#34;&gt;You only look once (YOLO)&lt;/a&gt; is a state-of-the-art, real-time object detection system. On a Pascal Titan X it processes images at 30 FPS and has a mAP of 57.9% on COCO test-dev. More importantly, YOLO keeps evolving in recent years.&lt;/p&gt;
 
 &lt;h3 id=&#34;yolov1&#34;&gt;YOLOv1&lt;/h3&gt;
 
+&lt;p&gt;YOLOv1 is a little bit less precise than R-CNN families, but it is the first work to realize real time detection with CNN. Similar to other single shot detectors, the intuition of YOLOv1 is quite straight forward.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/YOLOv1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;YOLOv1 models detection as a regression problem. It divides the image into an S × S grid and for each grid cell predicts B bounding boxes, confidence for those boxes, and C class probabilities. These predictions are encoded as an S × S × (B × 5 + C) tensor. For example, on PASCAL VOC, S = 7,
+B = 2. PASCAL VOC has 20 labelled classes so C = 20. Our final prediction is a 7 × 7 × 30 tensor.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/YOLOv1arch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;The figure above is the architecture of YOLOv1. Based on pretrain the convolutional layers on the ImageNet classification
+task at half the resolution (224 × 224 input image) and then double the resolution for detection.&lt;/p&gt;
+
+&lt;p&gt;Here is the multi-part loss function that we want to optimize:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/YOLOv1lossfunction.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;where:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;B: Number of bounding boxes (2)&lt;/li&gt;
+&lt;li&gt;$x_i,y_i,w_i,h_i$:  Bounding box parameters&lt;/li&gt;
+&lt;li&gt;$C_i$: Some particular class i&lt;/li&gt;
+&lt;li&gt;S: Grid size (7)&lt;/li&gt;
+&lt;li&gt;$\bf{1}^{obj}_i$ : If object appear on the cell i, if does not appear it will be zero&lt;/li&gt;
+&lt;li&gt;$\bf{1}^{obj}_{ij}$ : Bounding box j, from cell i responsible for prediction (i.e. has the highest
+IOU of any predictor in that grid cell)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;And the weight in loss function $\lambda_{coord} = 5$ and $\lambda_{noobj} = 0.5$. Different to bounding box regression, YOLO uses square root instead of logrithm, but they should act in the same way. Note that the loss function &lt;strong&gt;only&lt;/strong&gt; penalizes classification
+error if an object is present in that grid cell (hence the conditional
+class probability discussed earlier). It also &lt;strong&gt;only&lt;/strong&gt; penalizes
+bounding box coordinate error if that predictor is
+“responsible” for the ground truth box (i.e. has the highest
+IOU of any predictor in that grid cell). So, the first step of every training phase is &lt;strong&gt;bounding box matching&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;YOLOv1 also have a lot of limitations:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Each grid cell only predicts two boxes and can only have one class. This prevent YOLO from detecting nearby objects.&lt;/li&gt;
+&lt;li&gt;Compared to SSD, YOLO only uses coarse features. Cannot detect relative small objects.&lt;/li&gt;
+&lt;li&gt;YOLO has higher localization errors and the recall is lower compared to SSD.&lt;/li&gt;
+&lt;li&gt;The final FC layers are slow and kind of redundant.&lt;/li&gt;
+&lt;/ol&gt;
+
 &lt;h3 id=&#34;yolov2&#34;&gt;YOLOv2&lt;/h3&gt;
+
+&lt;p&gt;Inspired by faster RCNN and SSD, &lt;a href=&#34;https://arxiv.org/pdf/1612.08242.pdf&#34; target=&#34;_blank&#34;&gt;YOLOv2&lt;/a&gt; improves the accuracy significantly while making it faster.&lt;/p&gt;
+
+&lt;p&gt;First, YOLOv2 is &lt;strong&gt;Better&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Batch Normalization&lt;/strong&gt;. Batch normalization leads to significant
+improvements in convergence while eliminating the
+need for other forms of regularization. Improve mAP by 2%. See my another blog for &lt;a href=&#34;https://shen338.github.io/post/going-deeper-into-batch-normalization/&#34; target=&#34;_blank&#34;&gt;batch norm&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;High Resolution Classifier&lt;/strong&gt;: we first fine tune the classification network
+at the full 448 × 448 resolution for 10 epochs on ImageNet different to original use 224 × 224 network directly for 448 × 448 detection. Improve mAP by 4%.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Convolutional With Anchor Boxes&lt;/strong&gt;: We remove the fully connected layers from YOLO and
+use anchor boxes like &lt;a href=&#34;#faster-rcnn&#34;&gt;faster RCNN&lt;/a&gt; to predict bounding boxes. No improvement on mAP but 7% increase on recall rate, which makes the model has more room to improve.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Dimension Clusters&lt;/strong&gt;: The author run K-means algorithm to determine the anchor box sizes. Shown in the following figure, the authors choose
+k = 5 as a good tradeoff between model complexity and
+high recall.
+&lt;img src=&#34;/img/clusterbox.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Direct location prediction&lt;/strong&gt;: Instead of predicting offsets we follow the approach of
+YOLO and predict location coordinates relative to the location
+of the grid cell. (Predict coordinates directly and predict scale using archor boxes). Improve YOLO by 5%. The network predicts 5 coordinates
+for each bounding box, $t_x, t_y, t_w, t_h$, and $t_o.$ If the cell is
+offset from the top left corner of the image by $(c_x, c_y)$ and
+the bounding box prior has width and height $p_w, p_h$, then
+the predictions correspond to:
+&lt;img src=&#34;/img/YOLOv2direct.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Fine-Grained Features&lt;/strong&gt;: Similar to faster RCNN and SSD, adding a passthrough layer that brings
+features from an earlier layer at 26 × 26 resolution along with original 13 × 13 resolution. Improve mAP about 1%.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Multi-Scale Training&lt;/strong&gt;: During training, YOLO takes images of size {320, 352, &amp;hellip;, 608} (with a step of 32 = YOLO downsampling rate). For every 10 batches, YOLOv2 randomly selects another image size to train the model. This acts as data augmentation and forces the network to predict well for different input image dimension and scale.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Second, YOLOv2 is &lt;strong&gt;Faster&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;GoogleNet. Reduce billions of floating points operations but YOLO’s
+custom model gets 88.0% ImageNet compared to 90.0% for
+VGG-16.&lt;/li&gt;
+&lt;li&gt;DarkNet 19: Compare to VGG 19, double the number of channels after every
+pooling step. Replace redundant FC layer with global average pooling; use 1 × 1 filters to compress the feature representation
+between 3 × 3 convolutions (bottleneck). Requires 5.58 billion operations and 91.2% top-5 accuracy on ImageNet.&lt;/li&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ol&gt;
 
 &lt;h3 id=&#34;yolov3&#34;&gt;YOLOv3&lt;/h3&gt;
 
 &lt;h1 id=&#34;other-backbone-network&#34;&gt;Other backbone network&lt;/h1&gt;
+
+&lt;h2 id=&#34;fpn&#34;&gt;FPN&lt;/h2&gt;
+
+&lt;h2 id=&#34;focal-loss&#34;&gt;Focal Loss&lt;/h2&gt;
 
 &lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
 

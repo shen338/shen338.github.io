@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="theme" content="hugo-academic">
+  <meta name="generator" content="Hugo 0.41" />
+  <meta name="author" content="Tong Shen">
+
+  
+  
+  
+  
+    
+      
+    
+  
+  <meta name="description" content="Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision (AP) mean average precision (mAP)  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN Mask-RCNN  Single Shot Detector  Single Shot MultiBox Detector(SSD) You Only Look Once(YOLO)  YOLOv1 YOLOv2 YOLOv3   Summary Reference Materials  It&rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">
+
+  
+
+
+  
+
+  
+  
+  <meta name="theme-color" content="#0095eb">
+  
+  
+  
+  
+    
+  
+  
+    
+    
+      
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+      
+    
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha512-6MXa8B6uaO18Hid6blRMetEIoPqHf7Ux1tnyIQdpt9qI5OACx7C+O3IVTr98vwGnlcg0LOLa02i9Y1HpVhlfiw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+  
+  
+  
+  
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:400,700%7cMerriweather%7cRoboto&#43;Mono%7cPermanent&#43;Marker%7cPrata">
+  
+  <link rel="stylesheet" href="/styles.css">
+  
+
+  
+
+  
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  <link rel="feed" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">
+
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="og:site_name" content="Tong Shen">
+  <meta property="og:url" content="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">
+  <meta property="og:title" content="Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, and YOLO | Tong Shen">
+  <meta property="og:description" content="Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision (AP) mean average precision (mAP)  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN Mask-RCNN  Single Shot Detector  Single Shot MultiBox Detector(SSD) You Only Look Once(YOLO)  YOLOv1 YOLOv2 YOLOv3   Summary Reference Materials  It&rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.">
+  <meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2018-01-01T21:00:00-05:00">
+  
+  <meta property="article:modified_time" content="2018-01-01T21:00:00-05:00">
+  
+
+  
+  
+
+  <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, and YOLO | Tong Shen</title>
+
+</head>
+<body id="top" data-spy="scroll" data-target="#toc" data-offset="71" >
+
+<nav class="navbar navbar-default navbar-fixed-top" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="navbar-header">
+      
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+              data-target=".navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      
+      <a class="navbar-brand" href="/">Tong Shen</a>
+    </div>
+
+    
+    <div class="collapse navbar-collapse">
+
+      
+      
+      <ul class="nav navbar-nav navbar-right">
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#about">
+            
+            <span>Home</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#myself">
+            
+            <span>CV</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#projects">
+            
+            <span>Projects</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#posts">
+            
+            <span>Posts</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#publications_selected">
+            
+            <span>Publications</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#contact">
+            
+            <span>Contact</span>
+            
+          </a>
+        </li>
+
+        
+        
+      
+
+      
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+<article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+  <div class="article-container">
+    <h1 itemprop="name">Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, and YOLO</h1>
+
+    
+
+<div class="article-metadata">
+
+  <span class="article-date">
+    
+    <time datetime="2018-01-01 21:00:00 -0500 EST" itemprop="datePublished dateModified">
+      Jan 1, 2018
+    </time>
+  </span>
+  <span itemscope itemprop="author publisher" itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Tong Shen">
+  </span>
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    15 min read
+  </span>
+  
+
+  
+  
+
+  
+
+  
+  
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    <li>
+      <a class="twitter"
+         href="https://twitter.com/intent/tweet?text=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20and%20YOLO&amp;url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-twitter"></i>
+      </a>
+    </li>
+    <li>
+      <a class="facebook"
+         href="https://www.facebook.com/sharer.php?u=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-facebook"></i>
+      </a>
+    </li>
+    <li>
+      <a class="linkedin"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f&amp;title=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20and%20YOLO"
+         target="_blank" rel="noopener">
+        <i class="fa fa-linkedin"></i>
+      </a>
+    </li>
+    <li>
+      <a class="weibo"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f&amp;title=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20and%20YOLO"
+         target="_blank" rel="noopener">
+        <i class="fa fa-weibo"></i>
+      </a>
+    </li>
+    <li>
+      <a class="email"
+         href="mailto:?subject=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20and%20YOLO&amp;body=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f">
+        <i class="fa fa-envelope"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+<h2 id="table-of-content">Table of Content</h2>
+
+<ul>
+<li><a href="#history">History</a>
+
+<ul>
+<li><a href="#alexnet">AlexNet</a></li>
+<li><a href="#resnet">ResNet</a></li>
+<li><a href="#inception-network-series">Inception Network Series</a></li>
+<li><a href="#deformable-parts-model">Deformable Parts Model</a></li>
+<li><a href="#overfeat">Overfeat</a></li>
+</ul></li>
+<li><a href="#metrics--map">Metrics: mAP</a>
+
+<ul>
+<li><a href="#precision-and-recall">Precision and Recall</a></li>
+<li><a href="#average-precision--ap-">Average precision (AP)</a></li>
+<li><a href="#mean-average-precision--map-">mean average precision (mAP)</a></li>
+</ul></li>
+<li><a href="#r-cnn-families">R-CNN Families</a>
+
+<ul>
+<li><a href="#rcnn">RCNN</a>
+
+<ul>
+<li><a href="#selective-search">Selective Search</a></li>
+<li><a href="#bounding-box-regression">Bounding Box Regression</a></li>
+<li><a href="#non-maximum-suppression">Non Maximum Suppression</a></li>
+<li><a href="#workflow">Workflow</a></li>
+<li><a href="#speed-bottleneck">Speed Bottleneck</a></li>
+</ul></li>
+<li><a href="#fast-rcnn">Fast-RCNN</a>
+
+<ul>
+<li><a href="#roi-pooling">ROI pooling</a></li>
+<li><a href="#workflow-1">Workflow</a></li>
+</ul></li>
+<li><a href="#faster-rcnn">Faster-RCNN</a></li>
+<li><a href="#mask-rcnn">Mask-RCNN</a></li>
+</ul></li>
+<li><a href="#single-shot-detector">Single Shot Detector</a>
+
+<ul>
+<li><a href="#single-shot-multibox-detector-ssd-">Single Shot MultiBox Detector(SSD)</a></li>
+<li><a href="#you-only-look-once-yolo-">You Only Look Once(YOLO)</a>
+
+<ul>
+<li><a href="#yolov1">YOLOv1</a></li>
+<li><a href="#yolov2">YOLOv2</a></li>
+<li><a href="#yolov3">YOLOv3</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#reference-materials">Reference Materials</a></li>
+</ul>
+
+<p>It&rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision. Similar to image classification, deep learning/neural network represent the state of the art in modern object recognition.</p>
+
+<h1 id="history">History</h1>
+
+<p>To have a better intuition about the challenges and algorithm evolving, first we will have an overview about the progress of deep learning approach in the last couple of years. This progress also comes with the progress of image classification.</p>
+
+<h3 id="alexnet">AlexNet</h3>
+
+<p><a href="https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf" target="_blank">AlexNet</a> famously won the 2012 ImageNet LSVRC-2012 competition by a large margin (15.3% VS 26.2% (second place) error rates). It stands for the revival of neural network as well as deep learning.</p>
+
+<p>The main contribution of AlexNet is as follows:</p>
+
+<ol>
+<li>Use ReLU activation function instead of tanh and sigmoid to introduce nonlinearity to the network. Also, it eases the gradient vanishing problem when training deep neural network.</li>
+<li>Introduce dropout as a regularization. It works like an ensemble of different networks.</li>
+<li>Use two NVIDIA GPUs and CUDA, also parallel architecture to accelerate training.</li>
+</ol>
+
+<p>Here is a diagram of famous AlexNet:</p>
+
+<p><img src="/img/AlexNet.png" alt="AlexNet" /></p>
+
+<h3 id="resnet">ResNet</h3>
+
+<p>After AlexNet, the next significant work should be <a href="https://arxiv.org/abs/1512.03385" target="_blank">ResNet</a>.<br />
+These networks led to 1st-place winning entries in all five main tracks of the ImageNet and COCO 2015 competitions, which covered image classification, object detection, and semantic segmentation.</p>
+
+<p>The main difference of ResNet is just a skip connection between layers. The author’s hypothesis is that it is easy to optimize the residual mapping function F(x) than to optimize the original, unreferenced mapping H(x). And this method turns out to be very efficient to solve network degradation in deep network.</p>
+
+<p>Here is a diagram of residual blocks (image source: ):</p>
+
+<p><img src="/img/residualblock.png" alt="residual" /></p>
+
+<p>Plus, Resnet uses the bottleneck architecture from Inception network to reduce computation. After $1\times1$ convolution, the feature map channels are greatly reduced in order to save computation for next $3 \times 3$ convolution layer. Another $1\times1$ convolution after that can resume the feature map channels. Amazingly, this operation won&rsquo;t affect the performance. So, this bottleneck architecture is quite popular in modern neural network.</p>
+
+<p><img src="/img/bottleneck.jpg" alt="bottleneck" /></p>
+
+<p>ResNet can be interpreted as ensembles of relatively shallow networks, as described <a href="https://arxiv.org/abs/1605.06431?context=cs" target="_blank">here</a>.</p>
+
+<h3 id="inception-network-series">Inception Network Series</h3>
+
+<p>Inception network series comes from Google. It should be the most well-designed and popular network in image classification community. The architecture becomes very complicated in later version of Inception networks. For example, here is a diagram of InceptionResnetV2, with more than 600 layers:</p>
+
+<p><img src="/img/image00.png" alt="inceptionresnetv2" /></p>
+
+<p>The core of Inception network is the Inception module. The inspiration comes from the idea that you need to make a decision as to what type of convolution you want to make at each layer: $3 \times 3$ or $5 \times 5$? You may need specific image content to decide. How about use them all together? Here come the Inception module:</p>
+
+<p><img src="/img/inception_implement.png" alt="Inceptionmodule" /></p>
+
+<p>It uses all $1 \times 1$, $3 \times 3$, $5 \times 5$ convolution and  altogether and concate their result together. Plus, inception module introduces $N \times 1$ and $1 \times N$ convolution instead of traditional $N \times N $ convolution. This puts constraints on convolution kernel (center symmetric), but can greatly reduces computation. And residual connection, bottleneck architecture also appears in modern Inception network. Here is a diagram of Inception modules in InceptionV4:</p>
+
+<p><img src="/img/inceptionv4.jpeg" alt="v4" /></p>
+
+<h3 id="deformable-parts-model">Deformable Parts Model</h3>
+
+<p><a href="http://vision.stanford.edu/teaching/cs231b_spring1213/slides/dpm-slides-ross-girshick.pdf" target="_blank">Deformable Parts Model (DPM)</a> was invented by Pedro Felzenszwalb ands Ross Girshick, who becomes the leader of object recognition commumity with his R-CNN families.</p>
+
+<p>The model consists of three major components:</p>
+
+<ol>
+<li>A coarse root filter defines a detection window that approximately covers an entire object. A filter specifies weights for a region feature vector.</li>
+<li>Multiple part filters that cover smaller parts of the object. Parts filters are learned at twice resolution of the root filter.</li>
+<li>A spatial model for scoring the locations of part filters relative to the root.</li>
+</ol>
+
+<p>Deformable Part Models model an object as the sum of the geometric deformations of it. So take person model for example:</p>
+
+<p><img src="/img/DPM.jpeg" alt="DPM" /></p>
+
+<p>A root location with high score detects a region with high chances to contain an object, while the locations of the parts with high scores confirm a recognized object hypothesis. The paper adopted latent SVM to model the classifier.</p>
+
+<p><img src="/img/DPMmodel.png" alt="DPMmodel" /></p>
+
+<p>Also, DPM and later CNN models are not two different method to object recognition. Actually, DPM can be unrolled and interpreted as several equivalent CNN layers. See Ross&rsquo;s paper <a href="https://arxiv.org/abs/1409.5403" target="_blank">Deformable Part Models are Convolutional Neural Networks</a></p>
+
+<h3 id="overfeat">Overfeat</h3>
+
+<p><a href="https://arxiv.org/abs/1312.6229" target="_blank">Overfeat</a> is a poineer to incorprate CNN models into object detection, localization and classification tasks.</p>
+
+<h1 id="metrics-map">Metrics: mAP</h1>
+
+<p>mAP is the metric to measure the accuracy of object detectors like Faster R-CNN, SSD, etc. AP is the average of the maximum precisions at different recall values. And mAP is the mean of AP in different classes. This sounds complicated, so let&rsquo;s explain this step by step.</p>
+
+<h3 id="precision-and-recall">Precision and Recall</h3>
+
+<p>According to <a href="https://en.wikipedia.org/wiki/Precision_and_recall#F-measure" target="_blank">wiki</a>, <strong>precision</strong> (also called positive predictive value) is the fraction of relevant instances among the retrieved instances, for example, percentage of your positive predictions are correct.</p>
+
+<p><strong>Recall</strong> (also known as sensitivity) is the fraction of relevant instances that have been retrieved over the total amount of relevant instances. for example, percentage of positive instances in your positive predictions.</p>
+
+<p>Here is an image of precision and recall:</p>
+
+<p><img src="/img/precision-recall.jpg" alt="precision and recall" /></p>
+
+<h3 id="average-precision-ap">Average precision (AP)</h3>
+
+<p>First of all, a prediction is consider to be correct if IoU is greater than a threshold, usually 0.5. It is hard to explain AP by words, so let&rsquo;s create an example to make it clear. (<a href="https://medium.com/@jonathan_hui/map-mean-average-precision-for-object-detection-45c121a31173" target="_blank">example source</a>)</p>
+
+<p>For example, if our image has 5 objects. First, we sort the predictions of our detector based on the confidence level. We get correct prediction in 1st, 2nd, 4th, 6th and 10th prediction. So, in the top 4 predictions, we get 3 of them correct. A prediction is consider to be correct if IoU is greater than 0.5. So the precision and the recall for our top 4 predictions is:</p>
+
+<p><strong>Precision</strong> is the proportion of TP = <sup>3</sup>&frasl;<sub>4</sub> = 0.75.</p>
+
+<p><strong>Recall</strong> is the proportion of TP out of the possible positives = <sup>3</sup>&frasl;<sub>5</sub> = 0.6.</p>
+
+<p>Here is a table of different corresponding precision and recall ranks:</p>
+
+<p><img src="/img/precisionrecallrank.png" alt="prrank" /></p>
+
+<p>AP (average precision) is computed as the average of <strong>maximum precision</strong> at different recall levels. Here are two kinds of AP calculation:</p>
+
+<ul>
+<li>Before 2010, people get the precision value at 11 recall levels (0.0, 0.1, 0.2 &hellip; 1.0), and average them.</li>
+</ul>
+
+<p>$$AP = \frac{1}{11} (AP_r(0.0) + AP_r(0.1) + &hellip; AP_r(1.0))$$</p>
+
+<ul>
+<li>After 2010, people calculate the precision value at all different recall levels and average them. Here K is the number of total different recall levels.<br /></li>
+</ul>
+
+<p>$$AP = \sum_{i = 0}^K AP_r(i)$$</p>
+
+<p>The $AP_r$ represent the <strong>maximum precision</strong> in certain recall level.</p>
+
+<h3 id="mean-average-precision-map">mean average precision (mAP)</h3>
+
+<p>Latest research papers tend to give results for the COCO dataset only. For COCO, AP is the average over multiple IoU. <strong>AP@[.5:.95]</strong> corresponds to the average AP for IoU from 0.5 to 0.95 with a step size of 0.05. AP (which is also called mAP in COCO) averages AP over all class categories.</p>
+
+<h1 id="r-cnn-families">R-CNN Families</h1>
+
+<h2 id="rcnn">RCNN</h2>
+
+<p>The goal of <a href="https://arxiv.org/abs/1311.2524" target="_blank">R-CNN</a> is to take in an image, and correctly identify where are objects (via a bounding box) in the image. The intuition of RCNN is quite simple, just proposing some possible regions, and determine whether they are objects or not. Here is a diagram of RCNN:</p>
+
+<p><img src="/img/RCNN.jpg" alt="" /></p>
+
+<h3 id="selective-search">Selective Search</h3>
+
+<p>R-CNN uses Selective Search method to extract region proposals.</p>
+
+<p>This method uses an over-segmentation method to divide the image into small regions (1k to 2k). Merge the two most probable adjacent areas according to the consolidation rules. This is is a hierarchical grouping algorithm by J.R.R. Uijlings.</p>
+
+<p><img src="/img/grouping.png" alt="grouping" /></p>
+
+<p>Actually the similarity of regions is determined by their color histogram, texture(gradient histogram) and some other aspects. Note that this method tends to merge relatively small regions to avoid a large area gradually &ldquo;eat&rdquo; other small areas. Also, the method tend to merge the regions whose merged result takes large percentage in its bounding box.</p>
+
+<p>Repeat until the entire image merges into one area position. Output all areas that existed once, so-called candidate areas. And generate bounding box for them as region proposals.</p>
+
+<h3 id="bounding-box-regression">Bounding Box Regression</h3>
+
+<p>The Bounding Box Regressors are essential because the initial region proposals might not fully coincide with the region that is indicated by the learned features of the Convolutional Neural Network. It is a kind of a refinement step.</p>
+
+<p>So, based on the features obtained at the end of the final pooling layer, the region proposals are regressed. Note that only when region proposals have large IoU(&gt;0.6) with ground truth, we can treat this transformation as linear model and do regression. The bounding box regression process is quite straight forward in RCNN paper.</p>
+
+<p><img src="/img/bbregression.png" alt="bbregression" /></p>
+
+<p>We directly regress the location $P_x$ and $P_y$, while regress the width $P_w$ and height $P_h$ in log-space which produce better results on the wide range of bounding-box shift.</p>
+
+<h3 id="non-maximum-suppression">Non Maximum Suppression</h3>
+
+<p>In the end, we can have a lot of bounding boxes on an object. We need to determine the best bounding box for this object. So, what NMS does is as follows:</p>
+
+<ol>
+<li>First calculate the area of each bounding box, and then sort according to the score</li>
+<li>Use the largest bounding box with the score as the selected box, calculate the rest of the bounding box and the current maximum score and the IoU of the box, remove the IoU greater than the set threshold Bounding box.</li>
+<li>Then repeat the above process until the candidate bounding box is empty</li>
+<li>Delete the selected box with the score less than a certain threshold to get this kind of result</li>
+</ol>
+
+<p><img src="/img/NMS.png" alt="" /></p>
+
+<h3 id="workflow">Workflow</h3>
+
+<p>R-CNN is formulated as follows:</p>
+
+<ol>
+<li>Apply <a href="#selective-search">selective search</a> to input image, and generate ~2k candidates per image containing target objects with different sizes. Region candidates are warped to have a fixed size as required by CNN.</li>
+<li>Start from a pre-train a CNN network on image classification tasks. Continue fine-tuning the CNN on warped proposal regions for K + 1 classes; The additional one class refers to the background (no object of interest). In the fine-tuning stage, we should use a much smaller learning rate and the mini-batch oversamples the positive cases because most proposed regions are just background.</li>
+<li>Given every image region, one forward propagation through the CNN generates a feature vector. This feature vector is then consumed by a binary SVM trained for each class independently.
+The positive samples are proposed regions with IoU (intersection over union) overlap threshold &gt;= 0.3, and negative samples are irrelevant others.</li>
+<li>Use <a href="#bounding-box-regression">bounding box regression</a> to refine the region proposals with CNN feature vector. Also <a href="#non-maximum-suppression">NMS</a> to delete redundant region proposals.</li>
+</ol>
+
+<h3 id="speed-bottleneck">Speed Bottleneck</h3>
+
+<ol>
+<li>Selective search for proposal is slow.</li>
+<li>Calculate feature vectors for every region proposals.</li>
+<li>Detection process consists of three steps without any computation sharing.</li>
+</ol>
+
+<p>Later work mainly concentrate on the three aspects above to achieve real-time detection.</p>
+
+<h2 id="fast-rcnn">Fast-RCNN</h2>
+
+<p>Fast RCNN mainly deal with the second speed bottleneck of RCNN: Calculate feature vectors for every region proposals.</p>
+
+<p>Instead of extracting CNN feature vectors independently for each region proposal, this model aggregates them into one CNN forward pass over the entire image and the region proposals share this feature matrix. Then the same feature matrix is branched out to be used for learning the object classifier (No SVM but softmax) and the bounding-box regressor.</p>
+
+<p><img src="/img/fastrcnn.png" alt="" /></p>
+
+<h3 id="roi-pooling">ROI pooling</h3>
+
+<p>Indeed, there is nothing magic about ROI pooling. It is used to generate fixed size feature map regardless of the input image(region proposal) size.</p>
+
+<p>For example, the feature size of a projected region is $h \times w$, and we want a fixed feature map with size $H \times W$. ROI pooling will divide original feature map into $H \times W$ grids, approximately every subwindow of size $h/H \times w/W$. Then apply max-pooling in each grid.</p>
+
+<p>Here is a diagram of ROI pooling from cs231n Lecture:</p>
+
+<p><img src="/img/roi-pooling.png" width="600"></p>
+
+<h3 id="workflow-1">Workflow</h3>
+
+<p>Fast R-CNN is formulated as follows:</p>
+
+<ol>
+<li>The same with R-CNN, Apply <a href="#selective-search">selective search</a> to input image, and generate ~2k candidates per image containing target objects with different sizes.</li>
+<li>Start from a pretrained ImageNet model.
+
+<ul>
+<li>Replace the last max pooling layer of the pre-trained CNN with a RoI pooling layer to ensure fixed output size.</li>
+<li>Different from R-CNN, only do CNN forward pass once, and directly map region proposals to their corresponding feature map. Shared computation speed up the whole process.</li>
+<li>Replace the last fully connected layer and the last softmax layer (K classes) with a fully connected layer and softmax over K + 1 classes.</li>
+</ul></li>
+<li>Finally the model branches into two output layers:
+
+<ul>
+<li>A softmax classifier of K + 1 classes (extra one is the background class), output a discrete probability distribution per RoI.</li>
+<li>A bounding-box regression model to refine original RoI for each of K classes.</li>
+<li>The overall loss function is a combination of classification loss and bounding box location loss.
+<br />
+<br /></li>
+</ul></li>
+</ol>
+
+<h2 id="faster-rcnn">Faster-RCNN</h2>
+
+<p>The intuition of <a href="https://arxiv.org/pdf/1506.01497.pdf" target="_blank">Faster-RCNN</a> is simple: since CNN is so good and efficient, and using selective search is too slow, why not also using CNN to generate region proposals? So, the main difference between faster-RCNN and fast RCNN is the region proposal network (RPN) to generate region proposals with CNN.</p>
+
+<p>Here is an illustratioon of Faster RCNN:</p>
+
+<p><img src="/img/faster-RCNN.png" width="800"></p>
+
+<h3 id="region-proposal-network-rpn">Region Proposal Network (RPN)</h3>
+
+<p>Region proposal network consists of three parts:</p>
+
+<ol>
+<li>Feed input image into CNN and get a set of convlutional feature maps on the last convolutional layer.</li>
+<li>Then a sliding window is running spatially on these feature maps. The size of sliding window is $3 \times 3$. For each sliding window, a set of 9 anchors are generated which all have the same center (the same with sliding window) but with 3 different aspect ratios (1:2, 1:1, 2:1) and 3 different scales. Note that all these coordinates are computed with respect to the original image. (image <a href="https://www.quora.com/How-does-the-region-proposal-network-RPN-in-Faster-R-CNN-work" target="_blank">source</a>)
+<img src="/img/anchor.png" width="600"></li>
+<li>Finally, the 3×3 spatial features extracted from convolution feature maps are fed to a smaller network which has two tasks: classification (cls) and regression (reg). The output of regressor determines a a predicted bounding box (x,y,w,h), The classification network produces a probability p indicating whether the the predicted box contains an object (1) or it is from background (0 for no object).
+<img src="/img/rpn-end.jpg" width="600"></li>
+</ol>
+
+<p>So, the output of rpn is similar to selective search method, which is ~2k region proposals. But the speed of RPN is much faster than selective search method. In this way, the last speed bottleneck of RCNN is addressed. Note that if accuracy is not important, RPN can complete object recognition by its own by modify the classification into N classes.</p>
+
+<h3 id="workflow-2">Workflow</h3>
+
+<p>Except the RPN, the rest of Faster R-CNN is the same with Fast R-CNN. Faster R-CNN is formulated as follows:</p>
+
+<ol>
+<li>Start from ImageNet pretrained model, fine-tune the RPN (region proposal network) end-to-end for the region proposal task. Positive samples have IoU (intersection-over-union) &gt; 0.7, while negative samples have IoU &lt; 0.3.</li>
+<li>Train a Fast R-CNN object detection model using the proposals generated by the current RPN</li>
+<li>Then use the Fast R-CNN network to initialize RPN training. While keeping the shared convolutional layers, only fine-tune the RPN-specific (background/object classification and bounding box regression) layers. At this stage, RPN and the detection network share convolutional layers.</li>
+<li>Finally fine-tune the unique layers of Fast R-CNN</li>
+</ol>
+
+<h2 id="mask-rcnn">Mask-RCNN</h2>
+
+<p>So far, we’ve seen how CNN features are interesting and effective in object recognition with bounding boxes. Recently, Kaiming He, Ross Girshick and a team of researchers uses CNN features to another important aspect of object recognition: instance segmentation. They name their work <a href="https://arxiv.org/abs/1703.06870" target="_blank">Mask RCNN</a>.</p>
+
+<p>Semantic segmentation need to segment and cluster pixels of different object classes in a single graph; while instance segmentation need to locate every single object and cluster pixels of this object. This image shows the difference of semantic and instance segmentation:</p>
+
+<p><img src="/img/instancesegmentation.png" width="600"></p>
+
+<p>So, overall, instance is more difficult than semantic segmentation. And it is highly related to object detection. For semantic segmentation, most modern frameworks are based on <a href="https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf" target="_blank">Fully Convolutional Neural Networks (FCN)</a>. FCN managed to extract the region of objects in an image but it cannot tell us the exact region of every single object. Here, Mask RCNN combined RCN and Faster RCNN, adding an extra FCN branch to faster RCNN, parallel to localization and classification, to make pixel level prediction and instance segmentation in a single bounding box.</p>
+
+<p><img src="/img/mask-rcnn.png" width="600"></p>
+
+<h3 id="roi-align">ROI Align</h3>
+
+<p>Different to object detection, pixel level prediction need more fine-grained alignment rather than simple ROI pooling. In ROI pooling, the location information is quantified twice:</p>
+
+<ol>
+<li>Quantize region proposal coordinates as integer point coordinates</li>
+<li>The quantized region is evenly divided into $k \times k$ cells and the boundaries of each cell are quantized.</li>
+</ol>
+
+<p><img src="/img/ROIquantize.png" alt="" /></p>
+
+<p>From the diagram above, the ground truth bounding box is $655 \times 655$. And after 5 max pooling operation, the corresponding size on feature map is <sup>655</sup>&frasl;<sub>32</sub> = 20.78 , but ROI pooling quantizes it into $20$. After that, we need to divide the bounding box into $7 \times 7$ cells, the size of each cell is <sup>20</sup>&frasl;<sub>7</sub> = 2.86 , but ROI pooling quantizes it into $2$. So, the largest quantization error of ROI pooling is about $1.5$ pixels on feature map, which is $50$ pixels on input image.</p>
+
+<p>What ROIalign does is removing the quantization in ROI pooling.</p>
+
+<ol>
+<li>Do not quantize region proposal coordinates, keep it as float numbers.</li>
+<li>Do not quantize $k \times k$ cells boundaries when dividing, keep it as float numbers.</li>
+<li>Calculate the value of four fixed points in each cell using bilinear interpolation method, and then perform max pooling for these four points.</li>
+</ol>
+
+<p>Here is a figure for ROI align:</p>
+
+<p><img src="/img/ROIAlignDiagram.png" width="600"></p>
+
+<p>And according to the paper, four fixed points in a cell works best, but only use one fixed point in a cell merely hurt the performance. Bilinear interpolation is totally differentiable, so back propogation is also straight forward.</p>
+
+<h3 id="key-point-detection">Key Point Detection</h3>
+
+<p>In addition, mask RCNN can handle human pose key point detection. We just need to replace the segmentation mask with one-hot key point mask. In mask RCNN, human pose has 17 key points. The result of Mask RCNN is pretty good:</p>
+
+<p><img src="/img/maskrcnnresult.png" alt="" /></p>
+
+<h1 id="single-shot-detector">Single Shot Detector</h1>
+
+<p>The previous methods of object detection all share one thing in common: they have one part of their network dedicated to providing region proposals followed by a high quality classifier to classify these proposals. These methods are very accurate but come at a big computational cost. In embedded systems, we have to control the computation cost. These method may not be suitable.</p>
+
+<p>Another way of doing object detection is by combining these two tasks into one network. Similar to region proposal network, we use different pre-defined boxes with various shape to capture objects, and predict class scores and bounding box offsets.</p>
+
+<h2 id="single-shot-multibox-detector-ssd">Single Shot MultiBox Detector(SSD)</h2>
+
+<h2 id="you-only-look-once-yolo">You Only Look Once(YOLO)</h2>
+
+<h3 id="yolov1">YOLOv1</h3>
+
+<h3 id="yolov2">YOLOv2</h3>
+
+<h3 id="yolov3">YOLOv3</h3>
+
+<h1 id="other-backbone-network">Other backbone network</h1>
+
+<h2 id="summary">Summary</h2>
+
+<h2 id="reference-materials">Reference Materials</h2>
+
+    </div>
+
+    
+
+
+<div class="article-tags">
+  
+  <a class="btn btn-primary btn-outline" href="/tags/review/">review</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/deep-learning/">deep learning</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/tensorflow/">tensorflow</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/object-recognition/">object recognition</a>
+  
+</div>
+
+
+
+
+    
+    
+    <div class="article-widget">
+      <div class="hr-light"></div>
+      <h3>Related</h3>
+      <ul>
+        
+        <li><a href="/post/spatial-transform-network/">Spatial Transform Network (STN)</a></li>
+        
+      </ul>
+    </div>
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p class="powered-by">
+
+      &copy; 2018 &middot; 
+
+      Powered by
+      
+      <a href="https://shen338.github.io/" target="_blank" rel="noopener">Tong Shen</a>. 
+	  
+	  All rights reserved.
+
+      <span class="pull-right" aria-hidden="true">
+        <a href="#" id="back_to_top">
+          <span class="button_icon">
+            <i class="fa fa-chevron-up fa-2x"></i>
+          </span>
+        </a>
+      </span>
+
+    </p>
+  </div>
+</footer>
+
+
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close btn-large" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Cite</h4>
+      </div>
+      <div>
+        <pre><code class="modal-body tex"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-primary btn-outline js-copy-cite" href="#" target="_blank">
+          <i class="fa fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-primary btn-outline js-download-cite" href="#" target="_blank">
+          <i class="fa fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+    
+
+    
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha512-3P8rXCuGJdNZOnUx/03c1jOTnMn3rP63nBip5gOP2qmUh5YAdVAvFZ1E+QLZZbC1rtMrQb+mah3AfYW11RUrWA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.3/imagesloaded.pkgd.min.js" integrity="sha512-umsR78NN0D23AzgoZ11K7raBD+R6hqKojyBZs1w8WvYlsI+QuKRGBx3LFCwhatzBunCjDuJpDHwxD13sLMbpRA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha512-iztkobsvnjKfAtTNdHkGVjAYTrrtlC7mGp/54c40wowO7LhURYl3gVzzcEqGl/qKXQltJ2HwMrdLcNUdo+N/RQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.4/isotope.pkgd.min.js" integrity="sha512-VDBOIlDbuC4VWxGJNmuFRQ0Li0SKkDpmGyuhAG5LTDLd/dJ/S0WMVxriR2Y+CyPL5gzjpN4f/6iqWVBJlht0tQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+    
+    
+    <script src="/js/hugo-academic.js"></script>
+    
+
+    
+    
+      
+      
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+      
+
+      
+
+      
+
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_CHTML" integrity="sha512-tOav5w1OjvsSJzePRtt2uQPFwBoHt1VZcUq8l8nm5284LEKE9FSJBQryzMBzHxY5P0zRdNqEcpLIRVYFNgu1jw==" crossorigin="anonymous"></script>
+    
+    
+
+  </body>
+</html>
+

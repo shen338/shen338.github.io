@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="theme" content="hugo-academic">
+  <meta name="generator" content="Hugo 0.40.3" />
+  <meta name="author" content="Tong Shen">
+
+  
+  
+  
+  
+    
+      
+    
+  
+  <meta name="description" content="Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/w/">
+
+  
+
+
+  
+
+  
+  
+  <meta name="theme-color" content="#0095eb">
+  
+  
+  
+  
+    
+  
+  
+    
+    
+      
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+      
+    
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha512-6MXa8B6uaO18Hid6blRMetEIoPqHf7Ux1tnyIQdpt9qI5OACx7C+O3IVTr98vwGnlcg0LOLa02i9Y1HpVhlfiw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+  
+  
+  
+  
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:400,700%7cMerriweather%7cRoboto&#43;Mono%7cPermanent&#43;Marker%7cPrata">
+  
+  <link rel="stylesheet" href="/styles.css">
+  
+
+  
+
+  
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  <link rel="feed" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/w/">
+
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="og:site_name" content="Tong Shen">
+  <meta property="og:url" content="/post/w/">
+  <meta property="og:title" content="Amazing GAN - Wasserstein GAN | Tong Shen">
+  <meta property="og:description" content="Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.">
+  <meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2018-02-17T21:00:00-05:00">
+  
+  <meta property="article:modified_time" content="2018-02-17T21:00:00-05:00">
+  
+
+  
+  
+
+  <title>Amazing GAN - Wasserstein GAN | Tong Shen</title>
+
+</head>
+<body id="top" data-spy="scroll" data-target="#toc" data-offset="71" >
+
+<nav class="navbar navbar-default navbar-fixed-top" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="navbar-header">
+      
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+              data-target=".navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      
+      <a class="navbar-brand" href="/">Tong Shen</a>
+    </div>
+
+    
+    <div class="collapse navbar-collapse">
+
+      
+      
+      <ul class="nav navbar-nav navbar-right">
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#about">
+            
+            <span>Home</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#myself">
+            
+            <span>CV</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#projects">
+            
+            <span>Projects</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#posts">
+            
+            <span>Posts</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#publications_selected">
+            
+            <span>Publications</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#contact">
+            
+            <span>Contact</span>
+            
+          </a>
+        </li>
+
+        
+        
+      
+
+      
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+<article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+  <div class="article-container">
+    <h1 itemprop="name">Amazing GAN - Wasserstein GAN</h1>
+
+    
+
+<div class="article-metadata">
+
+  <span class="article-date">
+    
+    <time datetime="2018-02-17 21:00:00 -0500 EST" itemprop="datePublished dateModified">
+      Feb 17, 2018
+    </time>
+  </span>
+  <span itemscope itemprop="author publisher" itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Tong Shen">
+  </span>
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    13 min read
+  </span>
+  
+
+  
+  
+
+  
+
+  
+  
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    <li>
+      <a class="twitter"
+         href="https://twitter.com/intent/tweet?text=Amazing%20GAN%20-%20Wasserstein%20GAN&amp;url=%2fpost%2fw%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-twitter"></i>
+      </a>
+    </li>
+    <li>
+      <a class="facebook"
+         href="https://www.facebook.com/sharer.php?u=%2fpost%2fw%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-facebook"></i>
+      </a>
+    </li>
+    <li>
+      <a class="linkedin"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fw%2f&amp;title=Amazing%20GAN%20-%20Wasserstein%20GAN"
+         target="_blank" rel="noopener">
+        <i class="fa fa-linkedin"></i>
+      </a>
+    </li>
+    <li>
+      <a class="weibo"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fw%2f&amp;title=Amazing%20GAN%20-%20Wasserstein%20GAN"
+         target="_blank" rel="noopener">
+        <i class="fa fa-weibo"></i>
+      </a>
+    </li>
+    <li>
+      <a class="email"
+         href="mailto:?subject=Amazing%20GAN%20-%20Wasserstein%20GAN&amp;body=%2fpost%2fw%2f">
+        <i class="fa fa-envelope"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+<h2 id="table-of-content">Table of Content</h2>
+
+<ul>
+<li><a href="#kl-divergence-and-js-divergence">KL divergence and JS divergence</a></li>
+<li><a href="#generative-adversarial-networks">Generative Adversarial Networks</a>
+
+<ul>
+<li><a href="#global-optimal-loss">Global optimal loss</a></li>
+</ul></li>
+<li><a href="#problem-with-vanilla-gans">Problem with Vanilla GANs</a>
+
+<ul>
+<li><a href="#gradient-vanishing">Gradient Vanishing</a></li>
+<li><a href="#mode-collapse">Mode Collapse</a></li>
+</ul></li>
+<li><a href="#improved-training-of-gans">Improved Training of GANs</a></li>
+<li><a href="#wasserstein-gan">Wasserstein GAN</a>
+
+<ul>
+<li><a href="#earth-mover-distance">Earth Mover distance</a></li>
+<li><a href="#comparasion-between-em-distance-and-kl-js-divergence">Comparasion between EM distance and KL/JS divergence</a></li>
+<li><a href="#lipschitz-continuity">Lipschitz continuity</a></li>
+<li><a href="#modified-algorithm">Modified Algorithm</a></li>
+<li><a href="#wasserstein-gan-with-gradient-penalty">Wasserstein GAN with gradient penalty</a>
+
+<ul>
+<li><a href="#disadvantages-of-gradient-clipping-in-wgan">Disadvantages of gradient clipping in WGAN</a></li>
+<li><a href="#gradient-penalty">Gradient Penalty</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#reference-materials">Reference Materials</a>
+<br />
+<br /></li>
+</ul>
+
+<h2 id="kl-divergence-and-js-divergence">KL divergence and JS divergence</h2>
+
+<p>Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions:
+<a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence" target="_blank">Kullback-Leibler Divergence</a> and <a href="https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence" target="_blank">Jensen-Shannon Divergence</a>.</p>
+
+<ol>
+<li><p>Kullback-Leibler Divergence measures the divergence of probability distribution p(x) to q(x):
+$$KL(P||Q) = \int_x P(x)log\frac{P(x)}{Q(x)}dx$$
+KL(P||Q) achieves its minimum zero when P(x) and Q(x) are the same everywhere.<br />
+KL divergence is widely used as a metrics to measure the similarity between two distributions. But according to its formula, its is asymmetric. Also, due to the rapid decreasing of logrithm function, KL divergence put to much weight when P(x) is near zero. This can cause some buggy result in real world measurement.</p></li>
+
+<li><p>Jensen-Shannon Divergence. JS divergence is based on KL divergence and it is symmetric.<br />
+$$JS(P||Q) = \frac{1}{2} KL(P||\frac{P+Q}{2}) + \frac{1}{2} KL(Q||\frac{P+Q}{2})$$</p></li>
+</ol>
+
+<p>Here is a plot of KL and JS divergence of two normal distributions: N(0, 1) and N(1, 1). Image resource <a href="https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html" target="_blank">here</a>
+<img src="/img/KL_JS_divergence.png" alt="KL-JS" /></p>
+
+<p>As shown in the plot, JS divergence are symmetric while KL divergence is asymmetric. People believe the success of GANs comes from replacing the traditional maximum likelihood with symmetric similarity measure, JS divergence.</p>
+
+<h2 id="generative-adversarial-networks">Generative Adversarial Networks</h2>
+
+<p>Original GANs consists of two networks:</p>
+
+<ol>
+<li>Generator. It receive random samples and synthesize fake images feeding into discriminator. This random sample brings a potential output diversity.<br /></li>
+<li>Discriminator. It receive the real dataset images and the fake images from generator. It works as a critic to evaluate the probability of input image coming from dataset and from generator.</li>
+</ol>
+
+<p>This is a diagram showing how GAN works:
+<img src="/img/GANs.png" alt="GAN" /></p>
+
+<p>In one hand, we want the discriminator&rsquo;s output probability over real data to be higher by maximizing $\mathbb{E}_{x \sim p_{data}(x)}[logD(x)]$; In another hand, we want the discriminator&rsquo;s output probability over fake data from generator to be lower by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.</p>
+
+<p>And for the generator, we want it to fool the discriminator by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.</p>
+
+<p>So, the overall process of GAN training is obvious:
+$$\min_{G} \max_{D} L(G, D) =  [\mathbb{E}_{x \sim p_{data}(x)}[logD(x)] + \mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]]$$</p>
+
+<p>Overall, it is a minimax game between generator and discriminator. The main concern in training procedure is keeping the G and D evolving at the same speed.</p>
+
+<h3 id="global-optimal-loss">Global optimal loss</h3>
+
+<p>The global minimum of the training criterion $L(G, D)$ is achieved if and only if
+$p_g = p_{data}$. Proof of are in the original <a href="https://arxiv.org/pdf/1406.2661.pdf" target="_blank">GAN paper</a>.<br />
+First, we need to find the optimal solution for D when G is fixed. (Sorry, there is a problem in my equation alignment)</p>
+
+<p>$$L(G, D) = \int_x p_{data}(x)logD(x)dx +  \int_z p(z)log(1-D(G(z))dz $$
+         $$ = \int_x (p_{data}(x)logD(x) + p_g(x)log(1-D(x)))dx $$</p>
+
+<p>Assume:
+$$F(x) = p_{data}(x)logD(x) + p_g(x)log(1-D(x))$$
+Take the derivative over $D(x)$:
+$$\frac{d f(x)}{dx} = \frac{p_{data}(x)}{D(x)} + \frac{p_g(x)}{1-D(x)} = 0$$
+Solve this equation, easily get :
+$$D^{\star}(x) = \frac{p_{data}(x)}{p_{data}(x)+p_g(x)}$$</p>
+
+<blockquote>
+<p>When system is trained well, $p_{data}(x)$ and $p_g(x)$ should be similar, $D^{\star}(x) = \frac{1}{2}$.</p>
+</blockquote>
+
+<p>When discriminator is optimal, the loss function becomes:</p>
+
+<p>$$L(G, D) = \int_x p_{data}(x)logD(x)dx +  \int_z p(z)log(1-D(G(z))dz $$</p>
+
+<p>$$ = \int_x (p_{data}(x)logD(x) + p_g(x)log(1-D(x)))dx $$
+$$ = \int_x p_{data}(x)log(\frac{p_{data}(x)}{p_{data}(x)+p_g(x)}) + p_g(x)log(\frac{p_g(x)}{p_{data}(x)+p_g(x)})dx $$
+$$ = -log(4) + KL(p_{data} || \frac{p_{data}+p_g}{2}) + KL(p_g || \frac{p_{data}+p_g}{2})$$
+$$ = -log(4) + 2* JS(p_{data} || p_g)$$</p>
+
+<p>So, the loss function of GAN quantify the JS divergence of $p_{data}$ and $p_g$. The optimal value is $- log(4)$ when $p_{data} = p_g$.</p>
+
+<h2 id="problem-with-vanilla-gans">Problem with Vanilla GANs</h2>
+
+<h3 id="gradient-vanishing">Gradient Vanishing</h3>
+
+<p>The loss function for training G is: $\mathbb{E}_{z \sim p(z)}[log(1-D(G(z)))]$. But in the early stage of training, discriminator can be very confident in detecting results from G, $D(G(z))$ is always 0. In this way, the gradient to update G vanishes.</p>
+
+<p><img src="/img/GAN_gradient_vanishing.png" alt="gradient vanishing" /></p>
+
+<p>With the generator fixed we
+train a discriminator from scratch and measure the gradients with the original cost function. We see
+the gradient norms decay quickly, in the best case 5 orders of magnitude after 4000 discriminator
+iterations. Note the logarithmic scale.</p>
+
+<p>We can use an alternative loss function for G: $\mathbb{E}_{z \sim p(z)}[-log(D(G(z)))]$. Instead of minimizing, let G maximizing the logprobability of the discriminator being mistaken. It is heuristically motivated that generator can still
+learn even when discriminator successfully rejects
+all generator samples, but not theoretically
+guaranteed.</p>
+
+<p>But this will result in gradient unstable issue because the nature of logrithm function.</p>
+
+<p>So, the training of GAN faces a dilemma:</p>
+
+<ol>
+<li>If discriminator is trained badly, it fails to provide correct gradient to update generator.</li>
+<li>If discriminator is trained well, it will be too confident and give near 0 score to generator result, which kills the gradient
+in the generator.<br /></li>
+</ol>
+
+<p>To sum up, the difficulty to train a GAN is how to keep G and D in the same pace. This is quite hard to control in practice without a metrics to quantify it.</p>
+
+<h3 id="mode-collapse">Mode Collapse</h3>
+
+<p>Mode collapse is when the generator generates a limited diversity of samples, or even the same sample, regardless of the input. The main reason also comes from the nature of loss function.  It
+is not equally treated when G generates a unreal
+sample and when G fails to generate real sample.</p>
+
+<p>Without any guidance to ensure the diversity of generator, G only care about how to fool discriminator. Once get a good sample that successfully fools discriminator, it will produce this kind of samples as many as possible to optimize the loss function. When discriminator finally realized the mistake during its training, the generator can easily find another perfect example to fool the discriminator and produce a lot of similar samples. This becomes an endless circle between G and D updates. And the loss function value in this process  will have unnecessary oscillations.</p>
+
+<p>One method to compensate this is putting regularization on the diversity of generator, forcing it to produce various samples. In practice, this method is still not good enough.</p>
+
+<p>Here is some result of GAN mode collapse in LSUN dataset:
+<img src="/img/mode_collapse.png" alt="mode collapse" /></p>
+
+<h2 id="improved-training-of-gans">Improved Training of GANs</h2>
+
+<p>The following improvement are proposed to help stabilize and improve the training of GANs. These comes from this paper:
+<a href="http://papers.nips.cc/paper/6125-improved-techniques-for-training-gans.pdf" target="_blank">Improved Techniques for Training GANs</a></p>
+
+<ol>
+<li><p>Feature Matching<br />
+Feature matching addresses the instability of GANs by specifying a new objective for the generator
+that prevents it from overtraining on the current discriminator. Specifically, we train the generator to match the expected value of the
+features on an intermediate layer of the discriminator.<br />
+Our new objective for the generator is defined as: $| \mathbb{E}_{x \sim p_r} f(x) - \mathbb{E}_{z \sim p_z(z)}f(G(z)) |_2^2 $, where $f(x)$ denote activations on an intermediate layer of the discriminator.</p></li>
+
+<li><p>Mini-batch Discrimination<br />
+The concept of minibatch discrimination is quite general: any discriminator model that looks
+at multiple examples in combination, rather than in isolation, could potentially help avoid collapse
+of the generator.<br />
+In one minibatch, we approximate the closeness between every pair of samples, $c(x_i, x_j)$, and get the overall status of one data point by summing up how close it is to other samples in the same batch, $o(x_i) = \sum_{j} c(x_i, x_j)$. Then $o(x_i)$ is explicitly added to the input of the model.</p></li>
+
+<li><p>Historical averaging<br />
+When applying this technique, we modify each player&rsquo;s cost to include a term $||\theta - \frac{1}{t} \sum_{i=1}^t \theta[i]||^2$
+where $\theta[i]$ is the value of the parameters at past time i. The historical average of the parameters can
+be updated in an online fashion so this learning rule scales well to long time series.</p></li>
+
+<li><p>One-sided label smoothing<br />
+Replaces the 0 and 1 targets for a classifier with smoothed values, like .9 or .1, and was
+recently shown to reduce the vulnerability of neural networks to adversarial examples</p></li>
+
+<li><p>Virtual batch normalization<br />
+Each example x is normalized based on
+the statistics collected on a reference batch of examples that are chosen once and fixed at the start
+of training. The reference batch is normalized using only its own statistics.<br />
+VBN is
+computationally expensive because it requires running forward propagation on two minibatches of
+data, so we use it only in the generator network.</p></li>
+</ol>
+
+<h2 id="wasserstein-gan">Wasserstein GAN</h2>
+
+<h3 id="earth-mover-distance">Earth Mover distance</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Earth_mover%27s_distance" target="_blank">Earth Mover distance(EM distance, Wasserstein distance)</a> is another metrics on the similarity:
+$$ W(p_r, p_g) = \inf_{\gamma \sim \Pi(p_r, p_g)} \mathbb{E}_{(x, y) \sim \gamma}[| x-y |] $$</p>
+
+<p>Looks like a very complex formula, but actually quite simple. Intuitively, $\gamma(x, y)$ indicates how much &lsquo;mass&rsquo;
+must be transported from x to y in order to transform the distributions $p_g$
+into the distribution $p_r$. The EM distance then is the &lsquo;cost&rsquo; of the optimal
+transport plan. PS. Notice it is the expection over $| x-y |$, the total movement should be:</p>
+
+<p>$$ \sum_{x, y} \gamma(x, y) | x-y | = \mathbb{E}_{x, y \sim \gamma} | x-y | $$</p>
+
+<p>For example, we get two distributions:</p>
+
+<p>$$p_r : p_r(0) = \frac{1}{4}, p_r(1) = \frac{1}{4}, p_r(2) = \frac{1}{2}$$</p>
+
+<p>And:</p>
+
+<p>$$p_g : p_g(0) = \frac{1}{2}, p_g(1) = \frac{1}{2}, p_g(2) = 0$$</p>
+
+<p>The optimal plan to move from $p_r$ to $p_g$ should be move $\frac{1}{4}$ from $p_r(2)$ to $p_r(1)$ and $p_r(0)$. So, the EM distance of this two distribution is $\frac{1}{4} * |2-0| + \frac{1}{4} * |2-1| = \frac{3}{4}$.</p>
+
+<h3 id="comparasion-between-em-distance-and-kl-js-divergence">Comparasion between EM distance and KL/JS divergence</h3>
+
+<p>The example from Wasserstein GAN paper is pretty good. Let $ Z \sim U[0, 1] $ is a uniform distribution on unit interval.
+Let $P_0$ be the distribution of $(0, Z) \in R^2 $
+(0 on the x-axis and
+the random variable Z on the y-axis), uniform on a straight vertical line passing
+through the origin. Now let $g_{\theta}(z) = (\theta, z)$ with $\theta$ a single real parameter. It is easy
+to see that in this case when $\theta \neq 0$, (if $\theta = 0$, all these are zero):</p>
+
+<p>$$EM(P_0, P_{\theta}) = |\theta| $$
+$$JS(P_0, P_{\theta}) = log2 $$
+$$KL(P_0, P_{\theta}) = \infty $$</p>
+
+<p>KL gives us inifity when two distributions are non-overlapped. And this situation is quite normal in high dimension space. The value of JS has sudden jump, not differentiable at $\theta=0$. Only Wasserstein metric provides a smooth measure, which is super helpful to provide stable gradient to in training.</p>
+
+<h3 id="lipschitz-continuity">Lipschitz continuity</h3>
+
+<p>The definition of Lipschitz continuity is:
+A real-valued function $f: \mathbb{R} \rightarrow \mathbb{R}$ is called $K$-Lipschitz continuous if there exists a real constant $K \geq 0$ such that, for all $x_1, x_2 \in \mathbb{R}$,</p>
+
+<p>$$\lvert f(x_1) - f(x_2) \rvert \leq K \lvert x_1 - x_2 \rvert$$</p>
+
+<p>if a function is differentiable everywhere, it&rsquo;s derivative should be bounded in $[-K, K]$.</p>
+
+<p>The infimum in the earth mover distance is highly intractable. Also, it would be impossible to search all the cases to move one probability distribution to another. Here the Kantorovich-Rubinstein duality tells us that:</p>
+
+<p>$$ W(p_r, p_g) = \frac{1}{K} \sup_{| f |_L \leq K} \mathbb{E}_{x \sim p_r}[f(x)] - \mathbb{E}_{x \sim p_g}[f(x)] $$</p>
+
+<p>where the supremum is over all the 1-Lipschitz functions. If you want to know more about Kantorovich-Rubinstein duality, see this awesome <a href="https://vincentherrmann.github.io/blog/wasserstein/" target="_blank">blog</a>.</p>
+
+<p>Suppose this function $f$ comes from a family of K-Lipschitz continuous functions, ${ f_w }$, parameterized by $w$. The above equation becomes:</p>
+
+<p>$$ W(p_r, p_g) = \max_{w \in W} \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\theta(z))] $$</p>
+
+<p>In the modified Wasserstein-GAN, the &ldquo;discriminator&rdquo; model is used to learn $w$ to find a good $f_w$ and the loss function is equivalent to measure the Wasserstein distance between $p_r$ and $p_g$.</p>
+
+<p>In this perspective, the discriminator can be treated as a K-Lipschitz function to measure the Wasserstein distance between the distribution of $p_r$ and $p_g$. Since the Wasserstein distance is a smooth measure, the gradient should be stable and make $p_r$ closer to $p_g$.</p>
+
+<h3 id="modified-algorithm">Modified Algorithm</h3>
+
+<p>The next thing to care about is how to keep the discriminator function satisfying K-Lipschitz continuity. Wasserstein GAN adopts the most simple method, clipping the gradient into a small interval ($[-0.01, 0.01]$), and make the parameter $w$ lies in a compact space and  $f_w$ will preserve its Lipschitz continuity. The modified algorithm is as follows:</p>
+
+<p><img src="/img/GAN_algorithm.png" alt="WGAN" /></p>
+
+<p>Compared to original GANs, Wasserstein GAN takes these changes:</p>
+
+<ol>
+<li>Remove the sigmoid function at the end of Discriminator<br /></li>
+<li>Remove the log function in generator and discriminator loss function<br /></li>
+<li>Clip the gradient norm into an interval $[-c, c]$<br /></li>
+<li>Empirically use optimizers without momentum term, like RMSprop, not Adam.</li>
+</ol>
+
+<p>The first two modification comes from a brand-new loss function derived from Wasserstein distance. It is not a probability score anymore, so no sigmoid and logrithm is needed. And the last change comes from author&rsquo;s experience, it should be a practical suggestion for training.</p>
+
+<h3 id="wasserstein-gan-with-gradient-penalty">Wasserstein GAN with gradient penalty</h3>
+
+<p>In the original Wasserstein GAN paper, the author admitted gradient clipping is a terrible idea enforce a Lipschitz constraint:</p>
+
+<blockquote>
+<p>Weight clipping is a clearly terrible way to enforce a Lipschitz constraint. If the
+clipping parameter is large, then it can take a long time for any weights to reach
+their limit, thereby making it harder to train the critic till optimality. If the clipping
+is small, this can easily lead to vanishing gradients when the number of layers is
+big, or batch normalization is not used.</p>
+</blockquote>
+
+<p>So, this paper <a href="https://arxiv.org/pdf/1704.00028.pdf" target="_blank">Improved Training of Wasserstein GANs</a> proposed a new Wasserstein GAN with gradient penalty to replace gradient clipping.</p>
+
+<h4 id="disadvantages-of-gradient-clipping-in-wgan">Disadvantages of gradient clipping in WGAN</h4>
+
+<p>The author found weight clipping in WGAN leads to optimization difficulties, and that even when optimization
+succeeds the resulting critic can have a pathological value surface.</p>
+
+<p>Their experiments use the specific form of weight constraint like hard clipping of the magnitude
+of each weight, L2 norm clipping, weight normalization,
+as well as soft constraints (L1 and L2 weight decay) and found that they exhibit similar problems.</p>
+
+<ol>
+<li><p>Capacity underuse<br />
+Under a weight-clipping constraint, the authors observe that neural
+network architectures try to attain their maximum gradient norm k end up learning extremely
+simple functions. Also, the critic trained with weight clipping ignores higher moments of the data distribution
+and instead models very simple approximations to the optimal functions.</p></li>
+
+<li><p>Gradient vanishing and exploding
+Without careful tuning of the clipping threshold c, the network can easily stuck in gradient vanishing and exploding.</p></li>
+</ol>
+
+<h4 id="gradient-penalty">Gradient Penalty</h4>
+
+<p>The authors provide an alternative way to enforce the Lipschitz constraint. First, they proved that a differentiable function
+is 1-Lipschtiz if and only if it has gradients with norm at most 1 everywhere. So, gradient penalty term is add to directly
+constrain the gradient norm of the critic&rsquo;s output with respect to its input. The new loss function is:
+$$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\theta(z))] + \lambda \mathbb{E}_{\hat x \sim \mathbb{P}_{\hat x}}[(||\nabla{\hat{x}}D(\hat x)||_2 - 1)^2]$$</p>
+
+<p>So, they use a soft version constraint, putting penalty on gradient norm for random samples $\hat x \sim \mathbb{P}_{\hat x}$, where $\mathbb{P}_{\hat x}$ is drawn from a straight line between pairs of points sampled from the data distribution $\mathbb{P}_r$ and the generator distribution $\mathbb{P}_g$. Note the hyperparameter $\lambda = 10$</p>
+
+<p>The main reason they do this is that enforcing the unit gradient norm constraint everywhere is intractable, enforcing it only along these straight lines seems sufficient and experimentally results in good performance.</p>
+
+<p>Also, the batch norm layer can make this penalty invalid, so WGAN-GP simply remove the batch norm layers. And WGAN-GP takes two side penalty. Instead of forcing the gradient norm smaller than 1, it encourage gradient norm closer to 1 according to their proof. In practice, this works slightly better. Here is the algorithm of WGAN-GP:</p>
+
+<p><img src="/img/WGANGP.jpg" alt="WGAN-GP" /></p>
+
+<p>And the implementation on tensorflow is quite simple with tf.gradient function.</p>
+
+<pre><code class="language-python"> 
+ with tf.name_scope('gan_loss'):
+
+    D_loss = tf.reduce_mean(fake_score) - tf.reduce_mean(real_score)
+
+    G_loss = -tf.reduce_mean(fake_score)
+
+    def interpolate(a, b):
+        shape = tf.concat((tf.shape(a)[0:1], tf.tile([1], [a.shape.ndims - 1])), axis=0)
+        alpha = tf.random_uniform(shape=shape, minval=0., maxval=1.)
+        inter = a + alpha * (b - a)
+        inter.set_shape(a.get_shape().as_list())
+        return inter
+
+    gp_sample = interpolate(gen, image_hr)
+
+    gp_gradient = tf.gradients(net.discrimintor(gp_sample, reuse=True), gp_sample)
+
+    grad_norm = tf.sqrt(tf.reduce_sum(tf.square(gp_gradient[0]), reduction_indices=[-1]))
+
+    gp_loss = tf.reduce_mean(tf.square(grad_norm-1.))
+
+    D_overall_loss = D_loss + gp_rate*gp_loss
+
+    tf.summary.scalar('G_loss', (G_loss))
+    tf.summary.scalar('D_loss', (D_loss))
+    tf.summary.scalar('GP_loss', gp_loss)
+
+    G_overall_loss = gan_ratio*G_loss + SR_loss 
+</code></pre>
+
+<h2 id="reference-materials">Reference Materials</h2>
+
+<ol>
+<li><a href="https://arxiv.org/abs/1406.2661" target="_blank">Original Paper of GAN: Generative Adversarial Nets</a></li>
+<li><a href="https://arxiv.org/pdf/1611.02163.pdf" target="_blank">Unrolled Generative Adversarial Networks</a></li>
+<li><a href="https://arxiv.org/pdf/1701.04862.pdf" target="_blank">Towards Principled Methods for Training Generative Adversarial Networks</a></li>
+<li><a href="https://arxiv.org/pdf/1701.07875.pdf" target="_blank">Wasserstein GAN</a></li>
+<li><a href="http://papers.nips.cc/paper/6125-improved-techniques-for-training-gans.pdf" target="_blank">Improved Techniques for Training GANs</a></li>
+<li><a href="https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html" target="_blank">Another great blog of WGAN</a></li>
+<li><a href="https://arxiv.org/pdf/1704.00028.pdf" target="_blank">WGAN-GP: Improved Training of Wasserstein GANs</a></li>
+</ol>
+
+    </div>
+
+    
+
+
+<div class="article-tags">
+  
+  <a class="btn btn-primary btn-outline" href="/tags/wasserstein-gan/">Wasserstein GAN</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/gan/">GAN</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/deep-learning/">deep learning</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/tensorflow/">tensorflow</a>
+  
+</div>
+
+
+
+
+    
+    
+    <div class="article-widget">
+      <div class="hr-light"></div>
+      <h3>Related</h3>
+      <ul>
+        
+        <li><a href="/post/amazing-gan---wasserstein-gan/">Amazing GAN - Wasserstein GAN</a></li>
+        
+        <li><a href="/post/spatial-transform-network/">Spatial Transform Network (STN)</a></li>
+        
+        <li><a href="/project/obfuscatedblurred-human-face-reconstruction/">Obfuscated/Blurred Human Face Reconstruction</a></li>
+        
+      </ul>
+    </div>
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p class="powered-by">
+
+      &copy; 2018 &middot; 
+
+      Powered by
+      
+      <a href="https://shen338.github.io/" target="_blank" rel="noopener">Tong Shen</a>. 
+	  
+	  All rights reserved.
+
+      <span class="pull-right" aria-hidden="true">
+        <a href="#" id="back_to_top">
+          <span class="button_icon">
+            <i class="fa fa-chevron-up fa-2x"></i>
+          </span>
+        </a>
+      </span>
+
+    </p>
+  </div>
+</footer>
+
+
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close btn-large" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Cite</h4>
+      </div>
+      <div>
+        <pre><code class="modal-body tex"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-primary btn-outline js-copy-cite" href="#" target="_blank">
+          <i class="fa fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-primary btn-outline js-download-cite" href="#" target="_blank">
+          <i class="fa fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+    
+
+    
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha512-3P8rXCuGJdNZOnUx/03c1jOTnMn3rP63nBip5gOP2qmUh5YAdVAvFZ1E+QLZZbC1rtMrQb+mah3AfYW11RUrWA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.3/imagesloaded.pkgd.min.js" integrity="sha512-umsR78NN0D23AzgoZ11K7raBD+R6hqKojyBZs1w8WvYlsI+QuKRGBx3LFCwhatzBunCjDuJpDHwxD13sLMbpRA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha512-iztkobsvnjKfAtTNdHkGVjAYTrrtlC7mGp/54c40wowO7LhURYl3gVzzcEqGl/qKXQltJ2HwMrdLcNUdo+N/RQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.4/isotope.pkgd.min.js" integrity="sha512-VDBOIlDbuC4VWxGJNmuFRQ0Li0SKkDpmGyuhAG5LTDLd/dJ/S0WMVxriR2Y+CyPL5gzjpN4f/6iqWVBJlht0tQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+    
+    
+    <script src="/js/hugo-academic.js"></script>
+    
+
+    
+    
+      
+      
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+      
+
+      
+
+      
+
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_CHTML" integrity="sha512-tOav5w1OjvsSJzePRtt2uQPFwBoHt1VZcUq8l8nm5284LEKE9FSJBQryzMBzHxY5P0zRdNqEcpLIRVYFNgu1jw==" crossorigin="anonymous"></script>
+    
+    
+
+  </body>
+</html>
+

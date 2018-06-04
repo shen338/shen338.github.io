@@ -681,6 +681,406 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
     </item>
     
     <item>
+      <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, and YOLO</title>
+      <link>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
+      <pubDate>Mon, 01 Jan 2018 21:00:00 -0500</pubDate>
+      
+      <guid>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
+      <description>
+
+&lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#history&#34;&gt;History&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#alexnet&#34;&gt;AlexNet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#resnet&#34;&gt;ResNet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#inception-network-series&#34;&gt;Inception Network Series&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#deformable-parts-model&#34;&gt;Deformable Parts Model&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#overfeat&#34;&gt;Overfeat&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#metrics--map&#34;&gt;Metrics: mAP&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#precision-and-recall&#34;&gt;Precision and Recall&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#average-precision--ap-&#34;&gt;Average precision (AP)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#mean-average-precision--map-&#34;&gt;mean average precision (mAP)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#r-cnn-families&#34;&gt;R-CNN Families&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#rcnn&#34;&gt;RCNN&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#selective-search&#34;&gt;Selective Search&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#bounding-box-regression&#34;&gt;Bounding Box Regression&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#non-maximum-suppression&#34;&gt;Non Maximum Suppression&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#workflow&#34;&gt;Workflow&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#speed-bottleneck&#34;&gt;Speed Bottleneck&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#fast-rcnn&#34;&gt;Fast-RCNN&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#roi-pooling&#34;&gt;ROI pooling&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#workflow-1&#34;&gt;Workflow&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#faster-rcnn&#34;&gt;Faster-RCNN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#mask-rcnn&#34;&gt;Mask-RCNN&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#single-shot-detector&#34;&gt;Single Shot Detector&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#single-shot-multibox-detector-ssd-&#34;&gt;Single Shot MultiBox Detector(SSD)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#you-only-look-once-yolo-&#34;&gt;You Only Look Once(YOLO)&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#yolov1&#34;&gt;YOLOv1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#yolov2&#34;&gt;YOLOv2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#yolov3&#34;&gt;YOLOv3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#reference-materials&#34;&gt;Reference Materials&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It&amp;rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision. Similar to image classification, deep learning/neural network represent the state of the art in modern object recognition.&lt;/p&gt;
+
+&lt;h1 id=&#34;history&#34;&gt;History&lt;/h1&gt;
+
+&lt;p&gt;To have a better intuition about the challenges and algorithm evolving, first we will have an overview about the progress of deep learning approach in the last couple of years. This progress also comes with the progress of image classification.&lt;/p&gt;
+
+&lt;h3 id=&#34;alexnet&#34;&gt;AlexNet&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf&#34; target=&#34;_blank&#34;&gt;AlexNet&lt;/a&gt; famously won the 2012 ImageNet LSVRC-2012 competition by a large margin (15.3% VS 26.2% (second place) error rates). It stands for the revival of neural network as well as deep learning.&lt;/p&gt;
+
+&lt;p&gt;The main contribution of AlexNet is as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Use ReLU activation function instead of tanh and sigmoid to introduce nonlinearity to the network. Also, it eases the gradient vanishing problem when training deep neural network.&lt;/li&gt;
+&lt;li&gt;Introduce dropout as a regularization. It works like an ensemble of different networks.&lt;/li&gt;
+&lt;li&gt;Use two NVIDIA GPUs and CUDA, also parallel architecture to accelerate training.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Here is a diagram of famous AlexNet:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/AlexNet.png&#34; alt=&#34;AlexNet&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;resnet&#34;&gt;ResNet&lt;/h3&gt;
+
+&lt;p&gt;After AlexNet, the next significant work should be &lt;a href=&#34;https://arxiv.org/abs/1512.03385&#34; target=&#34;_blank&#34;&gt;ResNet&lt;/a&gt;.&lt;br /&gt;
+These networks led to 1st-place winning entries in all five main tracks of the ImageNet and COCO 2015 competitions, which covered image classification, object detection, and semantic segmentation.&lt;/p&gt;
+
+&lt;p&gt;The main difference of ResNet is just a skip connection between layers. The author’s hypothesis is that it is easy to optimize the residual mapping function F(x) than to optimize the original, unreferenced mapping H(x). And this method turns out to be very efficient to solve network degradation in deep network.&lt;/p&gt;
+
+&lt;p&gt;Here is a diagram of residual blocks (image source: ):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/residualblock.png&#34; alt=&#34;residual&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Plus, Resnet uses the bottleneck architecture from Inception network to reduce computation. After $1\times1$ convolution, the feature map channels are greatly reduced in order to save computation for next $3 \times 3$ convolution layer. Another $1\times1$ convolution after that can resume the feature map channels. Amazingly, this operation won&amp;rsquo;t affect the performance. So, this bottleneck architecture is quite popular in modern neural network.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/bottleneck.jpg&#34; alt=&#34;bottleneck&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;ResNet can be interpreted as ensembles of relatively shallow networks, as described &lt;a href=&#34;https://arxiv.org/abs/1605.06431?context=cs&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;inception-network-series&#34;&gt;Inception Network Series&lt;/h3&gt;
+
+&lt;p&gt;Inception network series comes from Google. It should be the most well-designed and popular network in image classification community. The architecture becomes very complicated in later version of Inception networks. For example, here is a diagram of InceptionResnetV2, with more than 600 layers:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/image00.png&#34; alt=&#34;inceptionresnetv2&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The core of Inception network is the Inception module. The inspiration comes from the idea that you need to make a decision as to what type of convolution you want to make at each layer: $3 \times 3$ or $5 \times 5$? You may need specific image content to decide. How about use them all together? Here come the Inception module:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/inception_implement.png&#34; alt=&#34;Inceptionmodule&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It uses all $1 \times 1$, $3 \times 3$, $5 \times 5$ convolution and  altogether and concate their result together. Plus, inception module introduces $N \times 1$ and $1 \times N$ convolution instead of traditional $N \times N $ convolution. This puts constraints on convolution kernel (center symmetric), but can greatly reduces computation. And residual connection, bottleneck architecture also appears in modern Inception network. Here is a diagram of Inception modules in InceptionV4:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/inceptionv4.jpeg&#34; alt=&#34;v4&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;deformable-parts-model&#34;&gt;Deformable Parts Model&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://vision.stanford.edu/teaching/cs231b_spring1213/slides/dpm-slides-ross-girshick.pdf&#34; target=&#34;_blank&#34;&gt;Deformable Parts Model (DPM)&lt;/a&gt; was invented by Pedro Felzenszwalb ands Ross Girshick, who becomes the leader of object recognition commumity with his R-CNN families.&lt;/p&gt;
+
+&lt;p&gt;The model consists of three major components:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;A coarse root filter defines a detection window that approximately covers an entire object. A filter specifies weights for a region feature vector.&lt;/li&gt;
+&lt;li&gt;Multiple part filters that cover smaller parts of the object. Parts filters are learned at twice resolution of the root filter.&lt;/li&gt;
+&lt;li&gt;A spatial model for scoring the locations of part filters relative to the root.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Deformable Part Models model an object as the sum of the geometric deformations of it. So take person model for example:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/DPM.jpeg&#34; alt=&#34;DPM&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A root location with high score detects a region with high chances to contain an object, while the locations of the parts with high scores confirm a recognized object hypothesis. The paper adopted latent SVM to model the classifier.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/DPMmodel.png&#34; alt=&#34;DPMmodel&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Also, DPM and later CNN models are not two different method to object recognition. Actually, DPM can be unrolled and interpreted as several equivalent CNN layers. See Ross&amp;rsquo;s paper &lt;a href=&#34;https://arxiv.org/abs/1409.5403&#34; target=&#34;_blank&#34;&gt;Deformable Part Models are Convolutional Neural Networks&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;overfeat&#34;&gt;Overfeat&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://arxiv.org/abs/1312.6229&#34; target=&#34;_blank&#34;&gt;Overfeat&lt;/a&gt; is a poineer to incorprate CNN models into object detection, localization and classification tasks.&lt;/p&gt;
+
+&lt;h1 id=&#34;metrics-map&#34;&gt;Metrics: mAP&lt;/h1&gt;
+
+&lt;p&gt;mAP is the metric to measure the accuracy of object detectors like Faster R-CNN, SSD, etc. AP is the average of the maximum precisions at different recall values. And mAP is the mean of AP in different classes. This sounds complicated, so let&amp;rsquo;s explain this step by step.&lt;/p&gt;
+
+&lt;h3 id=&#34;precision-and-recall&#34;&gt;Precision and Recall&lt;/h3&gt;
+
+&lt;p&gt;According to &lt;a href=&#34;https://en.wikipedia.org/wiki/Precision_and_recall#F-measure&#34; target=&#34;_blank&#34;&gt;wiki&lt;/a&gt;, &lt;strong&gt;precision&lt;/strong&gt; (also called positive predictive value) is the fraction of relevant instances among the retrieved instances, for example, percentage of your positive predictions are correct.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Recall&lt;/strong&gt; (also known as sensitivity) is the fraction of relevant instances that have been retrieved over the total amount of relevant instances. for example, percentage of positive instances in your positive predictions.&lt;/p&gt;
+
+&lt;p&gt;Here is an image of precision and recall:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/precision-recall.jpg&#34; alt=&#34;precision and recall&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;average-precision-ap&#34;&gt;Average precision (AP)&lt;/h3&gt;
+
+&lt;p&gt;First of all, a prediction is consider to be correct if IoU is greater than a threshold, usually 0.5. It is hard to explain AP by words, so let&amp;rsquo;s create an example to make it clear. (&lt;a href=&#34;https://medium.com/@jonathan_hui/map-mean-average-precision-for-object-detection-45c121a31173&#34; target=&#34;_blank&#34;&gt;example source&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;For example, if our image has 5 objects. First, we sort the predictions of our detector based on the confidence level. We get correct prediction in 1st, 2nd, 4th, 6th and 10th prediction. So, in the top 4 predictions, we get 3 of them correct. A prediction is consider to be correct if IoU is greater than 0.5. So the precision and the recall for our top 4 predictions is:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Precision&lt;/strong&gt; is the proportion of TP = &lt;sup&gt;3&lt;/sup&gt;&amp;frasl;&lt;sub&gt;4&lt;/sub&gt; = 0.75.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Recall&lt;/strong&gt; is the proportion of TP out of the possible positives = &lt;sup&gt;3&lt;/sup&gt;&amp;frasl;&lt;sub&gt;5&lt;/sub&gt; = 0.6.&lt;/p&gt;
+
+&lt;p&gt;Here is a table of different corresponding precision and recall ranks:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/precisionrecallrank.png&#34; alt=&#34;prrank&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;AP (average precision) is computed as the average of &lt;strong&gt;maximum precision&lt;/strong&gt; at different recall levels. Here are two kinds of AP calculation:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Before 2010, people get the precision value at 11 recall levels (0.0, 0.1, 0.2 &amp;hellip; 1.0), and average them.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;$$AP = \frac{1}{11} (AP_r(0.0) + AP_r(0.1) + &amp;hellip; AP_r(1.0))$$&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;After 2010, people calculate the precision value at all different recall levels and average them. Here K is the number of total different recall levels.&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;$$AP = \sum_{i = 0}^K AP_r(i)$$&lt;/p&gt;
+
+&lt;p&gt;The $AP_r$ represent the &lt;strong&gt;maximum precision&lt;/strong&gt; in certain recall level.&lt;/p&gt;
+
+&lt;h3 id=&#34;mean-average-precision-map&#34;&gt;mean average precision (mAP)&lt;/h3&gt;
+
+&lt;p&gt;Latest research papers tend to give results for the COCO dataset only. For COCO, AP is the average over multiple IoU. &lt;strong&gt;AP@[.5:.95]&lt;/strong&gt; corresponds to the average AP for IoU from 0.5 to 0.95 with a step size of 0.05. AP (which is also called mAP in COCO) averages AP over all class categories.&lt;/p&gt;
+
+&lt;h1 id=&#34;r-cnn-families&#34;&gt;R-CNN Families&lt;/h1&gt;
+
+&lt;h2 id=&#34;rcnn&#34;&gt;RCNN&lt;/h2&gt;
+
+&lt;p&gt;The goal of &lt;a href=&#34;https://arxiv.org/abs/1311.2524&#34; target=&#34;_blank&#34;&gt;R-CNN&lt;/a&gt; is to take in an image, and correctly identify where are objects (via a bounding box) in the image. The intuition of RCNN is quite simple, just proposing some possible regions, and determine whether they are objects or not. Here is a diagram of RCNN:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RCNN.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;selective-search&#34;&gt;Selective Search&lt;/h3&gt;
+
+&lt;p&gt;R-CNN uses Selective Search method to extract region proposals.&lt;/p&gt;
+
+&lt;p&gt;This method uses an over-segmentation method to divide the image into small regions (1k to 2k). Merge the two most probable adjacent areas according to the consolidation rules. This is is a hierarchical grouping algorithm by J.R.R. Uijlings.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/grouping.png&#34; alt=&#34;grouping&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Actually the similarity of regions is determined by their color histogram, texture(gradient histogram) and some other aspects. Note that this method tends to merge relatively small regions to avoid a large area gradually &amp;ldquo;eat&amp;rdquo; other small areas. Also, the method tend to merge the regions whose merged result takes large percentage in its bounding box.&lt;/p&gt;
+
+&lt;p&gt;Repeat until the entire image merges into one area position. Output all areas that existed once, so-called candidate areas. And generate bounding box for them as region proposals.&lt;/p&gt;
+
+&lt;h3 id=&#34;bounding-box-regression&#34;&gt;Bounding Box Regression&lt;/h3&gt;
+
+&lt;p&gt;The Bounding Box Regressors are essential because the initial region proposals might not fully coincide with the region that is indicated by the learned features of the Convolutional Neural Network. It is a kind of a refinement step.&lt;/p&gt;
+
+&lt;p&gt;So, based on the features obtained at the end of the final pooling layer, the region proposals are regressed. Note that only when region proposals have large IoU(&amp;gt;0.6) with ground truth, we can treat this transformation as linear model and do regression. The bounding box regression process is quite straight forward in RCNN paper.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/bbregression.png&#34; alt=&#34;bbregression&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We directly regress the location $P_x$ and $P_y$, while regress the width $P_w$ and height $P_h$ in log-space which produce better results on the wide range of bounding-box shift.&lt;/p&gt;
+
+&lt;h3 id=&#34;non-maximum-suppression&#34;&gt;Non Maximum Suppression&lt;/h3&gt;
+
+&lt;p&gt;In the end, we can have a lot of bounding boxes on an object. We need to determine the best bounding box for this object. So, what NMS does is as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;First calculate the area of each bounding box, and then sort according to the score&lt;/li&gt;
+&lt;li&gt;Use the largest bounding box with the score as the selected box, calculate the rest of the bounding box and the current maximum score and the IoU of the box, remove the IoU greater than the set threshold Bounding box.&lt;/li&gt;
+&lt;li&gt;Then repeat the above process until the candidate bounding box is empty&lt;/li&gt;
+&lt;li&gt;Delete the selected box with the score less than a certain threshold to get this kind of result&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/NMS.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;workflow&#34;&gt;Workflow&lt;/h3&gt;
+
+&lt;p&gt;R-CNN is formulated as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Apply &lt;a href=&#34;#selective-search&#34;&gt;selective search&lt;/a&gt; to input image, and generate ~2k candidates per image containing target objects with different sizes. Region candidates are warped to have a fixed size as required by CNN.&lt;/li&gt;
+&lt;li&gt;Start from a pre-train a CNN network on image classification tasks. Continue fine-tuning the CNN on warped proposal regions for K + 1 classes; The additional one class refers to the background (no object of interest). In the fine-tuning stage, we should use a much smaller learning rate and the mini-batch oversamples the positive cases because most proposed regions are just background.&lt;/li&gt;
+&lt;li&gt;Given every image region, one forward propagation through the CNN generates a feature vector. This feature vector is then consumed by a binary SVM trained for each class independently.
+The positive samples are proposed regions with IoU (intersection over union) overlap threshold &amp;gt;= 0.3, and negative samples are irrelevant others.&lt;/li&gt;
+&lt;li&gt;Use &lt;a href=&#34;#bounding-box-regression&#34;&gt;bounding box regression&lt;/a&gt; to refine the region proposals with CNN feature vector. Also &lt;a href=&#34;#non-maximum-suppression&#34;&gt;NMS&lt;/a&gt; to delete redundant region proposals.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;speed-bottleneck&#34;&gt;Speed Bottleneck&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Selective search for proposal is slow.&lt;/li&gt;
+&lt;li&gt;Calculate feature vectors for every region proposals.&lt;/li&gt;
+&lt;li&gt;Detection process consists of three steps without any computation sharing.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Later work mainly concentrate on the three aspects above to achieve real-time detection.&lt;/p&gt;
+
+&lt;h2 id=&#34;fast-rcnn&#34;&gt;Fast-RCNN&lt;/h2&gt;
+
+&lt;p&gt;Fast RCNN mainly deal with the second speed bottleneck of RCNN: Calculate feature vectors for every region proposals.&lt;/p&gt;
+
+&lt;p&gt;Instead of extracting CNN feature vectors independently for each region proposal, this model aggregates them into one CNN forward pass over the entire image and the region proposals share this feature matrix. Then the same feature matrix is branched out to be used for learning the object classifier (No SVM but softmax) and the bounding-box regressor.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/fastrcnn.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;roi-pooling&#34;&gt;ROI pooling&lt;/h3&gt;
+
+&lt;p&gt;Indeed, there is nothing magic about ROI pooling. It is used to generate fixed size feature map regardless of the input image(region proposal) size.&lt;/p&gt;
+
+&lt;p&gt;For example, the feature size of a projected region is $h \times w$, and we want a fixed feature map with size $H \times W$. ROI pooling will divide original feature map into $H \times W$ grids, approximately every subwindow of size $h/H \times w/W$. Then apply max-pooling in each grid.&lt;/p&gt;
+
+&lt;p&gt;Here is a diagram of ROI pooling from cs231n Lecture:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/roi-pooling.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;workflow-1&#34;&gt;Workflow&lt;/h3&gt;
+
+&lt;p&gt;Fast R-CNN is formulated as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;The same with R-CNN, Apply &lt;a href=&#34;#selective-search&#34;&gt;selective search&lt;/a&gt; to input image, and generate ~2k candidates per image containing target objects with different sizes.&lt;/li&gt;
+&lt;li&gt;Start from a pretrained ImageNet model.
+
+&lt;ul&gt;
+&lt;li&gt;Replace the last max pooling layer of the pre-trained CNN with a RoI pooling layer to ensure fixed output size.&lt;/li&gt;
+&lt;li&gt;Different from R-CNN, only do CNN forward pass once, and directly map region proposals to their corresponding feature map. Shared computation speed up the whole process.&lt;/li&gt;
+&lt;li&gt;Replace the last fully connected layer and the last softmax layer (K classes) with a fully connected layer and softmax over K + 1 classes.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Finally the model branches into two output layers:
+
+&lt;ul&gt;
+&lt;li&gt;A softmax classifier of K + 1 classes (extra one is the background class), output a discrete probability distribution per RoI.&lt;/li&gt;
+&lt;li&gt;A bounding-box regression model to refine original RoI for each of K classes.&lt;/li&gt;
+&lt;li&gt;The overall loss function is a combination of classification loss and bounding box location loss.
+&lt;br /&gt;
+&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;faster-rcnn&#34;&gt;Faster-RCNN&lt;/h2&gt;
+
+&lt;p&gt;The intuition of &lt;a href=&#34;https://arxiv.org/pdf/1506.01497.pdf&#34; target=&#34;_blank&#34;&gt;Faster-RCNN&lt;/a&gt; is simple: since CNN is so good and efficient, and using selective search is too slow, why not also using CNN to generate region proposals? So, the main difference between faster-RCNN and fast RCNN is the region proposal network (RPN) to generate region proposals with CNN.&lt;/p&gt;
+
+&lt;p&gt;Here is an illustratioon of Faster RCNN:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/faster-RCNN.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;region-proposal-network-rpn&#34;&gt;Region Proposal Network (RPN)&lt;/h3&gt;
+
+&lt;p&gt;Region proposal network consists of three parts:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Feed input image into CNN and get a set of convlutional feature maps on the last convolutional layer.&lt;/li&gt;
+&lt;li&gt;Then a sliding window is running spatially on these feature maps. The size of sliding window is $3 \times 3$. For each sliding window, a set of 9 anchors are generated which all have the same center (the same with sliding window) but with 3 different aspect ratios (1:2, 1:1, 2:1) and 3 different scales. Note that all these coordinates are computed with respect to the original image. (image &lt;a href=&#34;https://www.quora.com/How-does-the-region-proposal-network-RPN-in-Faster-R-CNN-work&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)
+&lt;img src=&#34;/img/anchor.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;li&gt;Finally, the 3×3 spatial features extracted from convolution feature maps are fed to a smaller network which has two tasks: classification (cls) and regression (reg). The output of regressor determines a a predicted bounding box (x,y,w,h), The classification network produces a probability p indicating whether the the predicted box contains an object (1) or it is from background (0 for no object).
+&lt;img src=&#34;/img/rpn-end.jpg&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;So, the output of rpn is similar to selective search method, which is ~2k region proposals. But the speed of RPN is much faster than selective search method. In this way, the last speed bottleneck of RCNN is addressed. Note that if accuracy is not important, RPN can complete object recognition by its own by modify the classification into N classes.&lt;/p&gt;
+
+&lt;h3 id=&#34;workflow-2&#34;&gt;Workflow&lt;/h3&gt;
+
+&lt;p&gt;Except the RPN, the rest of Faster R-CNN is the same with Fast R-CNN. Faster R-CNN is formulated as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Start from ImageNet pretrained model, fine-tune the RPN (region proposal network) end-to-end for the region proposal task. Positive samples have IoU (intersection-over-union) &amp;gt; 0.7, while negative samples have IoU &amp;lt; 0.3.&lt;/li&gt;
+&lt;li&gt;Train a Fast R-CNN object detection model using the proposals generated by the current RPN&lt;/li&gt;
+&lt;li&gt;Then use the Fast R-CNN network to initialize RPN training. While keeping the shared convolutional layers, only fine-tune the RPN-specific (background/object classification and bounding box regression) layers. At this stage, RPN and the detection network share convolutional layers.&lt;/li&gt;
+&lt;li&gt;Finally fine-tune the unique layers of Fast R-CNN&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;mask-rcnn&#34;&gt;Mask-RCNN&lt;/h2&gt;
+
+&lt;p&gt;So far, we’ve seen how CNN features are interesting and effective in object recognition with bounding boxes. Recently, Kaiming He, Ross Girshick and a team of researchers uses CNN features to another important aspect of object recognition: instance segmentation. They name their work &lt;a href=&#34;https://arxiv.org/abs/1703.06870&#34; target=&#34;_blank&#34;&gt;Mask RCNN&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Semantic segmentation need to segment and cluster pixels of different object classes in a single graph; while instance segmentation need to locate every single object and cluster pixels of this object. This image shows the difference of semantic and instance segmentation:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/instancesegmentation.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;So, overall, instance is more difficult than semantic segmentation. And it is highly related to object detection. For semantic segmentation, most modern frameworks are based on &lt;a href=&#34;https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf&#34; target=&#34;_blank&#34;&gt;Fully Convolutional Neural Networks (FCN)&lt;/a&gt;. FCN managed to extract the region of objects in an image but it cannot tell us the exact region of every single object. Here, Mask RCNN combined RCN and Faster RCNN, adding an extra FCN branch to faster RCNN, parallel to localization and classification, to make pixel level prediction and instance segmentation in a single bounding box.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/mask-rcnn.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;roi-align&#34;&gt;ROI Align&lt;/h3&gt;
+
+&lt;p&gt;Different to object detection, pixel level prediction need more fine-grained alignment rather than simple ROI pooling. In ROI pooling, the location information is quantified twice:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Quantize region proposal coordinates as integer point coordinates&lt;/li&gt;
+&lt;li&gt;The quantized region is evenly divided into $k \times k$ cells and the boundaries of each cell are quantized.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/ROIquantize.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;From the diagram above, the ground truth bounding box is $655 \times 655$. And after 5 max pooling operation, the corresponding size on feature map is &lt;sup&gt;655&lt;/sup&gt;&amp;frasl;&lt;sub&gt;32&lt;/sub&gt; = 20.78 , but ROI pooling quantizes it into $20$. After that, we need to divide the bounding box into $7 \times 7$ cells, the size of each cell is &lt;sup&gt;20&lt;/sup&gt;&amp;frasl;&lt;sub&gt;7&lt;/sub&gt; = 2.86 , but ROI pooling quantizes it into $2$. So, the largest quantization error of ROI pooling is about $1.5$ pixels on feature map, which is $50$ pixels on input image.&lt;/p&gt;
+
+&lt;p&gt;What ROIalign does is removing the quantization in ROI pooling.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Do not quantize region proposal coordinates, keep it as float numbers.&lt;/li&gt;
+&lt;li&gt;Do not quantize $k \times k$ cells boundaries when dividing, keep it as float numbers.&lt;/li&gt;
+&lt;li&gt;Calculate the value of four fixed points in each cell using bilinear interpolation method, and then perform max pooling for these four points.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Here is a figure for ROI align:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/ROIAlignDiagram.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;And according to the paper, four fixed points in a cell works best, but only use one fixed point in a cell merely hurt the performance. Bilinear interpolation is totally differentiable, so back propogation is also straight forward.&lt;/p&gt;
+
+&lt;h3 id=&#34;key-point-detection&#34;&gt;Key Point Detection&lt;/h3&gt;
+
+&lt;p&gt;In addition, mask RCNN can handle human pose key point detection. We just need to replace the segmentation mask with one-hot key point mask. In mask RCNN, human pose has 17 key points. The result of Mask RCNN is pretty good:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/maskrcnnresult.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;single-shot-detector&#34;&gt;Single Shot Detector&lt;/h1&gt;
+
+&lt;p&gt;The previous methods of object detection all share one thing in common: they have one part of their network dedicated to providing region proposals followed by a high quality classifier to classify these proposals. These methods are very accurate but come at a big computational cost. In embedded systems, we have to control the computation cost. These method may not be suitable.&lt;/p&gt;
+
+&lt;p&gt;Another way of doing object detection is by combining these two tasks into one network. Similar to region proposal network, we use different pre-defined boxes with various shape to capture objects, and predict class scores and bounding box offsets.&lt;/p&gt;
+
+&lt;h2 id=&#34;single-shot-multibox-detector-ssd&#34;&gt;Single Shot MultiBox Detector(SSD)&lt;/h2&gt;
+
+&lt;h2 id=&#34;you-only-look-once-yolo&#34;&gt;You Only Look Once(YOLO)&lt;/h2&gt;
+
+&lt;h3 id=&#34;yolov1&#34;&gt;YOLOv1&lt;/h3&gt;
+
+&lt;h3 id=&#34;yolov2&#34;&gt;YOLOv2&lt;/h3&gt;
+
+&lt;h3 id=&#34;yolov3&#34;&gt;YOLOv3&lt;/h3&gt;
+
+&lt;h1 id=&#34;other-backbone-network&#34;&gt;Other backbone network&lt;/h1&gt;
+
+&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
+
+&lt;h2 id=&#34;reference-materials&#34;&gt;Reference Materials&lt;/h2&gt;
+</description>
+    </item>
+    
+    <item>
       <title> Fine-Grained Visual Categorization on iNaturalist dataset</title>
       <link>/project/fine-grained-visual-categorization-inaturalist/</link>
       <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>

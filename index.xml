@@ -681,7 +681,7 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
     </item>
     
     <item>
-      <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, and YOLO</title>
+      <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</title>
       <link>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
       <pubDate>Mon, 01 Jan 2018 21:00:00 -0500</pubDate>
       
@@ -704,8 +704,8 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;#precision-and-recall&#34;&gt;Precision and Recall&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#average-precision--ap-&#34;&gt;Average precision (AP)&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#mean-average-precision--map-&#34;&gt;mean average precision (mAP)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#average-precision&#34;&gt;Average precision&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#mean-average-precision&#34;&gt;Mean Average Precision&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;#r-cnn-families&#34;&gt;R-CNN Families&lt;/a&gt;
 
@@ -725,19 +725,57 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 &lt;li&gt;&lt;a href=&#34;#roi-pooling&#34;&gt;ROI pooling&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;#workflow-1&#34;&gt;Workflow&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#faster-rcnn&#34;&gt;Faster-RCNN&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#mask-rcnn&#34;&gt;Mask-RCNN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#faster-rcnn&#34;&gt;Faster-RCNN&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#region-proposal-network&#34;&gt;Region Proposal Network&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#workflow-2&#34;&gt;Workflow&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#mask-rcnn&#34;&gt;Mask-RCNN&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#roi-align&#34;&gt;ROI Align&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#key-point-detection&#34;&gt;Key Point Detection&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;#single-shot-detector&#34;&gt;Single Shot Detector&lt;/a&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#single-shot-multibox-detector-ssd-&#34;&gt;Single Shot MultiBox Detector(SSD)&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#you-only-look-once-yolo-&#34;&gt;You Only Look Once(YOLO)&lt;/a&gt;
+&lt;li&gt;&lt;a href=&#34;#single-shot-multibox-detector&#34;&gt;Single Shot MultiBox Detector&lt;/a&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#yolov1&#34;&gt;YOLOv1&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#yolov2&#34;&gt;YOLOv2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#architecture&#34;&gt;Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#implementation-details&#34;&gt;Implementation Details&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#yolov1&#34;&gt;YOLOv1&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#architecture-1&#34;&gt;Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#loss-function&#34;&gt;Loss function&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#workflow-3&#34;&gt;Workflow&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#limitation&#34;&gt;Limitation&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#yolov2&#34;&gt;YOLOv2&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#improvements&#34;&gt;Improvements&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;#yolov3&#34;&gt;YOLOv3&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#feature-pyramid-network--fpn-&#34;&gt;Feature Pyramid Network (FPN)&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#architecture-2&#34;&gt;Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#feature-pyramid-networks-for-rpn&#34;&gt;Feature Pyramid Networks for RPN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#feature-pyramid-networks-for-faster-mask-r-cnn&#34;&gt;Feature Pyramid Networks for Faster/Mask R-CNN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#experimental-result&#34;&gt;Experimental Result&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#focal-loss-and-retinanet&#34;&gt;Focal Loss and RetinaNet&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#class-imbalance&#34;&gt;Class Imbalance&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#retinanet&#34;&gt;RetinaNet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#implementation-details-1&#34;&gt;Implementation Details&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#results&#34;&gt;Results&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;#summary&#34;&gt;Summary&lt;/a&gt;&lt;/li&gt;
@@ -799,7 +837,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;h3 id=&#34;deformable-parts-model&#34;&gt;Deformable Parts Model&lt;/h3&gt;
 
-&lt;p&gt;&lt;a href=&#34;http://vision.stanford.edu/teaching/cs231b_spring1213/slides/dpm-slides-ross-girshick.pdf&#34; target=&#34;_blank&#34;&gt;Deformable Parts Model (DPM)&lt;/a&gt; was invented by Pedro Felzenszwalb ands Ross Girshick, who becomes the leader of object recognition commumity with his R-CNN families.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://vision.stanford.edu/teaching/cs231b_spring1213/slides/dpm-slides-ross-girshick.pdf&#34; target=&#34;_blank&#34;&gt;Deformable Parts Model&lt;/a&gt; was invented by Pedro Felzenszwalb ands Ross Girshick, who becomes the leader of object recognition commumity with his R-CNN families.&lt;/p&gt;
 
 &lt;p&gt;The model consists of three major components:&lt;/p&gt;
 
@@ -837,7 +875,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;&lt;img src=&#34;/img/precision-recall.jpg&#34; alt=&#34;precision and recall&#34; /&gt;&lt;/p&gt;
 
-&lt;h3 id=&#34;average-precision-ap&#34;&gt;Average precision (AP)&lt;/h3&gt;
+&lt;h3 id=&#34;average-precision&#34;&gt;Average precision&lt;/h3&gt;
 
 &lt;p&gt;First of all, a prediction is consider to be correct if IoU is greater than a threshold, usually 0.5. It is hard to explain AP by words, so let&amp;rsquo;s create an example to make it clear. (&lt;a href=&#34;https://medium.com/@jonathan_hui/map-mean-average-precision-for-object-detection-45c121a31173&#34; target=&#34;_blank&#34;&gt;example source&lt;/a&gt;)&lt;/p&gt;
 
@@ -867,7 +905,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;The $AP_r$ represent the &lt;strong&gt;maximum precision&lt;/strong&gt; in certain recall level.&lt;/p&gt;
 
-&lt;h3 id=&#34;mean-average-precision-map&#34;&gt;mean average precision (mAP)&lt;/h3&gt;
+&lt;h3 id=&#34;mean-average-precision&#34;&gt;Mean Average Precision&lt;/h3&gt;
 
 &lt;p&gt;Latest research papers tend to give results for the COCO dataset only. For COCO, AP is the average over multiple IoU. &lt;strong&gt;AP@[.5:.95]&lt;/strong&gt; corresponds to the average AP for IoU from 0.5 to 0.95 with a step size of 0.05. AP (which is also called mAP in COCO) averages AP over all class categories.&lt;/p&gt;
 
@@ -986,7 +1024,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;&lt;img src=&#34;/img/faster-RCNN.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
 
-&lt;h3 id=&#34;region-proposal-network-rpn&#34;&gt;Region Proposal Network (RPN)&lt;/h3&gt;
+&lt;h3 id=&#34;region-proposal-network&#34;&gt;Region Proposal Network&lt;/h3&gt;
 
 &lt;p&gt;Region proposal network consists of three parts:&lt;/p&gt;
 
@@ -1064,9 +1102,9 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Another way of doing object detection is by combining these two tasks into one network. Similar to region proposal network, we use different pre-defined boxes with various shape to capture objects, and predict class scores and bounding box offsets.&lt;/p&gt;
 
-&lt;h2 id=&#34;single-shot-multibox-detector-ssd&#34;&gt;Single Shot MultiBox Detector(SSD)&lt;/h2&gt;
+&lt;h2 id=&#34;single-shot-multibox-detector&#34;&gt;Single Shot MultiBox Detector&lt;/h2&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://arxiv.org/abs/1512.02325&#34; target=&#34;_blank&#34;&gt;Single Shot MultiBox Detector(SSD)&lt;/a&gt; (by C. Szegedy et al.) was released at the end of 2016 and reaches the state-of-the-art performance of object recognition task in real time (58 FPS on a Nvidia Titan X).&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://arxiv.org/abs/1512.02325&#34; target=&#34;_blank&#34;&gt;Single Shot MultiBox Detector&lt;/a&gt; (by C. Szegedy et al.) was released at the end of 2016 and reaches the state-of-the-art performance of object recognition task in real time (58 FPS on a Nvidia Titan X).&lt;/p&gt;
 
 &lt;p&gt;The name of SSD describes itself very well. Single Shot mean this method only need to run CNN forward pass once; Multibox means this method uses multiple boxes (different shape, on multiple CNN feature map scales) to detect object; detector means emm&amp;hellip;. Let&amp;rsquo;s dive into the details of SSD:&lt;/p&gt;
 
@@ -1108,11 +1146,11 @@ between localization loss (e.g. Smooth L1) and confidence loss (e.g. Softmax). I
 &lt;li&gt;Data Augmentation: Sample patches with 0.1, 0.3, 0.5, 0.7, or 0.9 overlap to the ground truth; Random sample patches; 0.5 probability horizonal flip.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h2 id=&#34;you-only-look-once-yolo&#34;&gt;You Only Look Once(YOLO)&lt;/h2&gt;
+&lt;h2 id=&#34;yolov1&#34;&gt;YOLOv1&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://pjreddie.com/darknet/yolo/&#34; target=&#34;_blank&#34;&gt;You only look once (YOLO)&lt;/a&gt; is a state-of-the-art, real-time object detection system. On a Pascal Titan X it processes images at 30 FPS and has a mAP of 57.9% on COCO test-dev. More importantly, YOLO keeps evolving in recent years.&lt;/p&gt;
 
-&lt;h3 id=&#34;yolov1&#34;&gt;YOLOv1&lt;/h3&gt;
+&lt;h3 id=&#34;architecture-1&#34;&gt;Architecture&lt;/h3&gt;
 
 &lt;p&gt;YOLOv1 is a little bit less precise than R-CNN families, but it is the first work to realize real time detection with CNN. Similar to other single shot detectors, the intuition of YOLOv1 is quite straight forward.&lt;/p&gt;
 
@@ -1125,6 +1163,8 @@ B = 2. PASCAL VOC has 20 labelled classes so C = 20. Our final prediction is a 7
 
 &lt;p&gt;The figure above is the architecture of YOLOv1. Based on pretrain the convolutional layers on the ImageNet classification
 task at half the resolution (224 × 224 input image) and then double the resolution for detection.&lt;/p&gt;
+
+&lt;h3 id=&#34;loss-function&#34;&gt;Loss function&lt;/h3&gt;
 
 &lt;p&gt;Here is the multi-part loss function that we want to optimize:&lt;/p&gt;
 
@@ -1149,6 +1189,22 @@ bounding box coordinate error if that predictor is
 “responsible” for the ground truth box (i.e. has the highest
 IOU of any predictor in that grid cell). So, the first step of every training phase is &lt;strong&gt;bounding box matching&lt;/strong&gt;.&lt;/p&gt;
 
+&lt;h3 id=&#34;workflow-3&#34;&gt;Workflow&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Start from a pre-train CNN network on image classification tasks.&lt;/li&gt;
+&lt;li&gt;Split an image into S x S cells. Each cell is responsible for identifying the object (if any) with its &lt;strong&gt;center&lt;/strong&gt; located in this cell. Each cell predicts the location of B bounding boxes and a confidence score, and a probability of object class conditioned on the existence of an object in the bounding box.
+
+&lt;ul&gt;
+&lt;li&gt;A bounding box is defined by a tuple of $(C_x, C_y, C_w, C_h)$. x and y are normalized to be the offsets of a cell location; w and h are normalized by the image width and height, and thus between (0, 1].&lt;/li&gt;
+&lt;li&gt;A confidence score is: probability(containing an object) x IoU(pred, truth).&lt;/li&gt;
+&lt;li&gt;If the cell contains an object, it predicts a probability of this object belonging to one class $C_i$, i=1,2,…, K. At this stage, the model only predicts one set of class probabilities per cell, regardless of the number of boxes B.&lt;br /&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;The final layer of the pre-trained CNN is modified to output a prediction tensor of size S x S x (5B + C).&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;limitation&#34;&gt;Limitation&lt;/h3&gt;
+
 &lt;p&gt;YOLOv1 also have a lot of limitations:&lt;/p&gt;
 
 &lt;ol&gt;
@@ -1158,9 +1214,11 @@ IOU of any predictor in that grid cell). So, the first step of every training ph
 &lt;li&gt;The final FC layers are slow and kind of redundant.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h3 id=&#34;yolov2&#34;&gt;YOLOv2&lt;/h3&gt;
+&lt;h2 id=&#34;yolov2&#34;&gt;YOLOv2&lt;/h2&gt;
 
 &lt;p&gt;Inspired by faster RCNN and SSD, &lt;a href=&#34;https://arxiv.org/pdf/1612.08242.pdf&#34; target=&#34;_blank&#34;&gt;YOLOv2&lt;/a&gt; improves the accuracy significantly while making it faster.&lt;/p&gt;
+
+&lt;h3 id=&#34;improvements&#34;&gt;Improvements&lt;/h3&gt;
 
 &lt;p&gt;First, YOLOv2 is &lt;strong&gt;Better&lt;/strong&gt;:&lt;/p&gt;
 
@@ -1197,21 +1255,182 @@ custom model gets 88.0% ImageNet compared to 90.0% for
 VGG-16.&lt;/li&gt;
 &lt;li&gt;DarkNet 19: Compare to VGG 19, double the number of channels after every
 pooling step. Replace redundant FC layer with global average pooling; use 1 × 1 filters to compress the feature representation
-between 3 × 3 convolutions (bottleneck). Requires 5.58 billion operations and 91.2% top-5 accuracy on ImageNet.&lt;/li&gt;
-&lt;li&gt;&lt;/li&gt;
+between 3 × 3 convolutions (bottleneck). Requires only 5.58 billion operations and 91.2% top-5 accuracy on ImageNet.&lt;/li&gt;
+&lt;li&gt;Although SSD500 runs at 45 FPS, a lower resolution version of YOLOv2 with mAP 76.8 (the same as SSD500) runs at 67 FPS, thus showing us the high performance capabilities of YOLOv2 as a result of its design choices.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h3 id=&#34;yolov3&#34;&gt;YOLOv3&lt;/h3&gt;
+&lt;p&gt;Third, YOLOv2 is &lt;strong&gt;Stronger&lt;/strong&gt;:&lt;/p&gt;
 
-&lt;h1 id=&#34;other-backbone-network&#34;&gt;Other backbone network&lt;/h1&gt;
+&lt;p&gt;Hierarchical classification: Without going into details, YOLO combines labels in different datasets to form a tree-like structure WordTree. The children form an is a relationship with its parent like biplane is a plane. But the merged labels are now not mutually exclusive.&lt;/p&gt;
 
-&lt;h2 id=&#34;fpn&#34;&gt;FPN&lt;/h2&gt;
+&lt;p&gt;YOLO9000 extends YOLO to detect objects over 9000 classes using hierarchical classification with a 9418 node WordTree. It combines samples from COCO and the top 9000 classes from the ImageNet.  ImageNet is a much larger dataset so we balance
+the dataset by oversampling COCO so that ImageNet
+is only larger by a factor of 4:1. It learns to find objects using the detection data in COCO and to classify these objects with ImageNet samples.&lt;/p&gt;
 
-&lt;h2 id=&#34;focal-loss&#34;&gt;Focal Loss&lt;/h2&gt;
+&lt;p&gt;YOLO9000 evaluates its result from the ImageNet object detection dataset which has 200 categories. It shares about 44 categories with COCO. But for another 156 categories, YOLO is never trained how to locate them. But YOLO9000 gets 19.7 mAP overall with 16.0 mAP on those 156 categories. YOLO9000 performs well with new species of animals not found in COCO because their shapes can be generalized easily from their parent classes.&lt;/p&gt;
 
-&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
+&lt;h2 id=&#34;yolov3&#34;&gt;YOLOv3&lt;/h2&gt;
 
-&lt;h2 id=&#34;reference-materials&#34;&gt;Reference Materials&lt;/h2&gt;
+&lt;h2 id=&#34;feature-pyramid-network-fpn&#34;&gt;Feature Pyramid Network (FPN)&lt;/h2&gt;
+
+&lt;p&gt;In tradition neural network, due to pooling layer, early layers tends to have higher resolution and more spatial information; while higher layers tend to have more semantic information and low resolution. Before FPN, people often use a pyramid of images or features to utilize the advantages of different feature scales (see following figure). But this method are compute and memory intensive. And features close to input image is not so effective to detect objects.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://arxiv.org/pdf/1612.03144.pdf&#34; target=&#34;_blank&#34;&gt;Feature Pyramid Network (FPN)&lt;/a&gt; extends the idea of feature pyramid, incorprating a topdown architecture with lateral connections to different feature map scales. FPN shows significant improvement as a generic feature extractor
+in several applications.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/FPN.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;architecture-2&#34;&gt;Architecture&lt;/h3&gt;
+
+&lt;p&gt;FPN composes of a bottom-up and a top-down pathway. The bottom-up pathway is the usual convolutional network for feature extraction. Close to the end of CNN, the feature maps tend to have more semantic information but low resolution.&lt;/p&gt;
+
+&lt;p&gt;FPN also provide top-down path to preserve the semantic information from higher layer to lower, high resolution layer. In this way, we can utilize the advantages of different feature scales. As move up in CNN, the spatial dimension is reduced by &lt;sup&gt;1&lt;/sup&gt;&amp;frasl;&lt;sub&gt;2&lt;/sub&gt;, so we need to upsample it back in top-down path (using
+nearest neighbor upsampling for simplicity). And before every lateral connection, faeture maps undergo a 1×1 convolutional layer to reduce channel dimensions. The top-down path is just elementwise addition from different lateral connection.  Finally,
+a 3×3 convolution is appended on each merged map to
+generate the final feature map, which is to reduce the aliasing
+effect of upsampling. Here is an illustration of FPN:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/FPNarch.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;feature-pyramid-networks-for-rpn&#34;&gt;Feature Pyramid Networks for RPN&lt;/h3&gt;
+
+&lt;p&gt;Similar to the idea of &lt;a href=&#34;#ii&#34;&gt;SSD&lt;/a&gt;, RPN with feature pyramid network put anchor boxes in different feature map scales (15 in total). Formally, define the anchors
+to have areas of $[32^2, 64^2, 128^2, 256^2, 512^2]$ pixels
+on $[P_2, P_3, P_4, P_5, P_6]$ respectively.&lt;/p&gt;
+
+&lt;p&gt;According to the authors, the parameters of the heads are shared
+across all feature pyramid levels; they have also evaluated the
+alternative without sharing parameters and observed similar
+accuracy.&lt;/p&gt;
+
+&lt;h3 id=&#34;feature-pyramid-networks-for-faster-mask-r-cnn&#34;&gt;Feature Pyramid Networks for Faster/Mask R-CNN&lt;/h3&gt;
+
+&lt;p&gt;To use FPN in Faster/Mask R-CNN, we need
+to assign RoIs of different scales to the pyramid levels. We have to assign ROIs to a proper scale and easy to extract features. So, if ROI is bigger, it should use the feature map in higher level and vice versa. Formally, we assign an RoI of
+width w and height h (on the input image to the network) to
+the level $P_k$ of our feature pyramid by:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/FPNformula.png&#34; width=&#34;400&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;where:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$k_0 = 4$, Analogous to the ResNet-based
+Faster R-CNN system that uses C4 as the single-scale
+feature map&lt;/li&gt;
+&lt;li&gt;k indicates using $P_k$ from FPN&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;experimental-result&#34;&gt;Experimental Result&lt;/h3&gt;
+
+&lt;p&gt;FPN for region proposal network:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/FPN-RPN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;FPN for faster RCNN:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/FPN-FasterRCNN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;FPN on COCO dateset:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/FPNcoco.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;Top-down pathway plus lateral connections increases 8.0 points over the single-scale RPN
+baseline. For small objects, it improves 12.9 points. Recently, FPN has enabled new top results in all tracks
+of the COCO competition, including detection, instance
+segmentation, and keypoint estimation.&lt;/p&gt;
+
+&lt;p&gt;Currently, FPN is a standard baseline of almost every object recognition system.&lt;/p&gt;
+
+&lt;h2 id=&#34;focal-loss-and-retinanet&#34;&gt;Focal Loss and RetinaNet&lt;/h2&gt;
+
+&lt;p&gt;One stage detectors are applied over a regular, dense sampling of object locations, scales, and aspect ratios.  Recent work on one-stage detectors, like YOLO and SSD, yielding faster detectors with accuracy within 10-
+40% relative to state-of-the-art two-stage methods, like RCNN families.&lt;/p&gt;
+
+&lt;p&gt;The work &lt;a href=&#34;https://arxiv.org/pdf/1708.02002.pdf&#34; target=&#34;_blank&#34;&gt;Focal Loss for Dense Object Detection&lt;/a&gt; from facebook AI research pushs this envelop: theironestage
+object detector that, for the first time, matches the
+state-of-the-art, more complex two stage detectors.&lt;/p&gt;
+
+&lt;h3 id=&#34;class-imbalance&#34;&gt;Class Imbalance&lt;/h3&gt;
+
+&lt;p&gt;The authors identify class imbalance as the main obstacle hurting the performance of one stage detectors. Unlike two stage detectors, one stage detecors must process a much
+larger set of candidate object locations regularly sampled
+across an image(~100k), and most of them are easy samples. Detectors can easily classify them as background or object. Although their gradient is not large, their overwhelming amount may influence the performance of detectors. Hilariously, these easy samples are called &lt;strong&gt;&amp;ldquo;inliers&amp;rdquo;&lt;/strong&gt; in thie paper. In previous detectors, people use bootstrapping, hard negative mining to address this problem, which is not good enough.&lt;/p&gt;
+
+&lt;p&gt;So, here comes focal loss:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/focalloss.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;The focal loss just modify the cross entropy loss into weight cross entropy. The weight is given by the prediction confidence: $(1 − p_t)^{\gamma}$. In this way, the weight for very confident sample will decrease a lot during training, which perfectly addresses the class imbalance problem discussed above. In experiment, the recommended value of $\gamma$ is 2. Also, you can slightly improve the accuracy by using $\alpha$ balanced form ($\alpha$ is weight on rare class, $\gamma = 2$, $\alpha = -0.25$ works best):&lt;/p&gt;
+
+&lt;p&gt;$$FL(p_t) = - \alpha_t (1 - p_t)^{\gamma} log(p_t)$$&lt;/p&gt;
+
+&lt;h3 id=&#34;retinanet&#34;&gt;RetinaNet&lt;/h3&gt;
+
+&lt;p&gt;To express the effective of Focal Loss, the authors designed a simple ont stage detector, &lt;strong&gt;RetinaNet&lt;/strong&gt;, achieves a COCO test-dev AP of 39.1
+while running at 5 fps, surpassing current all single stage and two stage detectors.&lt;/p&gt;
+
+&lt;p&gt;Here is a diagram for RetinaNet architecture:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/retinanetarch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;implementation-details-1&#34;&gt;Implementation Details&lt;/h3&gt;
+
+&lt;p&gt;RetinaNet uses FPN backbone. Reason: preliminary experiments using features
+from only the final ResNet layer yielded low AP. Addition to original {1:2, 1:1, 2:1} anchor boxes, RetinaNet add anchor boxes wih size {$2^0, 2^{\frac{1}{3}}, 2^{\frac{2}{3}}$}, totally 9 anchor boxes. This brings in more computation but also high recall and accuracy. Anchor boxes with IOU &amp;gt; 0.5 is treated as positive examples, IOU &amp;lt; 0.4 are negative, 0.4 &amp;lt; IOU &amp;lt; 0.5 are ignored. Also, classification and bounding box regression subnets are sharing a common structure, use separate parameters.&lt;/p&gt;
+
+&lt;p&gt;Focal loss in RetinaNet are normalized by the number of anchors assigned to a ground-truth box, since the vast majority of anchors are easy
+negatives and receive negligible loss values under the focal loss.&lt;/p&gt;
+
+&lt;p&gt;Note that RetinaNet uses an &lt;strong&gt;initialization trick&lt;/strong&gt; to avoid overwhelming gradient from frequent class. All new conv layers except the final
+one in the RetinaNet subnets are initialized with bias b = 0
+and a Gaussian weight fill with $\sigma = 0.01$. For the final conv
+layer of the classification subnet, we set the bias initialization
+to $b = − log((1 − π)/π)$.&lt;/p&gt;
+
+&lt;p&gt;In this way, predictions of first iteration would be centered at $\pi$ (0.01 in experiment, not sensitive at all), which is a relatively small number. Since the frequent class is negative, the gradient of frequent, negative sample would be less than positive, rare samples. In this way, we can compensate the gradient advantage of frequent samples and avoid too large loss values in the first iteration of training.&lt;/p&gt;
+
+&lt;h3 id=&#34;results&#34;&gt;Results&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/retinanetresult.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+
+&lt;p&gt;According this figure, RetinaNet achieves top results,
+outperforming both one-stage and two-stage models. Plus, compared to existing
+one-stage methods, RetinaNet achieves a healthy
+5.9 point AP gap (39.1 vs. 33.2) with the closest competitor,
+DSSD.&lt;/p&gt;
+
+&lt;h1 id=&#34;summary&#34;&gt;Summary&lt;/h1&gt;
+
+&lt;p&gt;From all the discussion above, we can see the rapid progress of object recognition in recent five years. These models inspired and equipped each other to move forward.&lt;/p&gt;
+
+&lt;p&gt;Up to now, object tends to converge to a optimal solution. For example, &lt;strong&gt;anchor boxes&lt;/strong&gt; from Faster RCNN, &lt;strong&gt;Boxes in multi scale features&lt;/strong&gt; from SSD, &lt;strong&gt;image grid prediction&lt;/strong&gt; from YOLO, &lt;strong&gt;non-maximal suppression, bounding box regression&lt;/strong&gt; from RCNN, &lt;strong&gt;ROIpooling/align&lt;/strong&gt; from Fast/Mask RCNN are widely used and become an essential part of object recognition systems.&lt;/p&gt;
+
+&lt;p&gt;Also, various clever innovations really boost the performance of object recognition systems, like recent &lt;strong&gt;RetinaNet with Focal Loss&lt;/strong&gt;, &lt;strong&gt;Feature Pyramid network&lt;/strong&gt;, becomes the standard component of every state-of-the-art system.&lt;/p&gt;
+
+&lt;p&gt;One thing for sure, this optimal solution is definitely not the global optimal. Looking forward to the next stage of object recognition!&lt;/p&gt;
+
+&lt;h1 id=&#34;reference-materials&#34;&gt;Reference Materials&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks&#34; target=&#34;_blank&#34;&gt;AlexNet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1512.03385&#34; target=&#34;_blank&#34;&gt;ResNet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1409.4842.pdf&#34; target=&#34;_blank&#34;&gt;GoogLeNet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1512.00567&#34; target=&#34;_blank&#34;&gt;Inception v3 network&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1602.07261?context=cs&#34; target=&#34;_blank&#34;&gt;Inception Resnet v2 and Inception v4&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://vision.stanford.edu/teaching/cs231b_spring1213/slides/dpm-slides-ross-girshick.pdf&#34; target=&#34;_blank&#34;&gt;Deformable Part Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1312.6229&#34; target=&#34;_blank&#34;&gt;Overfeat&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1311.2524&#34; target=&#34;_blank&#34;&gt;R-CNN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1504.08083&#34; target=&#34;_blank&#34;&gt;Fast R-CNN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1506.01497&#34; target=&#34;_blank&#34;&gt;Faster R-CNN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1703.06870&#34; target=&#34;_blank&#34;&gt;Mask R-CNN&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1512.02325&#34; target=&#34;_blank&#34;&gt;Single Shot Multibox Detector(SSD)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1506.02640&#34; target=&#34;_blank&#34;&gt;YOLO&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1612.08242&#34; target=&#34;_blank&#34;&gt;YOLO9000: Better, Faster, Stronger&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://pjreddie.com/media/files/papers/YOLOv3.pdf&#34; target=&#34;_blank&#34;&gt;YOLOv3&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1612.03144&#34; target=&#34;_blank&#34;&gt;Feature Pyramid Network&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1708.02002&#34; target=&#34;_blank&#34;&gt;Focal Loss and RetinaNet&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
 </description>
     </item>
     

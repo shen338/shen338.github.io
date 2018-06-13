@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
-    <lastBuildDate>Thu, 17 May 2018 21:00:00 -0400</lastBuildDate>
+    <lastBuildDate>Fri, 01 Jun 2018 21:00:00 -0400</lastBuildDate>
     
 	<atom:link href="/tags/tensorflow/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>NLP basics - Word2vec: Skip-gram, CBOW, GloVe</title>
+      <link>/post/nlp-basics---word2vec/</link>
+      <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
+      
+      <guid>/post/nlp-basics---word2vec/</guid>
+      <description>Table of Content  Overview Basic Algorithm  Skip-Gram  Intuition Implementation details  CBOW Co-occurrence Models GloVe Evaluation Metrics  Limitation Reference Materials  Overview First of all, we need to figure out how do we represent the meaning of a word. A common solution is using WordNet: a resource containing lists of synonym sets and hypernyms (&amp;ldquo;is a&amp;rdquo; relationships).
+But this method is not so good. It is great as a resource but missing nuance.</description>
+    </item>
     
     <item>
       <title>Going Deeper in Batch Normalization</title>

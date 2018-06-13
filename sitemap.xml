@@ -5,6 +5,15 @@
     
     <url>
     
+      <loc>/post/nlp-basics---word2vec/</loc>
+      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
       <loc>/post/going-deeper-into-batch-normalization/</loc>
       <lastmod>2018-05-17T21:00:00-04:00</lastmod>
     </url>
@@ -143,7 +152,7 @@
     <url>
     
       <loc>/tags/deep-learning/</loc>
-      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
+      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -153,7 +162,7 @@
     <url>
     
       <loc>/tags/deep-learning/</loc>
-      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
+      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -174,6 +183,16 @@
     
       <loc>/tags/image-classification/</loc>
       <lastmod>2017-11-27T00:00:00-05:00</lastmod>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/tags/nlp/</loc>
+      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -243,7 +262,7 @@
     <url>
     
       <loc>/tags/tensorflow/</loc>
-      <lastmod>2018-05-17T21:00:00-04:00</lastmod>
+      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -264,6 +283,16 @@
     
       <loc>/tags/wasserstein-gan/</loc>
       <lastmod>2018-02-17T21:00:00-05:00</lastmod>
+      <priority>0</priority>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>/tags/word2vec/</loc>
+      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     

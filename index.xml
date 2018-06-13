@@ -11,6 +11,217 @@
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>NLP basics - Word2vec: Skip-gram, CBOW, GloVe</title>
+      <link>/post/nlp-basics---word2vec/</link>
+      <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
+      
+      <guid>/post/nlp-basics---word2vec/</guid>
+      <description>
+
+&lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#overview&#34;&gt;Overview&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#basic-algorithm&#34;&gt;Basic Algorithm&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#skip-gram&#34;&gt;Skip-Gram&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#intuition&#34;&gt;Intuition&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#implementation-details&#34;&gt;Implementation details&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#cbow&#34;&gt;CBOW&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#co-occurrence-models&#34;&gt;Co-occurrence Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#glove&#34;&gt;GloVe&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#evaluation-metrics&#34;&gt;Evaluation Metrics&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#limitation&#34;&gt;Limitation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#reference-materials&#34;&gt;Reference Materials&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+
+&lt;p&gt;First of all, we need to figure out how do we represent the meaning of a word. A common solution is using WordNet: a    resource containing lists   of synonym  sets and hypernyms (&amp;ldquo;is a&amp;rdquo; relationships).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/WordNet.png&#34; width=700&gt;&lt;/p&gt;
+
+&lt;p&gt;But this method is not so good. It is great as a resource but   missing nuance. Also it misses the new meaning of a word.&lt;/p&gt;
+
+&lt;p&gt;Another way is representing words   as discrete symbols. For example, like &amp;ldquo;hotel&amp;rdquo; and &amp;ldquo;motel&amp;rdquo;. We can represent them as $hotel = [0, 0, 0, 1]$ while $motel = [0, 0, 1, 0]$. In this way, word vector dimension is equal to the number of words in vocabulary. But apparently, this method is not perfect. The word &amp;ldquo;hotel&amp;rdquo; and &amp;ldquo;motel&amp;rdquo; is quite similar in meaning, but the word vectors of them are orthogonal, which is hard to quantify their similarity.&lt;/p&gt;
+
+&lt;p&gt;So, here comes the word2vec models. The core idea is: A word’s meaning is   given   by the words that frequently appear close-by. This is one of the most successful ideas in modern NLP. We will build a dense word vector for each word (dimension far less than the number of words in vocabulary)   so  that    the words   that    appear  in  similar contexts have similar word vectors.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://arxiv.org/pdf/1310.4546.pdf&#34; target=&#34;_blank&#34;&gt;Word2vec (Mikolov et   al. 2013)&lt;/a&gt; is  a   framework   for learning
+word vectors. The idea is as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;We   have    a   large   corpus  of  text&lt;/li&gt;
+&lt;li&gt;Every    word    in  a   fixed   vocabulary  is  represented by  a   vector&lt;/li&gt;
+&lt;li&gt;Go   through each    position    t in    the text,   which   has a   center  word c and  context (“outside”) words   o&lt;/li&gt;
+&lt;li&gt;Use  the similarity  of  the word    vectors for c   and o to    calculate   the probability of  o given c   (or vice    versa)&lt;/li&gt;
+&lt;li&gt;Keep adjusting   the word    vectors to  maximize    this    probability&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Here is an example of calculating the   probability of c given o:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/wordwindow.png&#34; width=800&gt;&lt;/p&gt;
+
+&lt;p&gt;So the total objective function is:&lt;/p&gt;
+
+&lt;p&gt;$$L(\theta) = \prod_{t=1}^{T} \prod_{j  \in [-m, 0) \bigcup (0, m]} P(w_{t+j}|w_t;\theta)  $$&lt;/p&gt;
+
+&lt;p&gt;Where the $T$ is corpus size, and m is the half window size. Our goal would be minimizing the negative log-likelihood:&lt;/p&gt;
+
+&lt;p&gt;$$J(\theta) = -\frac{1}{T} \sum_{t=1}^{T} \sum_{j  \in [-m, 0) \bigcup (0, m] }  P(w_{t+j}|w_t;\theta)  $$&lt;/p&gt;
+
+&lt;p&gt;So, the question is: how to calculate $P(w_{t+j}|w_t;\theta)$, the probability of  o given c. Here we will use the most simple one: vector inner product and softmax function to present the probability:&lt;/p&gt;
+
+&lt;p&gt;$$P(o|c) = \frac{exp(u_o^Tv_c)}{\sum_{w \in V} exp(u_w^Tv_c)}$$&lt;/p&gt;
+
+&lt;p&gt;Hmm&amp;hellip;Softmax again. Neural network then comes to play.&lt;/p&gt;
+
+&lt;h1 id=&#34;basic-algorithm&#34;&gt;Basic Algorithm&lt;/h1&gt;
+
+&lt;h2 id=&#34;skip-gram&#34;&gt;Skip-Gram&lt;/h2&gt;
+
+&lt;h3 id=&#34;intuition&#34;&gt;Intuition&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf&#34; target=&#34;_blank&#34;&gt;skip-gram algorithm&lt;/a&gt; is surprisingly simple and elegant. We’re going to train a simple neural network with a single hidden layer to minimizing the negative log-likelihood listed above. The input word is the &lt;strong&gt;center word&lt;/strong&gt; of windows on the text corpus, while the output word is the &lt;strong&gt;surrounding words&lt;/strong&gt;. And every word have two word vectors, $v$ for center and $u$ for context. But we are not actually using the neural work afterwards, instead just using the weight we trained in the  hidden layer. This weight matrix is actually the word vectors we want.&lt;/p&gt;
+
+&lt;p&gt;First, say we have a vacabulary of 10,000 words. We’re going to represent an input word like &amp;ldquo;hotel&amp;rdquo; as a one-hot vector. So the one hot vector will be 10000 dimensional. The output of the network is a single vector (also 10,000 dimensional), predicting the probability that certain word is appearing nearby the input word.&lt;/p&gt;
+
+&lt;p&gt;The architecture of skip-gram network is simple:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/skip-gram.png&#34; width=800&gt;&lt;/p&gt;
+
+&lt;p&gt;There is no activation function on the hidden layer neurons, but the output neurons use softmax to predict the probability of each word&amp;rsquo;s appearance in each nearby location.&lt;/p&gt;
+
+&lt;p&gt;Since the input is a one-hot vector, it just select the matrix row corresponding to the &amp;ldquo;1&amp;rdquo;. So, this is just a simple lookup table on the weight $W$ in the above figure. &lt;strong&gt;The corresponding row in weight W is the word vector of input word&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;The word vector will be sent into the output layer to produce the probability of each word&amp;rsquo;s appearance in each location. And number of prediction head is equal to the window size - 1.&lt;/p&gt;
+
+&lt;p&gt;The brilliance of skip-gram is that it makes sure the words frequently appearing in similar context would have similar word vectors, because the network only uses context words as ground truth. So, similar context words will certainly produce similar results.&lt;/p&gt;
+
+&lt;h3 id=&#34;implementation-details&#34;&gt;Implementation details&lt;/h3&gt;
+
+&lt;p&gt;The authors proposed some &lt;a href=&#34;https://arxiv.org/pdf/1310.4546.pdf&#34; target=&#34;_blank&#34;&gt;improvements&lt;/a&gt; to the original skip-gram model. There are three main modifications:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Use Word Pairs and &amp;ldquo;phrases&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;Subsample frequent words&lt;/li&gt;
+&lt;li&gt;Negative sampling&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;Use Word Pairs and “phrases”&lt;/strong&gt;: The author pointed out that some common word phrases, like &amp;ldquo;New York City&amp;rdquo;, should be represented as a single word with its own word vector. This is quite natural to understand. We often use word phrase as a word and their meanings are different when splitting them apart.&lt;/p&gt;
+
+&lt;p&gt;The phrase detection mechanism is quite simple, too. We just need to count the number of times each combination of two words appears in the training text, and then these counts are used in an equation to determine which word combinations to turn into phrases. This equation should be related to words co-occurence and individual occurence.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Subsample frequent words&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;There are two “problems” with common words like “the”:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;When looking at word pairs, (&amp;ldquo;fox&amp;rdquo;&amp;ldquo;, &amp;ldquo;the&amp;rdquo;) doesn’t tell us much about the meaning of &amp;ldquo;fox&amp;rdquo;. &amp;ldquo;the&amp;rdquo; appears in the context of pretty much every word.&lt;/li&gt;
+&lt;li&gt;We will have many more samples of (&amp;ldquo;the&amp;rdquo;, …) than we need to learn a good vector for “the”.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;So, we can subsample frequent words using the follow equation:&lt;/p&gt;
+
+&lt;p&gt;$$P(w_i) = (\sqrt{\frac{z(w_i)}{0.001}} + 1) \times \frac{0.001}{z(w_i)}$$&lt;/p&gt;
+
+&lt;p&gt;Where $P(w_i)$ is probability of keeping the word and $z(w_i)$ is the frequency of the word. For example, if &amp;ldquo;we&amp;rdquo; appears 100 time in a corpus of 10000 words, $z(&amp;ldquo;we&amp;rdquo;)$ should be 0.01.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Negative sampling&lt;/strong&gt;: Although the network only has three layers, but the weight size is huge because of a large vacabulary. And the nature of softmax (gradient on all input) function will result in huge amount of computation in single training step.&lt;/p&gt;
+
+&lt;p&gt;Negative sampling addresses this by having each training sample only modify a small percentage of the weights, rather than all of them. We are instead going to randomly select just a small number of “not ground truth” words (let’s say 5) to update their weights. In the paper, the authors suggested 5-20 words for smaller datasets, and you can get away with only 2-5 words for large datasets.&lt;/p&gt;
+
+&lt;p&gt;Here a totally random selection is not good. some rare words may have little probability to be selected. So, the sampling prob comes from an equation:&lt;/p&gt;
+
+&lt;p&gt;$$P(w_i) = \frac{f(w_i)^{\frac{3}{4}}}{\sum_{j=0}^{n} {f(w_i)^{\frac{3}{4}}}}$$&lt;/p&gt;
+
+&lt;p&gt;where $f(w_i)$ is the word appearance count. And the power $\frac{3}{4}$ is an empirical value, which works very well. Recent research result also proved the effectiveness of this value.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://www.tensorflow.org/tutorials/word2vec&#34; target=&#34;_blank&#34;&gt;Here&lt;/a&gt; is an official tutorial of word2vec on TensorFlow.&lt;/p&gt;
+
+&lt;h2 id=&#34;cbow&#34;&gt;CBOW&lt;/h2&gt;
+
+&lt;p&gt;In the other hand, Continuous   Bag of  Words   (CBOW) does the opposite thing compared to skip-gram. It uses the context words to predict the center word. (image &lt;a href=&#34;https://zhuanlan.zhihu.com/p/35074402&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/CBOW.jpg&#34; width=800&gt;&lt;/p&gt;
+
+&lt;p&gt;Note the weight matrix for every input is &lt;strong&gt;shared&lt;/strong&gt;. All hidden layer weights are &lt;strong&gt;added&lt;/strong&gt; and send into next layer.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Skip-Gram and CBOW difference&lt;/strong&gt;: CBOW smoothes over a lot of the distributional information (by treating an entire context as one observation). For the most part, this turns out to be a useful thing for smaller datasets. However, skip-gram treats each context-target pair as a new observation, and this tends to do better when we have larger datasets. Also, this makes the skip-gram model performs better on infrequent words.&lt;/p&gt;
+
+&lt;h2 id=&#34;co-occurrence-models&#34;&gt;Co-occurrence Models&lt;/h2&gt;
+
+&lt;p&gt;There are two kinds of co-occurrence models, window based and full document based models. Herem we only talk about window based models: Similar to  word2vec,   use window  around each word, and count the co-occurrence situations.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s use the example from &lt;a href=&#34;http://web.stanford.edu/class/cs224n/lectures/lecture3.pdf&#34; target=&#34;_blank&#34;&gt;cs224 lecture&lt;/a&gt; to illustrate:&lt;/p&gt;
+
+&lt;p&gt;The example corpus contains three sentences: &amp;ldquo;I like    deep    learning.&amp;rdquo;, &amp;ldquo;I like NLP.&amp;rdquo;, &amp;ldquo;I enjoy flying.&amp;rdquo;. The co-occurrence matrix would be:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/cooccurrence.png&#34; width=800&gt;&lt;/p&gt;
+
+&lt;p&gt;Problems of the model is obvious. It&amp;rsquo;s bery high dimensional and may need future process. And the matrix is quite sparse, which makes the model less robust. So, further we can use some dimensionality reduction technique to reduce the dimension of our word vectors, like singular  value   decomposition. However, the computational cost of SVD is quite high($O(mn^2)$), which is not suitable for large vacabulary. The &lt;a href=&#34;http://web.stanford.edu/class/cs224n/lectures/lecture3.pdf&#34; target=&#34;_blank&#34;&gt;cs224 lecture&lt;/a&gt; lecture summarized the pros and cons of Count   based model vs direct   prediction model:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/compare.png&#34; width=800&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;glove&#34;&gt;GloVe&lt;/h2&gt;
+
+&lt;p&gt;Since count based method and direct prediction method both have pros and cons, how about combine them together to make it stronger? &lt;a href=&#34;https://nlp.stanford.edu/projects/glove/&#34; target=&#34;_blank&#34;&gt;GloVe&lt;/a&gt; is a good attempt. The loss function of GloVe model is:&lt;/p&gt;
+
+&lt;p&gt;$$J(\theta) = \frac{1}{2} \sum_{i,j=1}^{W} f(P_{ij})(u_i^Tv_j - logP_{ij})^2$$&lt;/p&gt;
+
+&lt;p&gt;Where the $u_i$ $v_j$ is the same to skip-gram model, and $P_{ij}$ is the co-occurrent matrix. $F(x)$ is a step-like function:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/glove-fig-1.png&#34; width=400&gt;&lt;/p&gt;
+
+&lt;p&gt;The cut-off value $x_{max}$ is not sensitive. In experiment choose $x_{max} = 100$. Instead of direct predict center or context words, the GloVe model trains word vectors to fit the log probability of the co-occurrence matrix. The GloVe model utilizes the overall statistical information, and is also scalable for huge corpus. It can achieve good performance with small corpus. But it need to store the co-occurrence matrix, which requires a large storage space. But it is faster than skip-gram with negative sampling. So, the choice of GloVe or prediction model has a trade-off of speed and storage.&lt;/p&gt;
+
+&lt;h2 id=&#34;evaluation-metrics&#34;&gt;Evaluation Metrics&lt;/h2&gt;
+
+&lt;p&gt;For every machine learning model, we need a metrics to evaluate its performance. Word vectors encode the similarity of words, but how to exam their effectiveness on the encoding? Of course we can use real world tasks to do extrinsic evaluation, but it takes a long cycle to update the word vector model.&lt;/p&gt;
+
+&lt;p&gt;One popular method utilize syntactic    analogy to evaluate word vectors. We will evaluate  word    vectors by  how well    their   cosine  distance    after   addition    captures    intuitive   semantic    and
+syntactic   analogy questions. For example, given man over woman, we want the use the mapping to map king to queen. This mapping accuracy (cosine distance) is the key for evaluation. Here is an illustration:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/evaluation.png&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;Our model should uses the differential vector of &amp;ldquo;nephew&amp;rdquo; and &amp;ldquo;niece&amp;rdquo; to find &amp;ldquo;aunt&amp;rdquo; from &amp;ldquo;uncle&amp;rdquo;. A&lt;/p&gt;
+
+&lt;p&gt;Another way is just evaluate the word vector similarity (usually inner produce) of synonyms. Dataset like wordsim353, simlex999 should be helpful.&lt;/p&gt;
+
+&lt;p&gt;Also, people developed normal document classification tasks to reversely reflect the quality of word vectors.&lt;/p&gt;
+
+&lt;p&gt;But these similarity-based evaluation method is very sensitive to the choice of training data size, domain, source, and vocabulary. And the data set is too small and often does not adequately determine the quality of word vectors. Recently, people tend to learning task-specific word vectors, because it is hard to evaluate word embeddings using the same standard. In my mind, word vectors can be treated as a tool of further NLP process and it&amp;rsquo;s quality can not be evaluated directly.&lt;/p&gt;
+
+&lt;p&gt;Here is a great paper on this problem: &lt;a href=&#34;http://www.aclweb.org/anthology/D15-1036&#34; target=&#34;_blank&#34;&gt;Evaluation methods for unsupervised word embeddings&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;limitation&#34;&gt;Limitation&lt;/h1&gt;
+
+&lt;p&gt;The limitation of word embedding model has three folds:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;For each word, we only have one word vector&lt;/strong&gt;. When certain word is a polysemy, like &amp;ldquo;book&amp;rdquo;, this model obviously fails.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cannnot leverage the benefits of pre-trained models&lt;/strong&gt;. This means you probably need to train word vector models for your own dataset rather than using pretrained models like image classification tasks. The pretrained word vectors is a result representing the similarity of words in specific dataset rather than a feature extrator.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;No shared representations at sub-word levels&lt;/strong&gt;. For example, words like &amp;ldquo;newspaper&amp;rdquo; is assembled by two word, and their meaning is a combination of these two words. Like &amp;ldquo;unhappy&amp;rdquo;, the meaning is determine by &amp;ldquo;happy&amp;rdquo; and its prefix. But word vector model does not take this into account. I believe the word embedding model should be better with shared representation for sub-word.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&#34;reference-materials&#34;&gt;Reference Materials&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;http://web.stanford.edu/class/cs224n/syllabus.html&#34; target=&#34;_blank&#34;&gt;Stanford cs224n lectures&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/&#34; target=&#34;_blank&#34;&gt;Word2Vec Tutorial - The Skip-Gram Model&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1310.4546.pdf&#34; target=&#34;_blank&#34;&gt;Distributed Representations of Words and Phrases and their Compositionality&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1301.3781.pdf&#34; target=&#34;_blank&#34;&gt;Efficient Estimation of Word Representations in Vector Space&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://nlp.stanford.edu/projects/glove/&#34; target=&#34;_blank&#34;&gt;GloVe Model&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Going Deeper in Batch Normalization</title>
       <link>/post/going-deeper-into-batch-normalization/</link>
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>

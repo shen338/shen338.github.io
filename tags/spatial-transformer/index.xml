@@ -2,24 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Spatial transformer on Tong Shen</title>
-    <link>/tags/spatial-transformer/</link>
+    <link>https://shen338.github.io/tags/spatial-transformer/</link>
     <description>Recent content in Spatial transformer on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
-    <lastBuildDate>Sun, 19 Nov 2017 21:00:00 -0500</lastBuildDate>
+    <lastBuildDate>Thu, 19 Jul 2018 21:00:00 -0400</lastBuildDate>
     
-	<atom:link href="/tags/spatial-transformer/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://shen338.github.io/tags/spatial-transformer/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Spatial Transform Network (STN)</title>
-      <link>/post/spatial-transform-network/</link>
-      <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
+      <title>CapsNet and dynamic routing</title>
+      <link>https://shen338.github.io/post/capsnet-and-dynamic-routing/</link>
+      <pubDate>Thu, 19 Jul 2018 21:00:00 -0400</pubDate>
       
-      <guid>/post/spatial-transform-network/</guid>
-      <description> Spatial Transformer Before diving into STNs, we need to concrete our knowledge about image transformer.
-Image Transformation Bilinear Interpolation Tensorflow Implement Result Spatial Transform Network Motivation Fun work with STNs </description>
+      <guid>https://shen338.github.io/post/capsnet-and-dynamic-routing/</guid>
+      <description>Introduction In late 2017, Geoffrey Hinton, one of the biggest names in deep learning community, finally published his work about capsule theory. Hintion has worked on this for years, like Transforming Auto-Encoders. This should be a big step for us to understand human brain.
+CapsNet consists of many capsules. Rather than output a scalar, capsules output a vector. The length of the vector will represent the probability of certain entity and the vector itself will represent the property of this entity.</description>
     </item>
     
   </channel>

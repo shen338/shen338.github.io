@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Word2vec on Tong Shen</title>
-    <link>/tags/word2vec/</link>
+    <link>https://shen338.github.io/tags/word2vec/</link>
     <description>Recent content in Word2vec on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
     <lastBuildDate>Fri, 01 Jun 2018 21:00:00 -0400</lastBuildDate>
     
-	<atom:link href="/tags/word2vec/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://shen338.github.io/tags/word2vec/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>NLP basics - Word2vec: Skip-gram, CBOW, GloVe</title>
-      <link>/post/nlp-basics---word2vec/</link>
+      <link>https://shen338.github.io/post/nlp-basics---word2vec/</link>
       <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
       
-      <guid>/post/nlp-basics---word2vec/</guid>
+      <guid>https://shen338.github.io/post/nlp-basics---word2vec/</guid>
       <description>Table of Content  Overview Basic Algorithm  Skip-Gram  Intuition Implementation details  CBOW Co-occurrence Models GloVe Evaluation Metrics  Limitation Reference Materials  Overview First of all, we need to figure out how do we represent the meaning of a word. A common solution is using WordNet: a resource containing lists of synonym sets and hypernyms (&amp;ldquo;is a&amp;rdquo; relationships).
 But this method is not so good. It is great as a resource but missing nuance.</description>
     </item>

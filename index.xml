@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tong Shen on Tong Shen</title>
-    <link>/</link>
+    <link>https://shen338.github.io/</link>
     <description>Recent content in Tong Shen on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -11,11 +11,200 @@
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>CapsNet and dynamic routing</title>
+      <link>https://shen338.github.io/post/capsnet-and-dynamic-routing/</link>
+      <pubDate>Thu, 19 Jul 2018 21:00:00 -0400</pubDate>
+      
+      <guid>https://shen338.github.io/post/capsnet-and-dynamic-routing/</guid>
+      <description>
+
+&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;In late 2017, Geoffrey Hinton, one of the biggest names in deep learning community, finally published his work about capsule theory. Hintion has worked on this for years, like &lt;a href=&#34;http://www.cs.toronto.edu/~fritz/absps/transauto6.pdf&#34; target=&#34;_blank&#34;&gt;Transforming Auto-Encoders&lt;/a&gt;. This should be a big step for us to understand human brain.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://arxiv.org/pdf/1710.09829.pdf&#34; target=&#34;_blank&#34;&gt;CapsNet&lt;/a&gt; consists of many capsules. Rather than output a scalar, capsules output a vector. The length of the vector will represent the probability of certain entity and the vector itself will represent the property of this entity. These properties can include many different types of instantiation parameter such as pose (position, size, orientation), deformation, velocity, albedo, hue, texture, etc. Also, high level can only be activated when two or more lower level capsules predictions agree with each other, while CNN high layer only preserve big activations from lower layer.&lt;/p&gt;
+
+&lt;p&gt;This vector agreement immediately remind me of the attention mechanism I previously used in seq2seq models and object localization models. Attention mechanism also use vector agreement, like dot product, to measure the weight of previous output(seq2seq)/different part of image(object localization), and use the weighted version as input for the next step. And this perspective is also mentioned in the paper:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Dynamic routing can be viewed as a parallel attention mechanism that allows each capsule at one
+level to attend to some active capsules at the level below and to ignore others.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;But why CapsNet works? We need to start from the drawback of CNN.&lt;/p&gt;
+
+&lt;h2 id=&#34;problems-with-cnn&#34;&gt;Problems with CNN&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;“The pooling operation used in convolutional neural networks is a big mistake and the fact that it works so well is a disaster.” &amp;ndash; Hinton&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Based on the argument of Hinton, the main problem of convolutional neural network lies in max pooling layer. Maxpooling layers in CNN are used to squeeze the size of feature map, reduce its dimensionality and push the CNN to represent original image into another persperctive. Also, it can make the higher level neurons have larger receptive field to mkae semantic prediction. However it will lose a lot of valuable information, like the &lt;strong&gt;exact location information&lt;/strong&gt; of object in the image.&lt;/p&gt;
+
+&lt;p&gt;For example, assume we have 5 maxpooling layer in a network, and an object in a 32x32 block of input image. In this way, no matter how we move the object in the image, there will be no change in the final feature map. This will cause problems. The network not cares about what the object is, rather than where the object lies. So, if different parts of an object move a little bit, CNN will stay the same. Here is a famous picture illustrating this point:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet_face.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Every part of human face is tweaked, but CNN still recognizes it as human face. Real world situation is not so extreme, but this example can give us an intuition of this.&lt;/p&gt;
+
+&lt;p&gt;Additionally, CNNs cannot handle &lt;strong&gt;rotation&lt;/strong&gt; at all - if they are trained on objects in one orientation, they will have trouble when the orientation is changed. According to Hinton, CNNs cannot do ‘handedness’ detection at all, even in principle. In other words, CNNs could never tell a left shoe from a right shoe, even if they were trained on both. Also, human visual system also has this drawback. Human vision system appears to impose a rectangular coordinate frames on objects. If an object is not placed along to the coordinate, people have to mentally rotate it.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;But Capsnet has good ablity on rotations&lt;/strong&gt;. Unlike neurons in the output layer of a CNN, a capsule outputs a probability of whether an entity is present, but additionally has pose information on it. And when calculating agreement, we only care about the relative agreement over different part. So the pose of object will also incorporate the pose information. This can also transform part pose to object pose. So, when using CapsNet, we may not need to rotate the image, the capsule output already take care of it.&lt;/p&gt;
+
+&lt;p&gt;According to Hinton, CNN is a very inefficient way of learning, in that it requires a lot of data. While CapsNet utilizes data in a more efficient way. When taking entity properties into account, it&amp;rsquo;s like automatic data augmentation (My personal understanding).&lt;/p&gt;
+
+&lt;p&gt;To sum up, CNN&amp;rsquo;s problems lies in two part:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Lose concise location information to object parts and hierarchical pose relationships between object parts. Predict based on feature (activation) counting.&lt;/li&gt;
+&lt;li&gt;Impose a rectangular coordinate frames on objects. Make it hard to recognize affine transformed objects.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;inverse-graphics&#34;&gt;Inverse Graphics&lt;/h2&gt;
+
+&lt;p&gt;According to Hinton, the concept of CapsNet comes from the idea of inverse graphics. In computer graphics, if people want to render something, they will first render different parts, and use some vectors to put them in a proper &lt;strong&gt;relative location&lt;/strong&gt;. This process is illustrated in the following figure (image &lt;a href=&#34;https://jhui.github.io/2017/11/03/Dynamic-Routing-Between-Capsules/&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/inverse_graphics.jpg&#34; alt=&#34;inverse_graphics&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In computer graphics, people do it in the top-down way. For inverse graphics, we need to do it in a bottom-up fashion. First, we detect different small parts and their propertis, represented in the capsule output. And then, if the output &amp;ldquo;agrees&amp;rdquo;, it is reversely equivalent to the process in graphics that assembling different part into a bigger object. So, lower level capsules are more concise for entity location and high-level capsules are more about sementic information, which is the same to CNNs. In the paper, Hinton called the lower level capsule &amp;ldquo;place-encoded&amp;rdquo; and the higher-level capsules &amp;ldquo;rate-encoded&amp;rdquo;.&lt;/p&gt;
+
+&lt;p&gt;The most important part of CapsNet is routed by &amp;ldquo;agreement&amp;rdquo; between capsules. We only care about the &lt;strong&gt;relative&lt;/strong&gt; relationship between capsules. So, the higher level capsules only cares about whether lower level capsules agree or not, rather than what exact consists in the capsule. This is kind of like graphics, rended object is not related to view angle. This can address CNN&amp;rsquo;s weakness in affine transforms like rotation. Capsule will treat the liberty statue in different pictures equally.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/statue.jpg&#34; alt=&#34;statue&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Also, for occluded object, CapsNet only need the agreement of some parts of an object to predict the object, rather than counting feature appearance to predict the object in CNN. Also, if two objects are overlapped, their feature map in CNN may inference each other, and make prediction inaccurate, while CapsNet can avoid this with &amp;ldquo;agreement routing&amp;rdquo;. So CapsNet has advantage on recognize partly showed object in images, like the occluded faces in the following image (&lt;a href=&#34;http://www.lce.hut.fi/research/eas/object/&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/occluded_face.png&#34; alt=&#34;occluded_face&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Based on my understanding, the inverse graphics idea is quite interesting and mind blowing.&lt;/p&gt;
+
+&lt;p&gt;But I want to say, CNN also cannot analyze the image in 3D space that objects actually lies in. In computer graphics, people always construct object in a 3D sapce and project it on screen as images. Why not push inverse graphics to the limit, make it exactly the inverse of graphics? I believe the next generation of CNNs would be the breakthrough of 3D reconstruction.&lt;/p&gt;
+
+&lt;h2 id=&#34;capsnet-architecture&#34;&gt;CapsNet architecture&lt;/h2&gt;
+
+&lt;h3 id=&#34;iterative-dynamic-routing&#34;&gt;Iterative Dynamic Routing&lt;/h3&gt;
+
+&lt;p&gt;At first, we don&amp;rsquo;t know the weight of each capsule to calculate next layer of capsules. So, the initial value of the weight is all zero.&lt;/p&gt;
+
+&lt;p&gt;$$b_{ij} \leftarrow 0$$&lt;/p&gt;
+
+&lt;p&gt;In this article, all the lower right corner indexes, like $b_{ij}$, means the parameter to calculate higher level capsules $j$ with lower level capsule $i$&amp;rsquo;s output.&lt;/p&gt;
+
+&lt;p&gt;So, with the weight of all lower capsules, we need a softmax to normalize it, just like what we do in CNNs. When calculating $j-th$ capsule in higher layer, we get:&lt;/p&gt;
+
+&lt;p&gt;$$c_i = softmax(b_i)$$&lt;/p&gt;
+
+&lt;p&gt;And the output of every capsule, $u_i$, need to go through a transformation:&lt;/p&gt;
+
+&lt;p&gt;$$\hat{u}_{j|i} = W_{ij} * u_i$$&lt;/p&gt;
+
+&lt;p&gt;We need to apply the softmax weight on the capsule output, which will be the input of next layer:&lt;/p&gt;
+
+&lt;p&gt;$$s_j \leftarrow \sum_i c_{ij} \hat{u}_{j|i} $$&lt;/p&gt;
+
+&lt;p&gt;The nonlinearity of CapsNet comes from the squash operation. Each capsule will simply squash long capsule input to 1 length, and squash short capsule input to 0, following this formula:&lt;/p&gt;
+
+&lt;p&gt;$$v_j = \frac{||s_j||^2}{1+||s_j||^2} \frac{s_j}{||s_j||}$$&lt;/p&gt;
+
+&lt;p&gt;And after each iteration, we accumulatively add $a_{ij}$ to $b_{ij}$:&lt;/p&gt;
+
+&lt;p&gt;$$b_{ij} \leftarrow b_{ij} + a_{ij}$$&lt;/p&gt;
+
+&lt;p&gt;where $a_{ij}$ is equal to  $\hat{u}_{j|i} * v_j$, simple dot product of last layers capsule output and current layers output.&lt;/p&gt;
+
+&lt;p&gt;$$b_{ij} \leftarrow b_{ij} + \hat{u}_{j|i} v_j$$&lt;/p&gt;
+
+&lt;p&gt;So, every higher layer capsule is trying to select certain lower layer capsules, whose output vector has a bigger dot product (agreement measure) with higher capsule&amp;rsquo;s own output. Note there would be a lot of other ways to do this routing by agreement thing as well.&lt;/p&gt;
+
+&lt;p&gt;The overall algorithm goes like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/dynamic_routing.png&#34; alt=&#34;dynamic routing&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;loss-function&#34;&gt;Loss function&lt;/h3&gt;
+
+&lt;p&gt;CapsNet uses margin loss for digit existence. The top-level capsules are responsible to present the existence of digits. And also, the loss function should talk care multi-digit cases. The loss function goes like:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/lossfunction.png&#34; alt=&#34;marginloss&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;where $T_k = 1$ iff a digit of class k is present
+and $m^+$ = 0.9 and $m^-$ = 0.1. The λ down weighting
+of the loss for absent digit classes stops the initial learning from shrinking the lengths of the activity
+vectors of all the digit capsules. We use λ = 0.5. The total loss is simply the sum of the losses of all
+digit capsules.&lt;/p&gt;
+
+&lt;p&gt;And also, they use an additional reconstruction loss to encourage the digit capsules to encode the instantiation
+parameters of the input digit. The reconstruction is quite simple:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet_reconstruction.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;architecture&#34;&gt;Architecture&lt;/h3&gt;
+
+&lt;p&gt;The overall architecture of CapsNet is quite straightforward. Just copy from the paper:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;First layer is just like CNNs&lt;/strong&gt;: Conv1 has 256, 9 × 9 convolution kernels with a
+stride of 1 and ReLU activation. This layer converts pixel intensities to the activities of local feature
+detectors that are then used as inputs to the primary capsules.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Second layer is a preparation of Routing (output vectors):&lt;/strong&gt; The second layer (PrimaryCapsules) is a convolutional capsule layer with 32 channels of convolutional 8D capsules (i.e. each primary capsule contains 8 convolutional units with a 9 × 9 kernel and a stride
+of 2)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Third layer is DigitCaps layer:&lt;/strong&gt; It has one 16D capsule per digit class and each of these
+capsules receives input from all the capsules in the layer below. Dynamic routing is implemented between PrimaryCapsules layer and DigitCaps layer.&lt;/p&gt;
+
+&lt;p&gt;Overall diagram is as follows:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet.png&#34; alt=&#34;capsNet&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;result-comparasion&#34;&gt;Result comparasion&lt;/h2&gt;
+
+&lt;p&gt;I just want to analyze this figure:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet_result.png&#34; alt=&#34;capsNet&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We can clearly see CapsNet surpasses the state-of-the-art network. Amusingly, the improvement from reconstruction loss is larger than capsules and dynamic routing&amp;hellip;&lt;/p&gt;
+
+&lt;h2 id=&#34;advantages&#34;&gt;Advantages&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Robust&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Interpretability&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;problems&#34;&gt;Problems&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Computational cost.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;em-routing&#34;&gt;EM routing&lt;/h2&gt;
+
+&lt;h3 id=&#34;implementation&#34;&gt;Implementation&lt;/h3&gt;
+
+&lt;h3 id=&#34;result&#34;&gt;Result&lt;/h3&gt;
+
+&lt;h2 id=&#34;sum-up&#34;&gt;Sum up&lt;/h2&gt;
+
+&lt;p&gt;To sum up, the advantage of CapsNet has two folders:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Instead of output a scalar in a neuron, capsules output a vector to encode the properties of an entity, like pose (position, size, orientation), deformation, velocity, albedo, hue, texture, etc.&lt;/li&gt;
+&lt;li&gt;With a vector output, higher layers are able to choose any lower capsule as input. While in CNN, their input neurons are fixed.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;reference-materials&#34;&gt;Reference materials&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1710.09829.pdf&#34; target=&#34;_blank&#34;&gt;Dynamic Routing Between Capsules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://openreview.net/pdf?id=HJWLfGWRb&#34; target=&#34;_blank&#34;&gt;MATRIX CAPSULES WITH EM ROUTING&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://moreisdifferent.com/2017/09/hinton-whats-wrong-with-CNNs&#34; target=&#34;_blank&#34;&gt;Hinton: What&amp;rsquo;s wrong with CNNs&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;[]&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
+    
+    <item>
       <title>NLP basics - Word2vec: Skip-gram, CBOW, GloVe</title>
-      <link>/post/nlp-basics---word2vec/</link>
+      <link>https://shen338.github.io/post/nlp-basics---word2vec/</link>
       <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
       
-      <guid>/post/nlp-basics---word2vec/</guid>
+      <guid>https://shen338.github.io/post/nlp-basics---word2vec/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -44,7 +233,7 @@
 
 &lt;p&gt;First of all, we need to figure out how do we represent the meaning of a word. A common solution is using WordNet: a    resource containing lists   of synonym  sets and hypernyms (&amp;ldquo;is a&amp;rdquo; relationships).&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/WordNet.png&#34; width=700&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/WordNet.png&#34; width=700&gt;&lt;/p&gt;
 
 &lt;p&gt;But this method is not so good. It is great as a resource but   missing nuance. Also it misses the new meaning of a word.&lt;/p&gt;
 
@@ -65,7 +254,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;Here is an example of calculating the   probability of c given o:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/wordwindow.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/wordwindow.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;So the total objective function is:&lt;/p&gt;
 
@@ -93,7 +282,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;The architecture of skip-gram network is simple:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/skip-gram.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/skip-gram.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;There is no activation function on the hidden layer neurons, but the output neurons use softmax to predict the probability of each word&amp;rsquo;s appearance in each nearby location.&lt;/p&gt;
 
@@ -148,7 +337,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;In the other hand, Continuous   Bag of  Words   (CBOW) does the opposite thing compared to skip-gram. It uses the context words to predict the center word. (image &lt;a href=&#34;https://zhuanlan.zhihu.com/p/35074402&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/CBOW.jpg&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/CBOW.jpg&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;Note the weight matrix for every input is &lt;strong&gt;shared&lt;/strong&gt;. All hidden layer weights are &lt;strong&gt;added&lt;/strong&gt; and send into next layer.&lt;/p&gt;
 
@@ -162,11 +351,11 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;The example corpus contains three sentences: &amp;ldquo;I like    deep    learning.&amp;rdquo;, &amp;ldquo;I like NLP.&amp;rdquo;, &amp;ldquo;I enjoy flying.&amp;rdquo;. The co-occurrence matrix would be:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/cooccurrence.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/cooccurrence.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;Problems of the model is obvious. It&amp;rsquo;s bery high dimensional and may need future process. And the matrix is quite sparse, which makes the model less robust. So, further we can use some dimensionality reduction technique to reduce the dimension of our word vectors, like singular  value   decomposition. However, the computational cost of SVD is quite high($O(mn^2)$), which is not suitable for large vacabulary. The &lt;a href=&#34;http://web.stanford.edu/class/cs224n/lectures/lecture3.pdf&#34; target=&#34;_blank&#34;&gt;cs224 lecture&lt;/a&gt; lecture summarized the pros and cons of Count   based model vs direct   prediction model:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/compare.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/compare.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;glove&#34;&gt;GloVe&lt;/h2&gt;
 
@@ -176,7 +365,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;Where the $u_i$ $v_j$ is the same to skip-gram model, and $P_{ij}$ is the co-occurrent matrix. $F(x)$ is a step-like function:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/glove-fig-1.png&#34; width=400&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/glove-fig-1.png&#34; width=400&gt;&lt;/p&gt;
 
 &lt;p&gt;The cut-off value $x_{max}$ is not sensitive. In experiment choose $x_{max} = 100$. Instead of direct predict center or context words, the GloVe model trains word vectors to fit the log probability of the co-occurrence matrix. The GloVe model utilizes the overall statistical information, and is also scalable for huge corpus. It can achieve good performance with small corpus. But it need to store the co-occurrence matrix, which requires a large storage space. But it is faster than skip-gram with negative sampling. So, the choice of GloVe or prediction model has a trade-off of speed and storage.&lt;/p&gt;
 
@@ -187,7 +376,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 &lt;p&gt;One popular method utilize syntactic    analogy to evaluate word vectors. We will evaluate  word    vectors by  how well    their   cosine  distance    after   addition    captures    intuitive   semantic    and
 syntactic   analogy questions. For example, given man over woman, we want the use the mapping to map king to queen. This mapping accuracy (cosine distance) is the key for evaluation. Here is an illustration:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/word2vec/evaluation.png&#34; width=600&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/evaluation.png&#34; width=600&gt;&lt;/p&gt;
 
 &lt;p&gt;Our model should uses the differential vector of &amp;ldquo;nephew&amp;rdquo; and &amp;ldquo;niece&amp;rdquo; to find &amp;ldquo;aunt&amp;rdquo; from &amp;ldquo;uncle&amp;rdquo;. A&lt;/p&gt;
 
@@ -223,10 +412,10 @@ syntactic   analogy questions. For example, given man over woman, we want the us
     
     <item>
       <title>Going Deeper in Batch Normalization</title>
-      <link>/post/going-deeper-into-batch-normalization/</link>
+      <link>https://shen338.github.io/post/going-deeper-into-batch-normalization/</link>
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
       
-      <guid>/post/going-deeper-into-batch-normalization/</guid>
+      <guid>https://shen338.github.io/post/going-deeper-into-batch-normalization/</guid>
       <description>
 
 &lt;h3 id=&#34;table-of-contents-optimization&#34;&gt;Table of contents/optimization&lt;/h3&gt;
@@ -284,7 +473,7 @@ from this. But this effect is quite minor.&lt;br /&gt;&lt;/li&gt;
 
 &lt;blockquote&gt;
 &lt;p&gt;Here is the algorithm diagram batch norm.
-&lt;img src=&#34;/img/batch_norm_fp.png&#34; alt=&#34;Batch norm algorithm&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://shen338.github.io/img/batch_norm_fp.png&#34; alt=&#34;Batch norm algorithm&#34; /&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;Nothing fancy but extremely practical algorithm. One thing has to mention, &lt;span class=&#34;markup-quote&#34;&gt;the learnable variables
@@ -468,7 +657,7 @@ as batch norm.&lt;/p&gt;
 
 &lt;p&gt;Just simply replace all batch normalization layers with instance normalization layers. Batch normalization normalizes using the information from the whole batch, while instance normalization normalizes each feature map on its own.&lt;br /&gt;
 Formula comparasion:&lt;br /&gt;
-&lt;img src=&#34;/img/instancenorm.jpg&#34; alt=&#34;instance norm&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://shen338.github.io/img/instancenorm.jpg&#34; alt=&#34;instance norm&#34; /&gt;&lt;/p&gt;
 
 &lt;h4 id=&#34;group-normalization&#34;&gt;Group Normalization&lt;/h4&gt;
 
@@ -477,7 +666,7 @@ Formula comparasion:&lt;br /&gt;
 &lt;p&gt;Instead of normalizing along the batch dimension, GN divides the channels into groups and computes within each group the mean and variance. Therefore, GN&amp;rsquo;s computation is independent of batch sizes, and so does its accuracy.&lt;/p&gt;
 
 &lt;p&gt;Here is a diagram for all these Group techniques:&lt;br /&gt;
-&lt;img src=&#34;/img/GN.jpg&#34; alt=&#34;GN&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://shen338.github.io/img/GN.jpg&#34; alt=&#34;GN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The difference is obvious. Batch norm uses data in the same batch to calculate $\mu $ and $\sigma$; Layer norm uses all the neurons in single layer; Instance norm uses all in data in the same batch and channel; Group norm uses only a small piece of batch.&lt;/p&gt;
 
@@ -515,10 +704,10 @@ to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differen
     
     <item>
       <title>Amazing GAN - Wasserstein GAN</title>
-      <link>/post/amazing-gan---wasserstein-gan/</link>
+      <link>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</link>
       <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
       
-      <guid>/post/amazing-gan---wasserstein-gan/</guid>
+      <guid>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -572,7 +761,7 @@ $$JS(P||Q) = \frac{1}{2} KL(P||\frac{P+Q}{2}) + \frac{1}{2} KL(Q||\frac{P+Q}{2})
 &lt;/ol&gt;
 
 &lt;p&gt;Here is a plot of KL and JS divergence of two normal distributions: N(0, 1) and N(1, 1). Image resource &lt;a href=&#34;https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;
-&lt;img src=&#34;/img/KL_JS_divergence.png&#34; alt=&#34;KL-JS&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://shen338.github.io/img/KL_JS_divergence.png&#34; alt=&#34;KL-JS&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;As shown in the plot, JS divergence are symmetric while KL divergence is asymmetric. People believe the success of GANs comes from replacing the traditional maximum likelihood with symmetric similarity measure, JS divergence.&lt;/p&gt;
 
@@ -586,7 +775,7 @@ $$JS(P||Q) = \frac{1}{2} KL(P||\frac{P+Q}{2}) + \frac{1}{2} KL(Q||\frac{P+Q}{2})
 &lt;/ol&gt;
 
 &lt;p&gt;This is a diagram showing how GAN works:
-&lt;img src=&#34;/img/GANs.png&#34; alt=&#34;GAN&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://shen338.github.io/img/GANs.png&#34; alt=&#34;GAN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;In one hand, we want the discriminator&amp;rsquo;s output probability over real data to be higher by maximizing $\mathbb{E}_{x \sim p_{data}(x)}[logD(x)]$; In another hand, we want the discriminator&amp;rsquo;s output probability over fake data from generator to be lower by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.&lt;/p&gt;
 
@@ -634,7 +823,7 @@ $$ = -log(4) + 2* JS(p_{data} || p_g)$$&lt;/p&gt;
 
 &lt;p&gt;The loss function for training G is: $\mathbb{E}_{z \sim p(z)}[log(1-D(G(z)))]$. But in the early stage of training, discriminator can be very confident in detecting results from G, $D(G(z))$ is always 0. In this way, the gradient to update G vanishes.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/GAN_gradient_vanishing.png&#34; alt=&#34;gradient vanishing&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/GAN_gradient_vanishing.png&#34; alt=&#34;gradient vanishing&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;With the generator fixed we
 train a discriminator from scratch and measure the gradients with the original cost function. We see
@@ -669,7 +858,7 @@ sample and when G fails to generate real sample.&lt;/p&gt;
 &lt;p&gt;One method to compensate this is putting regularization on the diversity of generator, forcing it to produce various samples. In practice, this method is still not good enough.&lt;/p&gt;
 
 &lt;p&gt;Here is some result of GAN mode collapse in LSUN dataset:
-&lt;img src=&#34;/img/mode_collapse.png&#34; alt=&#34;mode collapse&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://shen338.github.io/img/mode_collapse.png&#34; alt=&#34;mode collapse&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;improved-training-of-gans&#34;&gt;Improved Training of GANs&lt;/h2&gt;
 
@@ -773,7 +962,7 @@ A real-valued function $f: \mathbb{R} \rightarrow \mathbb{R}$ is called $K$-Lips
 
 &lt;p&gt;The next thing to care about is how to keep the discriminator function satisfying K-Lipschitz continuity. Wasserstein GAN adopts the most simple method, clipping the gradient into a small interval ($[-0.01, 0.01]$), and make the parameter $w$ lies in a compact space and  $f_w$ will preserve its Lipschitz continuity. The modified algorithm is as follows:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/GAN_algorithm.png&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/GAN_algorithm.png&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Compared to original GANs, Wasserstein GAN takes these changes:&lt;/p&gt;
 
@@ -833,7 +1022,7 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 
 &lt;p&gt;Also, the batch norm layer can make this penalty invalid, so WGAN-GP simply remove the batch norm layers. And WGAN-GP takes two side penalty. Instead of forcing the gradient norm smaller than 1, it encourage gradient norm closer to 1 according to their proof. In practice, this works slightly better. Here is the algorithm of WGAN-GP:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/WGANGP.jpg&#34; alt=&#34;WGAN-GP&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/WGANGP.jpg&#34; alt=&#34;WGAN-GP&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;And the implementation on tensorflow is quite simple with tf.gradient function.&lt;/p&gt;
 
@@ -884,19 +1073,19 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
     
     <item>
       <title>Microscale two-dimensional (2D) temperature mapping by ratiometric fluorescence imaging under orthogonal excitations</title>
-      <link>/publication/temperature_mapping/</link>
+      <link>https://shen338.github.io/publication/temperature_mapping/</link>
       <pubDate>Thu, 15 Feb 2018 00:00:00 -0500</pubDate>
       
-      <guid>/publication/temperature_mapping/</guid>
+      <guid>https://shen338.github.io/publication/temperature_mapping/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</title>
-      <link>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
+      <link>https://shen338.github.io/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
       <pubDate>Mon, 01 Jan 2018 21:00:00 -0500</pubDate>
       
-      <guid>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
+      <guid>https://shen338.github.io/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -1013,7 +1202,7 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 
 &lt;p&gt;Here is a diagram of famous AlexNet:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/AlexNet.png&#34; alt=&#34;AlexNet&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/AlexNet.png&#34; alt=&#34;AlexNet&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;resnet&#34;&gt;ResNet&lt;/h3&gt;
 
@@ -1024,11 +1213,11 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Here is a diagram of residual blocks (image source: ):&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/residualblock.png&#34; alt=&#34;residual&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/residualblock.png&#34; alt=&#34;residual&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Plus, Resnet uses the bottleneck architecture from Inception network to reduce computation. After $1\times1$ convolution, the feature map channels are greatly reduced in order to save computation for next $3 \times 3$ convolution layer. Another $1\times1$ convolution after that can resume the feature map channels. Amazingly, this operation won&amp;rsquo;t affect the performance. So, this bottleneck architecture is quite popular in modern neural network.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/bottleneck.jpg&#34; alt=&#34;bottleneck&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/bottleneck.jpg&#34; alt=&#34;bottleneck&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;ResNet can be interpreted as ensembles of relatively shallow networks, as described &lt;a href=&#34;https://arxiv.org/abs/1605.06431?context=cs&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
@@ -1036,15 +1225,15 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Inception network series comes from Google. It should be the most well-designed and popular network in image classification community. The architecture becomes very complicated in later version of Inception networks. For example, here is a diagram of InceptionResnetV2, with more than 600 layers:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/image00.png&#34; alt=&#34;inceptionresnetv2&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/image00.png&#34; alt=&#34;inceptionresnetv2&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The core of Inception network is the Inception module. The inspiration comes from the idea that you need to make a decision as to what type of convolution you want to make at each layer: $3 \times 3$ or $5 \times 5$? You may need specific image content to decide. How about use them all together? Here come the Inception module:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/inception_implement.png&#34; alt=&#34;Inceptionmodule&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/inception_implement.png&#34; alt=&#34;Inceptionmodule&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;It uses all $1 \times 1$, $3 \times 3$, $5 \times 5$ convolution and  altogether and concate their result together. Plus, inception module introduces $N \times 1$ and $1 \times N$ convolution instead of traditional $N \times N $ convolution. This puts constraints on convolution kernel (center symmetric), but can greatly reduces computation. And residual connection, bottleneck architecture also appears in modern Inception network. Here is a diagram of Inception modules in InceptionV4:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/inceptionv4.jpeg&#34; alt=&#34;v4&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/inceptionv4.jpeg&#34; alt=&#34;v4&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;deformable-parts-model&#34;&gt;Deformable Parts Model&lt;/h3&gt;
 
@@ -1060,11 +1249,11 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Deformable Part Models model an object as the sum of the geometric deformations of it. So take person model for example:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/DPM.jpeg&#34; alt=&#34;DPM&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/DPM.jpeg&#34; alt=&#34;DPM&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;A root location with high score detects a region with high chances to contain an object, while the locations of the parts with high scores confirm a recognized object hypothesis. The paper adopted latent SVM to model the classifier.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/DPMmodel.png&#34; alt=&#34;DPMmodel&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/DPMmodel.png&#34; alt=&#34;DPMmodel&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Also, DPM and later CNN models are not two different method to object recognition. Actually, DPM can be unrolled and interpreted as several equivalent CNN layers. See Ross&amp;rsquo;s paper &lt;a href=&#34;https://arxiv.org/abs/1409.5403&#34; target=&#34;_blank&#34;&gt;Deformable Part Models are Convolutional Neural Networks&lt;/a&gt;&lt;/p&gt;
 
@@ -1084,7 +1273,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Here is an image of precision and recall:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/precision-recall.jpg&#34; alt=&#34;precision and recall&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/precision-recall.jpg&#34; alt=&#34;precision and recall&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;average-precision&#34;&gt;Average precision&lt;/h3&gt;
 
@@ -1098,7 +1287,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Here is a table of different corresponding precision and recall ranks:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/precisionrecallrank.png&#34; alt=&#34;prrank&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/precisionrecallrank.png&#34; alt=&#34;prrank&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;AP (average precision) is computed as the average of &lt;strong&gt;maximum precision&lt;/strong&gt; at different recall levels. Here are two kinds of AP calculation:&lt;/p&gt;
 
@@ -1126,7 +1315,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;The goal of &lt;a href=&#34;https://arxiv.org/abs/1311.2524&#34; target=&#34;_blank&#34;&gt;R-CNN&lt;/a&gt; is to take in an image, and correctly identify where are objects (via a bounding box) in the image. The intuition of RCNN is quite simple, just proposing some possible regions, and determine whether they are objects or not. Here is a diagram of RCNN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/RCNN.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/RCNN.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;selective-search&#34;&gt;Selective Search&lt;/h3&gt;
 
@@ -1134,7 +1323,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;This method uses an over-segmentation method to divide the image into small regions (1k to 2k). Merge the two most probable adjacent areas according to the consolidation rules. This is is a hierarchical grouping algorithm by J.R.R. Uijlings.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/grouping.png&#34; alt=&#34;grouping&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/grouping.png&#34; alt=&#34;grouping&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Actually the similarity of regions is determined by their color histogram, texture(gradient histogram) and some other aspects. Note that this method tends to merge relatively small regions to avoid a large area gradually &amp;ldquo;eat&amp;rdquo; other small areas. Also, the method tend to merge the regions whose merged result takes large percentage in its bounding box.&lt;/p&gt;
 
@@ -1146,7 +1335,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;So, based on the features obtained at the end of the final pooling layer, the region proposals are regressed. Note that only when region proposals have large IoU(&amp;gt;0.6) with ground truth, we can treat this transformation as linear model and do regression. The bounding box regression process is quite straight forward in RCNN paper.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/bbregression.png&#34; alt=&#34;bbregression&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/bbregression.png&#34; alt=&#34;bbregression&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We directly regress the location $P_x$ and $P_y$, while regress the width $P_w$ and height $P_h$ in log-space which produce better results on the wide range of bounding-box shift.&lt;/p&gt;
 
@@ -1161,7 +1350,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 &lt;li&gt;Delete the selected box with the score less than a certain threshold to get this kind of result&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/NMS.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/NMS.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;workflow&#34;&gt;Workflow&lt;/h3&gt;
 
@@ -1191,7 +1380,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Instead of extracting CNN feature vectors independently for each region proposal, this model aggregates them into one CNN forward pass over the entire image and the region proposals share this feature matrix. Then the same feature matrix is branched out to be used for learning the object classifier (No SVM but softmax) and the bounding-box regressor.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/fastrcnn.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/fastrcnn.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;roi-pooling&#34;&gt;ROI pooling&lt;/h3&gt;
 
@@ -1201,7 +1390,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is a diagram of ROI pooling from cs231n Lecture:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/roi-pooling.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/roi-pooling.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;workflow-1&#34;&gt;Workflow&lt;/h3&gt;
 
@@ -1233,7 +1422,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is an illustratioon of Faster RCNN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/faster-RCNN.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/faster-RCNN.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;region-proposal-network&#34;&gt;Region Proposal Network&lt;/h3&gt;
 
@@ -1242,9 +1431,9 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 &lt;ol&gt;
 &lt;li&gt;Feed input image into CNN and get a set of convlutional feature maps on the last convolutional layer.&lt;/li&gt;
 &lt;li&gt;Then a sliding window is running spatially on these feature maps. The size of sliding window is $3 \times 3$. For each sliding window, a set of 9 anchors are generated which all have the same center (the same with sliding window) but with 3 different aspect ratios (1:2, 1:1, 2:1) and 3 different scales. Note that all these coordinates are computed with respect to the original image. (image &lt;a href=&#34;https://www.quora.com/How-does-the-region-proposal-network-RPN-in-Faster-R-CNN-work&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)
-&lt;img src=&#34;/img/anchor.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;https://shen338.github.io/img/anchor.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;li&gt;Finally, the 3×3 spatial features extracted from convolution feature maps are fed to a smaller network which has two tasks: classification (cls) and regression (reg). The output of regressor determines a a predicted bounding box (x,y,w,h), The classification network produces a probability p indicating whether the the predicted box contains an object (1) or it is from background (0 for no object).
-&lt;img src=&#34;/img/rpn-end.jpg&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;https://shen338.github.io/img/rpn-end.jpg&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;So, the output of rpn is similar to selective search method, which is ~2k region proposals. But the speed of RPN is much faster than selective search method. In this way, the last speed bottleneck of RCNN is addressed. Note that if accuracy is not important, RPN can complete object recognition by its own by modify the classification into N classes.&lt;/p&gt;
@@ -1266,11 +1455,11 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Semantic segmentation need to segment and cluster pixels of different object classes in a single graph; while instance segmentation need to locate every single object and cluster pixels of this object. This image shows the difference of semantic and instance segmentation:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/instancesegmentation.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/instancesegmentation.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;So, overall, instance is more difficult than semantic segmentation. And it is highly related to object detection. For semantic segmentation, most modern frameworks are based on &lt;a href=&#34;https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf&#34; target=&#34;_blank&#34;&gt;Fully Convolutional Neural Networks (FCN)&lt;/a&gt;. FCN managed to extract the region of objects in an image but it cannot tell us the exact region of every single object. Here, Mask RCNN combined RCN and Faster RCNN, adding an extra FCN branch to faster RCNN, parallel to localization and classification, to make pixel level prediction and instance segmentation in a single bounding box.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/mask-rcnn.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/mask-rcnn.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;roi-align&#34;&gt;ROI Align&lt;/h3&gt;
 
@@ -1281,7 +1470,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 &lt;li&gt;The quantized region is evenly divided into $k \times k$ cells and the boundaries of each cell are quantized.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/ROIquantize.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/ROIquantize.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;From the diagram above, the ground truth bounding box is $655 \times 655$. And after 5 max pooling operation, the corresponding size on feature map is &lt;sup&gt;655&lt;/sup&gt;&amp;frasl;&lt;sub&gt;32&lt;/sub&gt; = 20.78 , but ROI pooling quantizes it into $20$. After that, we need to divide the bounding box into $7 \times 7$ cells, the size of each cell is &lt;sup&gt;20&lt;/sup&gt;&amp;frasl;&lt;sub&gt;7&lt;/sub&gt; = 2.86 , but ROI pooling quantizes it into $2$. So, the largest quantization error of ROI pooling is about $1.5$ pixels on feature map, which is $50$ pixels on input image.&lt;/p&gt;
 
@@ -1295,7 +1484,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is a figure for ROI align:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/ROIAlignDiagram.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/ROIAlignDiagram.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;And according to the paper, four fixed points in a cell works best, but only use one fixed point in a cell merely hurt the performance. Bilinear interpolation is totally differentiable, so back propogation is also straight forward.&lt;/p&gt;
 
@@ -1305,7 +1494,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;In addition, mask RCNN can handle human pose key point detection. We just need to replace the segmentation mask with one-hot key point mask. In mask RCNN, human pose has 17 key points. The result of Mask RCNN is pretty good:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/maskrcnnresult.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/maskrcnnresult.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;single-shot-detector&#34;&gt;Single Shot Detector&lt;/h1&gt;
 
@@ -1323,11 +1512,11 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is a diagram of SSD architecture:(image &lt;a href=&#34;https://www.slideshare.net/xavigiro/ssd-single-shot-multibox-detector&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/SSDarchitecture.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/SSDarchitecture.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The main property of SSD is that it uses feature map from different CNN layers with different scale. SSD is built on VGG net and has six feature maps in total, each responsible for a different scale of objects, allowing it to identify objects across a large range of scales.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/ssdwork.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/ssdwork.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;The figure above shows how SSD works. In a convolutional fashion, we evaluate a small set
 of default boxes (like &lt;a href=&#34;#region-proposal-network&#34;&gt;RPN anchor boxes&lt;/a&gt; of different aspect ratios at each location in several feature maps with
@@ -1365,12 +1554,12 @@ between localization loss (e.g. Smooth L1) and confidence loss (e.g. Softmax). I
 
 &lt;p&gt;YOLOv1 is a little bit less precise than R-CNN families, but it is the first work to realize real time detection with CNN. Similar to other single shot detectors, the intuition of YOLOv1 is quite straight forward.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/YOLOv1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/YOLOv1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;YOLOv1 models detection as a regression problem. It divides the image into an S × S grid and for each grid cell predicts B bounding boxes, confidence for those boxes, and C class probabilities. These predictions are encoded as an S × S × (B × 5 + C) tensor. For example, on PASCAL VOC, S = 7,
 B = 2. PASCAL VOC has 20 labelled classes so C = 20. Our final prediction is a 7 × 7 × 30 tensor.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/YOLOv1arch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/YOLOv1arch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;The figure above is the architecture of YOLOv1. Based on pretrain the convolutional layers on the ImageNet classification
 task at half the resolution (224 × 224 input image) and then double the resolution for detection.&lt;/p&gt;
@@ -1379,7 +1568,7 @@ task at half the resolution (224 × 224 input image) and then double the resolut
 
 &lt;p&gt;Here is the multi-part loss function that we want to optimize:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/YOLOv1lossfunction.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/YOLOv1lossfunction.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;where:&lt;/p&gt;
 
@@ -1444,7 +1633,7 @@ use anchor boxes like &lt;a href=&#34;#faster-rcnn&#34;&gt;faster RCNN&lt;/a&gt;
 &lt;li&gt;&lt;strong&gt;Dimension Clusters&lt;/strong&gt;: The author run K-means algorithm to determine the anchor box sizes. Shown in the following figure, the authors choose
 k = 5 as a good tradeoff between model complexity and
 high recall.
-&lt;img src=&#34;/img/clusterbox.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;https://shen338.github.io/img/clusterbox.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Direct location prediction&lt;/strong&gt;: Instead of predicting offsets we follow the approach of
 YOLO and predict location coordinates relative to the location
 of the grid cell. (Predict coordinates directly and predict scale using archor boxes). Improve YOLO by 5%. The network predicts 5 coordinates
@@ -1452,7 +1641,7 @@ for each bounding box, $t_x, t_y, t_w, t_h$, and $t_o.$ If the cell is
 offset from the top left corner of the image by $(c_x, c_y)$ and
 the bounding box prior has width and height $p_w, p_h$, then
 the predictions correspond to:
-&lt;img src=&#34;/img/YOLOv2direct.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;https://shen338.github.io/img/YOLOv2direct.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Fine-Grained Features&lt;/strong&gt;: Similar to faster RCNN and SSD, adding a passthrough layer that brings
 features from an earlier layer at 26 × 26 resolution along with original 13 × 13 resolution. Improve mAP about 1%.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Multi-Scale Training&lt;/strong&gt;: During training, YOLO takes images of size {320, 352, &amp;hellip;, 608} (with a step of 32 = YOLO downsampling rate). For every 10 batches, YOLOv2 randomly selects another image size to train the model. This acts as data augmentation and forces the network to predict well for different input image dimension and scale.&lt;/li&gt;
@@ -1489,7 +1678,7 @@ is only larger by a factor of 4:1. It learns to find objects using the detection
 &lt;p&gt;&lt;a href=&#34;https://arxiv.org/pdf/1612.03144.pdf&#34; target=&#34;_blank&#34;&gt;Feature Pyramid Network (FPN)&lt;/a&gt; extends the idea of feature pyramid, incorprating a topdown architecture with lateral connections to different feature map scales. FPN shows significant improvement as a generic feature extractor
 in several applications.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/FPN.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPN.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;architecture-2&#34;&gt;Architecture&lt;/h3&gt;
 
@@ -1501,7 +1690,7 @@ a 3×3 convolution is appended on each merged map to
 generate the final feature map, which is to reduce the aliasing
 effect of upsampling. Here is an illustration of FPN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/FPNarch.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPNarch.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;feature-pyramid-networks-for-rpn&#34;&gt;Feature Pyramid Networks for RPN&lt;/h3&gt;
 
@@ -1521,7 +1710,7 @@ to assign RoIs of different scales to the pyramid levels. We have to assign ROIs
 width w and height h (on the input image to the network) to
 the level $P_k$ of our feature pyramid by:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/FPNformula.png&#34; width=&#34;400&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPNformula.png&#34; width=&#34;400&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;where:&lt;/p&gt;
 
@@ -1536,15 +1725,15 @@ feature map&lt;/li&gt;
 
 &lt;p&gt;FPN for region proposal network:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/FPN-RPN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPN-RPN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;FPN for faster RCNN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/FPN-FasterRCNN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPN-FasterRCNN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;FPN on COCO dateset:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/FPNcoco.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPNcoco.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;Top-down pathway plus lateral connections increases 8.0 points over the single-scale RPN
 baseline. For small objects, it improves 12.9 points. Recently, FPN has enabled new top results in all tracks
@@ -1570,7 +1759,7 @@ across an image(~100k), and most of them are easy samples. Detectors can easily 
 
 &lt;p&gt;So, here comes focal loss:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/focalloss.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/focalloss.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;The focal loss just modify the cross entropy loss into weight cross entropy. The weight is given by the prediction confidence: $(1 − p_t)^{\gamma}$. In this way, the weight for very confident sample will decrease a lot during training, which perfectly addresses the class imbalance problem discussed above. In experiment, the recommended value of $\gamma$ is 2. Also, you can slightly improve the accuracy by using $\alpha$ balanced form ($\alpha$ is weight on rare class, $\gamma = 2$, $\alpha = -0.25$ works best):&lt;/p&gt;
 
@@ -1583,7 +1772,7 @@ while running at 5 fps, surpassing current all single stage and two stage detect
 
 &lt;p&gt;Here is a diagram for RetinaNet architecture:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/retinanetarch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/retinanetarch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;implementation-details-1&#34;&gt;Implementation Details&lt;/h3&gt;
 
@@ -1603,7 +1792,7 @@ to $b = − log((1 − π)/π)$.&lt;/p&gt;
 
 &lt;h3 id=&#34;results&#34;&gt;Results&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/retinanetresult.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/retinanetresult.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;According this figure, RetinaNet achieves top results,
 outperforming both one-stage and two-stage models. Plus, compared to existing
@@ -1647,10 +1836,10 @@ DSSD.&lt;/p&gt;
     
     <item>
       <title> Fine-Grained Visual Categorization on iNaturalist dataset</title>
-      <link>/project/fine-grained-visual-categorization-inaturalist/</link>
+      <link>https://shen338.github.io/project/fine-grained-visual-categorization-inaturalist/</link>
       <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
       
-      <guid>/project/fine-grained-visual-categorization-inaturalist/</guid>
+      <guid>https://shen338.github.io/project/fine-grained-visual-categorization-inaturalist/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -1831,8 +2020,8 @@ image and prevent the background from affecting the classification result. That&
 
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;img src=&#34;/img/Weak1.jpg&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
-&lt;td&gt;&lt;img src=&#34;/img/weak2.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src=&#34;https://shen338.github.io/img/weak1.jpg&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src=&#34;https://shen338.github.io/img/weak2.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -1850,7 +2039,7 @@ eases the gradient vanishing problem when training deep neural nets. And the tot
 
 &lt;p&gt;The first trail is directly classification over 8142 categories. Here is an architecture diagram of Inception Resnet V2:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/InceptionResnetv2.jpg&#34; alt=&#34;InceptionResnetv2.jpg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/InceptionResnetv2.jpg&#34; alt=&#34;InceptionResnetv2.jpg&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We first freeze the CNN feature extraction part, and train our own classifier - the final layers
 of the network. Note that we have to training two classifier, one at the end of network, the auxiliary one at the middle. The middle one is used to provide additional
@@ -1869,7 +2058,7 @@ After 5 epoches of training, the accurarcy goes up to 40%.&lt;/p&gt;
 
 &lt;p&gt;Here is a diagram of image space:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/Figure_1.png&#34; alt=&#34;Diagram of image space&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/Figure_1.png&#34; alt=&#34;Diagram of image space&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;It would be more efficient to classify ABC and DE first. In this way, the class distance variance would be much less, we can use relatively less resource to achieve comparable performance to direct classification.&lt;/p&gt;
 
@@ -1885,7 +2074,7 @@ After 5 epoches of training, the accurarcy goes up to 40%.&lt;/p&gt;
 Here attention model comes to the rescue. With attention model, we can determine which part of images matters for the network to make predictions, which should be the object we want to localize. Since we already have the network of super-category classification, its feature map can be utilized to generate class activation map &lt;a href=&#34;http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf&#34; target=&#34;_blank&#34;&gt;(CAM)&lt;/a&gt; to represent the attention level of input images.
 Here is a diagram of CAM:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/CAM.png&#34; alt=&#34;CAM&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/CAM.png&#34; alt=&#34;CAM&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;As shown in the diagram, we can use the feature map and fc layer weight to generate the attention map for images with super-category network. Put an image into the network, we can get a feature map $[H, W, C]$ and a prediction. In order to map the global pooling layers
 to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the output class number. If the prediction is $j$, CAM is calculated as follows:&lt;/p&gt;
@@ -1898,7 +2087,7 @@ to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the ou
 
 &lt;p&gt;First column is original images and generated bounding box; second column is CAM heatmap; third column is the binary image after OSTU algorithm and the biggest contour.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/CAM_result.png&#34; alt=&#34;drawing&#34; style=&#34;width: 500px;&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/CAM_result.png&#34; alt=&#34;drawing&#34; style=&#34;width: 500px;&#34;/&gt;&lt;/p&gt;
 
 &lt;p&gt;The result is pretty amazing. Regardless of the type of objects, like plants, birds, insects, we can accurately locate them.&lt;/p&gt;
 
@@ -1918,10 +2107,10 @@ to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the ou
     
     <item>
       <title>Obfuscated/Blurred Human Face Reconstruction</title>
-      <link>/project/obfuscatedblurred-human-face-reconstruction/</link>
+      <link>https://shen338.github.io/project/obfuscatedblurred-human-face-reconstruction/</link>
       <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
       
-      <guid>/project/obfuscatedblurred-human-face-reconstruction/</guid>
+      <guid>https://shen338.github.io/project/obfuscatedblurred-human-face-reconstruction/</guid>
       <description>
 
 &lt;h1 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h1&gt;
@@ -2069,7 +2258,7 @@ The whole model can easily crash due to a small shift of a single hyperparameter
 Although still have imperfections, WGAN almost totally solve issues like training instability, failure to converge or model collapse.&lt;/p&gt;
 
 &lt;p&gt;Here is the algorithm of WGAN:
-&lt;img src=&#34;/img/WGAN.jpg&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;https://shen338.github.io/img/WGAN.jpg&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Just minor modification from original GAN algorithm, how amazing is that! In Wasserstein GAN paper, the author thoroughly analyzed the weakness and holes on
 original GANs. For details of the mathematics and implementation about WGAN, see my &lt;a href=&#34;https://shen338.github.io/post/amazing-gan---wasserstein-gan/&#34; target=&#34;_blank&#34;&gt;another blog&lt;/a&gt;. Here I will only list the modification from original GAN to WGAN:&lt;/p&gt;
@@ -2224,39 +2413,11 @@ Some of them are funny and some of them are just scary&amp;hellip;&lt;/p&gt;
     </item>
     
     <item>
-      <title>Spatial Transform Network (STN)</title>
-      <link>/post/spatial-transform-network/</link>
-      <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
-      
-      <guid>/post/spatial-transform-network/</guid>
-      <description>
-
-&lt;h2 id=&#34;spatial-transformer&#34;&gt;Spatial Transformer&lt;/h2&gt;
-
-&lt;p&gt;Before diving into STNs, we need to concrete our knowledge about image transformer.&lt;/p&gt;
-
-&lt;h3 id=&#34;image-transformation&#34;&gt;Image Transformation&lt;/h3&gt;
-
-&lt;h3 id=&#34;bilinear-interpolation&#34;&gt;Bilinear Interpolation&lt;/h3&gt;
-
-&lt;h3 id=&#34;tensorflow-implement&#34;&gt;Tensorflow Implement&lt;/h3&gt;
-
-&lt;h3 id=&#34;result&#34;&gt;Result&lt;/h3&gt;
-
-&lt;h2 id=&#34;spatial-transform-network&#34;&gt;Spatial Transform Network&lt;/h2&gt;
-
-&lt;h3 id=&#34;motivation&#34;&gt;Motivation&lt;/h3&gt;
-
-&lt;h3 id=&#34;fun-work-with-stns&#34;&gt;Fun work with STNs&lt;/h3&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Subwavelength focusing by binary multi-annular plates: design theory and experiment</title>
-      <link>/publication/map/</link>
+      <link>https://shen338.github.io/publication/map/</link>
       <pubDate>Sun, 15 Feb 2015 00:00:00 -0500</pubDate>
       
-      <guid>/publication/map/</guid>
+      <guid>https://shen338.github.io/publication/map/</guid>
       <description></description>
     </item>
     

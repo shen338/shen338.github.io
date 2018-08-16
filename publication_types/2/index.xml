@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>2 on Tong Shen</title>
-    <link>/publication_types/2/</link>
+    <link>https://shen338.github.io/publication_types/2/</link>
     <description>Recent content in 2 on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
     <lastBuildDate>Thu, 15 Feb 2018 00:00:00 -0500</lastBuildDate>
     
-	<atom:link href="/publication_types/2/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://shen338.github.io/publication_types/2/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Microscale two-dimensional (2D) temperature mapping by ratiometric fluorescence imaging under orthogonal excitations</title>
-      <link>/publication/temperature_mapping/</link>
+      <link>https://shen338.github.io/publication/temperature_mapping/</link>
       <pubDate>Thu, 15 Feb 2018 00:00:00 -0500</pubDate>
       
-      <guid>/publication/temperature_mapping/</guid>
+      <guid>https://shen338.github.io/publication/temperature_mapping/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Subwavelength focusing by binary multi-annular plates: design theory and experiment</title>
-      <link>/publication/map/</link>
+      <link>https://shen338.github.io/publication/map/</link>
       <pubDate>Sun, 15 Feb 2015 00:00:00 -0500</pubDate>
       
-      <guid>/publication/map/</guid>
+      <guid>https://shen338.github.io/publication/map/</guid>
       <description></description>
     </item>
     

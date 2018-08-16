@@ -2,130 +2,130 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Tong Shen</title>
-    <link>/tags/</link>
+    <link>https://shen338.github.io/tags/</link>
     <description>Recent content in Tags on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
     <lastBuildDate>Sun, 01 Jan 2017 00:00:00 -0500</lastBuildDate>
     
-	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://shen338.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Content tagged as &#39;Academic&#39;</title>
-      <link>/tags/academic/</link>
+      <link>https://shen338.github.io/tags/academic/</link>
       <pubDate>Sun, 01 Jan 2017 00:00:00 -0500</pubDate>
       
-      <guid>/tags/academic/</guid>
+      <guid>https://shen338.github.io/tags/academic/</guid>
       <description>Here is a list of all the content that has been tagged as academic.</description>
     </item>
     
     <item>
       <title>Batch norm</title>
-      <link>/tags/batch-norm/</link>
+      <link>https://shen338.github.io/tags/batch-norm/</link>
       <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
       
-      <guid>/tags/batch-norm/</guid>
+      <guid>https://shen338.github.io/tags/batch-norm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Deep learning</title>
-      <link>/tags/deep-learning/</link>
-      <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
+      <link>https://shen338.github.io/tags/deep-learning/</link>
+      <pubDate>Thu, 19 Jul 2018 21:00:00 -0400</pubDate>
       
-      <guid>/tags/deep-learning/</guid>
+      <guid>https://shen338.github.io/tags/deep-learning/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Deep-learning</title>
-      <link>/tags/deep-learning/</link>
-      <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
+      <link>https://shen338.github.io/tags/deep-learning/</link>
+      <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
       
-      <guid>/tags/deep-learning/</guid>
+      <guid>https://shen338.github.io/tags/deep-learning/</guid>
       <description></description>
     </item>
     
     <item>
       <title>GAN</title>
-      <link>/tags/gan/</link>
+      <link>https://shen338.github.io/tags/gan/</link>
       <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
       
-      <guid>/tags/gan/</guid>
+      <guid>https://shen338.github.io/tags/gan/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Image classification</title>
-      <link>/tags/image-classification/</link>
+      <link>https://shen338.github.io/tags/image-classification/</link>
       <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
       
-      <guid>/tags/image-classification/</guid>
+      <guid>https://shen338.github.io/tags/image-classification/</guid>
       <description></description>
     </item>
     
     <item>
       <title>NLP</title>
-      <link>/tags/nlp/</link>
+      <link>https://shen338.github.io/tags/nlp/</link>
       <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
       
-      <guid>/tags/nlp/</guid>
+      <guid>https://shen338.github.io/tags/nlp/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Object recognition</title>
-      <link>/tags/object-recognition/</link>
+      <link>https://shen338.github.io/tags/object-recognition/</link>
       <pubDate>Mon, 01 Jan 2018 21:00:00 -0500</pubDate>
       
-      <guid>/tags/object-recognition/</guid>
+      <guid>https://shen338.github.io/tags/object-recognition/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Review</title>
-      <link>/tags/review/</link>
+      <link>https://shen338.github.io/tags/review/</link>
       <pubDate>Mon, 01 Jan 2018 21:00:00 -0500</pubDate>
       
-      <guid>/tags/review/</guid>
+      <guid>https://shen338.github.io/tags/review/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Spatial transformer</title>
-      <link>/tags/spatial-transformer/</link>
-      <pubDate>Sun, 19 Nov 2017 21:00:00 -0500</pubDate>
+      <link>https://shen338.github.io/tags/spatial-transformer/</link>
+      <pubDate>Thu, 19 Jul 2018 21:00:00 -0400</pubDate>
       
-      <guid>/tags/spatial-transformer/</guid>
+      <guid>https://shen338.github.io/tags/spatial-transformer/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Tensorflow</title>
-      <link>/tags/tensorflow/</link>
-      <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
+      <link>https://shen338.github.io/tags/tensorflow/</link>
+      <pubDate>Thu, 19 Jul 2018 21:00:00 -0400</pubDate>
       
-      <guid>/tags/tensorflow/</guid>
+      <guid>https://shen338.github.io/tags/tensorflow/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Wasserstein GAN</title>
-      <link>/tags/wasserstein-gan/</link>
+      <link>https://shen338.github.io/tags/wasserstein-gan/</link>
       <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
       
-      <guid>/tags/wasserstein-gan/</guid>
+      <guid>https://shen338.github.io/tags/wasserstein-gan/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Word2vec</title>
-      <link>/tags/word2vec/</link>
+      <link>https://shen338.github.io/tags/word2vec/</link>
       <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
       
-      <guid>/tags/word2vec/</guid>
+      <guid>https://shen338.github.io/tags/word2vec/</guid>
       <description></description>
     </item>
     

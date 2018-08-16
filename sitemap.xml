@@ -5,7 +5,16 @@
     
     <url>
     
-      <loc>/post/nlp-basics---word2vec/</loc>
+      <loc>https://shen338.github.io/post/capsnet-and-dynamic-routing/</loc>
+      <lastmod>2018-07-19T21:00:00-04:00</lastmod>
+    </url>
+    
+  
+    
+    
+    <url>
+    
+      <loc>https://shen338.github.io/post/nlp-basics---word2vec/</loc>
       <lastmod>2018-06-01T21:00:00-04:00</lastmod>
     </url>
     
@@ -14,7 +23,7 @@
     
     <url>
     
-      <loc>/post/going-deeper-into-batch-normalization/</loc>
+      <loc>https://shen338.github.io/post/going-deeper-into-batch-normalization/</loc>
       <lastmod>2018-05-17T21:00:00-04:00</lastmod>
     </url>
     
@@ -23,7 +32,7 @@
     
     <url>
     
-      <loc>/post/amazing-gan---wasserstein-gan/</loc>
+      <loc>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</loc>
       <lastmod>2018-02-17T21:00:00-05:00</lastmod>
     </url>
     
@@ -32,7 +41,7 @@
     
     <url>
     
-      <loc>/publication/temperature_mapping/</loc>
+      <loc>https://shen338.github.io/publication/temperature_mapping/</loc>
       <lastmod>2018-02-15T00:00:00-05:00</lastmod>
     </url>
     
@@ -41,7 +50,7 @@
     
     <url>
     
-      <loc>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</loc>
+      <loc>https://shen338.github.io/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</loc>
       <lastmod>2018-01-01T21:00:00-05:00</lastmod>
     </url>
     
@@ -50,7 +59,7 @@
     
     <url>
     
-      <loc>/project/fine-grained-visual-categorization-inaturalist/</loc>
+      <loc>https://shen338.github.io/project/fine-grained-visual-categorization-inaturalist/</loc>
       <lastmod>2017-11-27T00:00:00-05:00</lastmod>
     </url>
     
@@ -59,7 +68,7 @@
     
     <url>
     
-      <loc>/project/obfuscatedblurred-human-face-reconstruction/</loc>
+      <loc>https://shen338.github.io/project/obfuscatedblurred-human-face-reconstruction/</loc>
       <lastmod>2017-11-27T00:00:00-05:00</lastmod>
     </url>
     
@@ -68,16 +77,7 @@
     
     <url>
     
-      <loc>/post/spatial-transform-network/</loc>
-      <lastmod>2017-11-19T21:00:00-05:00</lastmod>
-    </url>
-    
-  
-    
-    
-    <url>
-    
-      <loc>/tags/academic/</loc>
+      <loc>https://shen338.github.io/tags/academic/</loc>
       <lastmod>2017-01-01T00:00:00-05:00</lastmod>
     </url>
     
@@ -86,7 +86,7 @@
     
     <url>
     
-      <loc>/post/</loc>
+      <loc>https://shen338.github.io/post/</loc>
       <lastmod>2017-01-01T00:00:00-05:00</lastmod>
     </url>
     
@@ -95,7 +95,7 @@
     
     <url>
     
-      <loc>/publication/</loc>
+      <loc>https://shen338.github.io/publication/</loc>
       <lastmod>2017-01-01T00:00:00-05:00</lastmod>
     </url>
     
@@ -104,7 +104,7 @@
     
     <url>
     
-      <loc>/talk/</loc>
+      <loc>https://shen338.github.io/talk/</loc>
       <lastmod>2017-01-01T00:00:00-05:00</lastmod>
     </url>
     
@@ -113,7 +113,7 @@
     
     <url>
     
-      <loc>/publication/map/</loc>
+      <loc>https://shen338.github.io/publication/map/</loc>
       <lastmod>2015-02-15T00:00:00-05:00</lastmod>
     </url>
     
@@ -122,7 +122,7 @@
     
     <url>
     
-      <loc>/publication_types/2/</loc>
+      <loc>https://shen338.github.io/publication_types/2/</loc>
       <lastmod>2018-02-15T00:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -132,7 +132,7 @@
     
     <url>
     
-      <loc>/tags/batch-norm/</loc>
+      <loc>https://shen338.github.io/tags/batch-norm/</loc>
       <lastmod>2018-05-17T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
@@ -142,7 +142,7 @@
     
     <url>
     
-      <loc>/categories/</loc>
+      <loc>https://shen338.github.io/categories/</loc>
       <priority>0</priority>
     </url>
     
@@ -151,8 +151,8 @@
     
     <url>
     
-      <loc>/tags/deep-learning/</loc>
-      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
+      <loc>https://shen338.github.io/tags/deep-learning/</loc>
+      <lastmod>2018-07-19T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -161,8 +161,8 @@
     
     <url>
     
-      <loc>/tags/deep-learning/</loc>
-      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
+      <loc>https://shen338.github.io/tags/deep-learning/</loc>
+      <lastmod>2017-11-27T00:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -171,7 +171,7 @@
     
     <url>
     
-      <loc>/tags/gan/</loc>
+      <loc>https://shen338.github.io/tags/gan/</loc>
       <lastmod>2018-02-17T21:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -181,7 +181,7 @@
     
     <url>
     
-      <loc>/tags/image-classification/</loc>
+      <loc>https://shen338.github.io/tags/image-classification/</loc>
       <lastmod>2017-11-27T00:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -191,7 +191,7 @@
     
     <url>
     
-      <loc>/tags/nlp/</loc>
+      <loc>https://shen338.github.io/tags/nlp/</loc>
       <lastmod>2018-06-01T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
@@ -201,7 +201,7 @@
     
     <url>
     
-      <loc>/tags/object-recognition/</loc>
+      <loc>https://shen338.github.io/tags/object-recognition/</loc>
       <lastmod>2018-01-01T21:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -211,7 +211,7 @@
     
     <url>
     
-      <loc>/project/</loc>
+      <loc>https://shen338.github.io/project/</loc>
       <lastmod>2017-11-27T00:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -221,7 +221,7 @@
     
     <url>
     
-      <loc>/publication_types/</loc>
+      <loc>https://shen338.github.io/publication_types/</loc>
       <lastmod>2018-02-15T00:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -231,7 +231,7 @@
     
     <url>
     
-      <loc>/tags/review/</loc>
+      <loc>https://shen338.github.io/tags/review/</loc>
       <lastmod>2018-01-01T21:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -241,8 +241,8 @@
     
     <url>
     
-      <loc>/tags/spatial-transformer/</loc>
-      <lastmod>2017-11-19T21:00:00-05:00</lastmod>
+      <loc>https://shen338.github.io/tags/spatial-transformer/</loc>
+      <lastmod>2018-07-19T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -251,7 +251,7 @@
     
     <url>
     
-      <loc>/tags/</loc>
+      <loc>https://shen338.github.io/tags/</loc>
       <lastmod>2017-01-01T00:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -261,8 +261,8 @@
     
     <url>
     
-      <loc>/tags/tensorflow/</loc>
-      <lastmod>2018-06-01T21:00:00-04:00</lastmod>
+      <loc>https://shen338.github.io/tags/tensorflow/</loc>
+      <lastmod>2018-07-19T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
     
@@ -271,7 +271,7 @@
     
     <url>
     
-      <loc>/</loc>
+      <loc>https://shen338.github.io/</loc>
       <lastmod>2017-10-15T00:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>
@@ -281,7 +281,7 @@
     
     <url>
     
-      <loc>/tags/wasserstein-gan/</loc>
+      <loc>https://shen338.github.io/tags/wasserstein-gan/</loc>
       <lastmod>2018-02-17T21:00:00-05:00</lastmod>
       <priority>0</priority>
     </url>
@@ -291,7 +291,7 @@
     
     <url>
     
-      <loc>/tags/word2vec/</loc>
+      <loc>https://shen338.github.io/tags/word2vec/</loc>
       <lastmod>2018-06-01T21:00:00-04:00</lastmod>
       <priority>0</priority>
     </url>

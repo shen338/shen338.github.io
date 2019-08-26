@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Batch norm on Tong Shen</title>
-    <link>https://shen338.github.io/tags/batch-norm/</link>
+    <link>/tags/batch-norm/</link>
     <description>Recent content in Batch norm on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
-    <lastBuildDate>Thu, 17 May 2018 21:00:00 -0400</lastBuildDate>
+    <lastBuildDate>Thu, 17 May 2018 21:00:00 -0500</lastBuildDate>
     
-	<atom:link href="https://shen338.github.io/tags/batch-norm/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/batch-norm/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Going Deeper in Batch Normalization</title>
-      <link>https://shen338.github.io/post/going-deeper-into-batch-normalization/</link>
-      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
+      <link>/post/going-deeper-into-batch-normalization/</link>
+      <pubDate>Thu, 17 May 2018 21:00:00 -0500</pubDate>
       
-      <guid>https://shen338.github.io/post/going-deeper-into-batch-normalization/</guid>
+      <guid>/post/going-deeper-into-batch-normalization/</guid>
       <description>Table of contents/optimization  Interpretation and Advantage of Batch Norm Algorithm and implementation Improvements and Alternatives  Batch norm fused with Convolution Layer normalization Instance Normalization Group Normalization Other normalization techniques*  Reference Materials:  This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.</description>
     </item>
     

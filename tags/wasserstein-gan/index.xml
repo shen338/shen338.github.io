@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Wasserstein GAN on Tong Shen</title>
-    <link>https://shen338.github.io/tags/wasserstein-gan/</link>
+    <link>/tags/wasserstein-gan/</link>
     <description>Recent content in Wasserstein GAN on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
-    <lastBuildDate>Sat, 17 Feb 2018 21:00:00 -0500</lastBuildDate>
+    <lastBuildDate>Sat, 17 Feb 2018 21:00:00 -0600</lastBuildDate>
     
-	<atom:link href="https://shen338.github.io/tags/wasserstein-gan/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/wasserstein-gan/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Amazing GAN - Wasserstein GAN</title>
-      <link>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</link>
-      <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
+      <link>/post/amazing-gan---wasserstein-gan/</link>
+      <pubDate>Sat, 17 Feb 2018 21:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</guid>
+      <guid>/post/amazing-gan---wasserstein-gan/</guid>
       <description>Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.</description>
     </item>
     

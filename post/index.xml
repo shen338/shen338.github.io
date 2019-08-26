@@ -2,60 +2,69 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Tong Shen</title>
-    <link>https://shen338.github.io/post/</link>
+    <link>/post/</link>
     <description>Recent content in Posts on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
-    <lastBuildDate>Sun, 01 Jan 2017 00:00:00 -0500</lastBuildDate>
+    <lastBuildDate>Sun, 01 Jan 2017 00:00:00 -0600</lastBuildDate>
     
-	<atom:link href="https://shen338.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>CapsNet and dynamic routing</title>
-      <link>https://shen338.github.io/post/capsnet-and-dynamic-routing/</link>
-      <pubDate>Thu, 19 Jul 2018 21:00:00 -0400</pubDate>
+      <title>Reinforcement Learning: Markov Decision Process and Model-free Algorithms</title>
+      <link>/post/model-free-reinforcement-learning/</link>
+      <pubDate>Sat, 01 Dec 2018 21:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/post/capsnet-and-dynamic-routing/</guid>
+      <guid>/post/model-free-reinforcement-learning/</guid>
+      <description>What is reinforcement learning? In supervised learning, we saw algorithms that tried to make their outputs mimic the labels y given in the training set. In that setting, the labels gave an unambiguous “right answer” for each of the inputs x. In contrast, for many sequential decision making and control problems, it is very difficult to provide this type of explicit supervision to a learning algorithm. For example, if we have just built a four-legged robot and are trying to program it to walk, then initially we have no idea what the “correct” actions to take are to make it walk, and so do not know how to provide explicit supervision for a learning algorithm to try to mimic.</description>
+    </item>
+    
+    <item>
+      <title>CapsNet and dynamic routing</title>
+      <link>/post/capsnet-and-dynamic-routing/</link>
+      <pubDate>Thu, 19 Jul 2018 21:00:00 -0500</pubDate>
+      
+      <guid>/post/capsnet-and-dynamic-routing/</guid>
       <description>Introduction In late 2017, Geoffrey Hinton, one of the biggest names in deep learning community, finally published his work about capsule theory. Hintion has worked on this for years, like Transforming Auto-Encoders. This should be a big step for us to understand human brain.
 CapsNet consists of many capsules. Rather than output a scalar, capsules output a vector. The length of the vector will represent the probability of certain entity and the vector itself will represent the property of this entity.</description>
     </item>
     
     <item>
       <title>NLP basics - Word2vec: Skip-gram, CBOW, GloVe</title>
-      <link>https://shen338.github.io/post/nlp-basics---word2vec/</link>
-      <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
+      <link>/post/nlp-basics---word2vec/</link>
+      <pubDate>Fri, 01 Jun 2018 21:00:00 -0500</pubDate>
       
-      <guid>https://shen338.github.io/post/nlp-basics---word2vec/</guid>
+      <guid>/post/nlp-basics---word2vec/</guid>
       <description>Table of Content  Overview Basic Algorithm  Skip-Gram  Intuition Implementation details  CBOW Co-occurrence Models GloVe Evaluation Metrics  Limitation Reference Materials  Overview First of all, we need to figure out how do we represent the meaning of a word. A common solution is using WordNet: a resource containing lists of synonym sets and hypernyms (&amp;ldquo;is a&amp;rdquo; relationships).
 But this method is not so good. It is great as a resource but missing nuance.</description>
     </item>
     
     <item>
       <title>Going Deeper in Batch Normalization</title>
-      <link>https://shen338.github.io/post/going-deeper-into-batch-normalization/</link>
-      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
+      <link>/post/going-deeper-into-batch-normalization/</link>
+      <pubDate>Thu, 17 May 2018 21:00:00 -0500</pubDate>
       
-      <guid>https://shen338.github.io/post/going-deeper-into-batch-normalization/</guid>
+      <guid>/post/going-deeper-into-batch-normalization/</guid>
       <description>Table of contents/optimization  Interpretation and Advantage of Batch Norm Algorithm and implementation Improvements and Alternatives  Batch norm fused with Convolution Layer normalization Instance Normalization Group Normalization Other normalization techniques*  Reference Materials:  This article will thoroughly explain batch normalization in a simple way. I wrote this article after getting failed an interview because of detailed batchnorm related question. I will start with why we need it, how it works, then how to fuse it into conv layer, and finally how to implement it in tensorflow.</description>
     </item>
     
     <item>
       <title>Amazing GAN - Wasserstein GAN</title>
-      <link>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</link>
-      <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
+      <link>/post/amazing-gan---wasserstein-gan/</link>
+      <pubDate>Sat, 17 Feb 2018 21:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</guid>
+      <guid>/post/amazing-gan---wasserstein-gan/</guid>
       <description>Table of Content  KL divergence and JS divergence Generative Adversarial Networks  Global optimal loss  Problem with Vanilla GANs  Gradient Vanishing Mode Collapse  Improved Training of GANs Wasserstein GAN  Earth Mover distance Comparasion between EM distance and KL/JS divergence Lipschitz continuity Modified Algorithm Wasserstein GAN with gradient penalty  Disadvantages of gradient clipping in WGAN Gradient Penalty   Reference Materials   KL divergence and JS divergence Before diving into details, let first review two very important metrics to quantify the similarity of two probability distributions: Kullback-Leibler Divergence and Jensen-Shannon Divergence.</description>
     </item>
     
     <item>
       <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</title>
-      <link>https://shen338.github.io/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
-      <pubDate>Mon, 01 Jan 2018 21:00:00 -0500</pubDate>
+      <link>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
+      <pubDate>Mon, 01 Jan 2018 21:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
+      <guid>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
       <description>Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision Mean Average Precision  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN  Region Proposal Network Workflow  Mask-RCNN  ROI Align Key Point Detection   Single Shot Detector  Single Shot MultiBox Detector  Architecture Implementation Details  YOLOv1  Architecture Loss function Workflow Limitation  YOLOv2  Improvements  YOLOv3 Feature Pyramid Network (FPN)  Architecture Feature Pyramid Networks for RPN Feature Pyramid Networks for Faster/Mask R-CNN Experimental Result  Focal Loss and RetinaNet  Class Imbalance RetinaNet Implementation Details Results   Summary Reference Materials  It&amp;rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.</description>
     </item>
     

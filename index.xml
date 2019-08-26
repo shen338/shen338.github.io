@@ -2,20 +2,804 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tong Shen on Tong Shen</title>
-    <link>https://shen338.github.io/</link>
+    <link>/</link>
     <description>Recent content in Tong Shen on Tong Shen</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2018</copyright>
-    <lastBuildDate>Sun, 15 Oct 2017 00:00:00 -0400</lastBuildDate>
+    <lastBuildDate>Sun, 15 Oct 2017 00:00:00 -0500</lastBuildDate>
     <atom:link href="/" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>CapsNet and dynamic routing</title>
-      <link>https://shen338.github.io/post/capsnet-and-dynamic-routing/</link>
-      <pubDate>Thu, 19 Jul 2018 21:00:00 -0400</pubDate>
+      <title>Reinforcement Learning: Markov Decision Process and Model-free Algorithms</title>
+      <link>/post/model-free-reinforcement-learning/</link>
+      <pubDate>Sat, 01 Dec 2018 21:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/post/capsnet-and-dynamic-routing/</guid>
+      <guid>/post/model-free-reinforcement-learning/</guid>
+      <description>
+
+&lt;h1 id=&#34;what-is-reinforcement-learning&#34;&gt;What is reinforcement learning?&lt;/h1&gt;
+
+&lt;p&gt;In supervised learning, we saw algorithms that tried to make their outputs
+mimic the labels y given in the training set. In that setting, the labels gave
+an unambiguous “right answer” for each of the inputs x. In contrast, for
+many sequential decision making and control problems, it is very difficult to
+provide this type of explicit supervision to a learning algorithm. For example,
+if we have just built a four-legged robot and are trying to program it to walk,
+then initially we have no idea what the “correct” actions to take are to make
+it walk, and so do not know how to provide explicit supervision for a learning
+algorithm to try to mimic.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/RL_image.png&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;A typical RL problem diagram is shown above. The agent &amp;ldquo;mouse&amp;rdquo; is frequently
+interacting with environment &amp;ldquo;maze&amp;rdquo; with different actions,
+and a reward from outside environment works as a guideline for the agent to achieve the optimum. Different to
+supervised learning problem, the reward cannot be directly used as supervision. The RL alogrithms act like the mouse, learn proper actions from observations and rewards to approach the final goal &amp;ldquo;cake&amp;rdquo;.&lt;/p&gt;
+
+&lt;p&gt;To sum up, the goal of reinforcement learning is to find a good strategy for the agent in such environment by
+taking experimental trails and optimize the reward.
+And a better strategy means a higher &lt;strong&gt;expection&lt;/strong&gt; of overall reward with this strategy.&lt;/p&gt;
+
+&lt;h2 id=&#34;model&#34;&gt;Model&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/RL1.jpg&#34; width=680&gt;&lt;/p&gt;
+
+&lt;p&gt;The agent is acting in an environment (Image &lt;a href=&#34;http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching_files/intro_RL.pdf&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;). The environment can have many different conditions/states, called &lt;strong&gt;state&lt;/strong&gt;$(s \in S)$. And the agent can have a lot of different behaviors, called &lt;strong&gt;action&lt;/strong&gt;$(a \in A)$. In the agent&amp;rsquo;s perspective, it observes the environment state as an &lt;strong&gt;observation&lt;/strong&gt;$(o \in O)$. The RL algorithms give agent a guidance to follow in different states and usually it is a probability distribution, $P(a|s)$, called &lt;strong&gt;policy&lt;/strong&gt;. After the agent takes an action, the environment state can change accordingly.&lt;/p&gt;
+
+&lt;p&gt;Also, after taking an action, the agent will receive a reward with state: $(r \in R : S × A)$ as a feedback. The system itself can be
+stochastic: the probability of the next state $(s&amp;rsquo;)$ on current state $(s)$ and with action $(a)$ is: $P(s&amp;rsquo;|s, a)$ (System Dynamics).&lt;/p&gt;
+
+&lt;p&gt;Divided by this probability, there are two main categories of RL algorithm:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Model-free algorithms. In model-free algorithm, we do not need to optimize over state dynamics models $P(s&amp;rsquo;|s, a)$, like policy gradient algorithm, directly optimizing policy with gradient descent or deep Q-learning to build neural network to fit expected value of the total reward over all successive steps.&lt;/li&gt;
+&lt;li&gt;Model-based algorithms. In this setting, we already know the system dynamics, like $P(s&amp;rsquo;|s, a)$ or we can learn a good model to simulate the environment. It might be hard to learning system dynamics and good strategy at the same time. So, it can be particularly effective if we can hand-engineer a dynamics representation using our knowledge of physics, and fit just a few parameters.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;At this blog, we only care about model-free algorithms. And we will talk about model-based algorithm in next blog.&lt;/p&gt;
+
+&lt;h2 id=&#34;markov-decision-process&#34;&gt;Markov Decision Process&lt;/h2&gt;
+
+&lt;p&gt;Markov decision process(MDP) is a simplified sequential decision making process, in which RL problems are usually posed. Here are two main assumptions hold for MDP:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;The whole system is fully observed.&lt;/li&gt;
+&lt;li&gt;System state transition is a Markov process. $P(S_t | S_{t-1}, S_{t-2} , &amp;hellip; ,  S_{1}) = P(S_t | S_{t-1})$&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Basically, markov decision process is just a tuple: {$ S, A, P, \gamma, r $}. Here, $\gamma$ is a discount factor, it will discount the reward with time step increases, which can make RL algorithms get the reward as soon as possible.&lt;/p&gt;
+
+&lt;p&gt;The dynamics of an MDP proceeds as follows: We start in some state $S_0$, and get to choose some action $a_0 \in A$ to take in the MDP. As a result of our choice, the state of the MDP randomly transitions to some successor state $s_1$. And from $s_1$, continue this process on and on. So, this process goes like:&lt;/p&gt;
+
+&lt;p&gt;$$s_0 \xrightarrow[]{a_0} s_1 \xrightarrow[]{a_1} s_2 \xrightarrow[]{a_2} &amp;hellip; $$&lt;/p&gt;
+
+&lt;p&gt;In such a sequence, the reward is given as:&lt;/p&gt;
+
+&lt;p&gt;$$R(s_0, a_0) + \gamma R(s_1, a_1)  + \gamma^2 R(s_2, a_2)  + \gamma^3 R(s_3, a_3) &amp;hellip;$$&lt;/p&gt;
+
+&lt;p&gt;For Markov decision process, our goal is to find a good action strategy to maximize the reward expection:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/MDP_expection.jpg&#34; width=680&gt;&lt;/p&gt;
+
+&lt;p&gt;Here, $\pi$ means a union of all policies. And the reward at timestep t is discounted by a factor of $\gamma$
+. Thus, to
+make this expectation large, we would like to accrue positive rewards as soon
+as possible.&lt;/p&gt;
+
+&lt;p&gt;With this, we define the &lt;strong&gt;Value Function&lt;/strong&gt; as:&lt;/p&gt;
+
+&lt;p&gt;$$V_{\pi}(s) = E[R(s_0, a_0) + \gamma R(s_1, a_1)  + \gamma^2 R(s_2, a_2)  + \gamma^3 R(s_3, a_3) &amp;hellip; | s_0, \pi]$$&lt;/p&gt;
+
+&lt;p&gt;$V_{\pi}(s)$ is just a simple expection over all the future reward with a start state $s$.&lt;/p&gt;
+
+&lt;p&gt;Given a stationary policy, we have the &lt;strong&gt;Bellman equation&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;$$V_{\pi}(s) = R(s) + \gamma \sum_{s&amp;rsquo; \in S} P(s&amp;rsquo;|s, a) V_{\pi}(s&amp;rsquo;)$$&lt;/p&gt;
+
+&lt;p&gt;And here, $V_{\pi}(s)$ is equal to current state reward plus the value function of all possible next state with a discount.&lt;/p&gt;
+
+&lt;p&gt;So, the optimal value function should be the value function obtained by optimal policy:&lt;/p&gt;
+
+&lt;p&gt;$$ V^{\star}(s) = max_{\pi} V_{\pi}(s) = R(s) + \gamma max_{a \in A} \sum_{s&amp;rsquo; \in S} P(s&amp;rsquo;|s, a) V^{\star}(s&amp;rsquo;) $$&lt;/p&gt;
+
+&lt;p&gt;The second term
+is the maximum over all actions $a$ of the expected future sum of discounted
+rewards we’ll get upon after action $a$. It is very easy to understand, just go with the optimal policy and the value function will also be optimal.&lt;/p&gt;
+
+&lt;p&gt;From this equation, the optimal policy will guarantee the largest future reward from certain state. This means that we can use the same policy $\pi^{\star}$ no matter what the initial state of our MDP is.&lt;/p&gt;
+
+&lt;h2 id=&#34;policy-value-iteration&#34;&gt;Policy/Value iteration&lt;/h2&gt;
+
+&lt;p&gt;We now describe two efficient algorithms for solving finite-state MDPs, $|S| &amp;lt; \infty$, $|A| &amp;lt; \infty$.&lt;/p&gt;
+
+&lt;p&gt;The frist one is &lt;strong&gt;value iteration&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;For each state s, initialize V (s) := 0.&lt;/li&gt;
+&lt;li&gt;Repeat until convergence
+{&lt;br /&gt;
+For every state, update $V (s) := R(s) + max_{a \in A} \gamma \sum_{s&amp;rsquo; \in S} P(s&amp;rsquo;|a, s) V(s&amp;rsquo;)$&lt;br /&gt;
+}&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This algorithm iteratively update estimated value function using Bellman equation.There are two kinds of value iteration, asynchronous or synchronous. The first one will update value function for every step, while the second one will overwrite all value functions after one iteration. After the algorithm converges, we can easily get optimal policies with value functions.&lt;/p&gt;
+
+&lt;p&gt;Another algorithm is &lt;strong&gt;policy iteration&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Initialize $\pi$ randomly.&lt;/li&gt;
+&lt;li&gt;Repeat until convergence {&lt;br /&gt;
+(a) Let $V := V_{\pi}$&lt;br /&gt;
+(b) For each state s, let $π(s) := argmax_{a \in A} P(s&amp;rsquo;|s, a) V(s)$&lt;br /&gt;
+}&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Thus, the inner-loop repeatedly computes the value function for the current
+policy, and then updates the policy using the current value function.&lt;/p&gt;
+
+&lt;p&gt;Note that step (a) can be done via solving Bellman’s equations
+as described earlier, which in the case of a fixed policy, is just a set of |S|
+linear equations in |S| variables.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Both value iteration and policy iteration are standard algorithms for solving
+MDPs, and there isn’t currently universal agreement over which algorithm
+is better. For small MDPs, policy iteration is often very fast and
+converges with very few iterations. However, for MDPs with large state
+spaces, solving for $V_{\pi}$
+explicitly would involve solving a large system of linear
+equations, and could be difficult. In these problems, value iteration may
+be preferred. For this reason, in practice value iteration seems to be used
+more often than policy iteration. &amp;ndash; From CS229 by Andrew Ng&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;All above derivation does not learn the state transition dynamics, $P(s|s&amp;rsquo;, a)$. In many realistic problems,
+we are not given state transition probabilities and rewards explicitly,
+but must instead estimate them from data.&lt;/p&gt;
+
+&lt;p&gt;The most naive approach is just counting:&lt;/p&gt;
+
+&lt;p&gt;$$P(s|s&amp;rsquo;, a) = \frac{times \space took \space we \space action \space a  \space in \space state  \space s \space and \space got \space to \space s_0}{times \space took \space we \space action \space a \space in \space state \space s}$$&lt;/p&gt;
+
+&lt;p&gt;Note that the $0/0$ situation may happen, a little smooth is necessary.&lt;/p&gt;
+
+&lt;p&gt;So, here comes a easy algorithm:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Initialize π randomly.&lt;/li&gt;
+&lt;li&gt;Repeat {&lt;br /&gt;
+a. Execute $\pi$ in the MDP for some number of trials.&lt;br /&gt;
+b. Using the accumulated experience in the MDP, update our estimates
+for $P(s|s&amp;rsquo;, a)$&lt;br /&gt;
+c. Apply value iteration with the estimated state transition probabilities
+and rewards to get a new estimated value function V .&lt;br /&gt;
+d. For each state s, let $π(s) := argmax_{a \in A} P(s|s&amp;rsquo;, a) V(s)$&lt;br /&gt;
+}&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;MDP provides a mathematical framework for modeling decision making. MDPs are useful for studying optimization problems solved via dynamic programming and reinforcement learning. It can be used in many disciplines, including robotics, automatic control, economics and manufacturing. Next part, we wil dive into reinforcement learning algorithms.&lt;/p&gt;
+
+&lt;h2 id=&#34;imitation-learning&#34;&gt;Imitation Learning&lt;/h2&gt;
+
+&lt;p&gt;In the beginning, we may let the machine mimic human behaviors. In this way, it is easy to give human supervision. Just let the human expert complete the task, and their hehavior should be the label to train algorithms.&lt;/p&gt;
+
+&lt;p&gt;For example, we can easily train a neural network to fit human expert&amp;rsquo;s behaviors, like shown in the following diagram:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/imitation_learning.png&#34; width=800&gt;&lt;/p&gt;
+
+&lt;p&gt;But this method has two main drawbacks:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Since human experts seldom make mistake, the training samples of some extreme cases will be rare. But such extreme situations is critical for a controller. For example, an autonomous vehice should be able to deal with some unexpected obstacles, but such training sample is not efficient to draw from human experts.&lt;/li&gt;
+&lt;li&gt;Errors are accumulative. Every state, the controller might make some mistakes, and for next state the controller will make decision based on current state. So, if the controller make some mistakes in some early stages, the whole trajectory should be totally different and the error will be bigger and bigger, as shown in the following figure.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/error_accumulate.jpg&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;One possible algorithm to mitigate this problem: DAgger (Dataset Aggregation). The main idea is using human expert to correct the wrong behavior rather than using human supervision all the time.&lt;/p&gt;
+
+&lt;p&gt;DAgger:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;train $\pi_{\theta}(a|o)$ with small amount of training data, $D = $ {$a_1, o_1, a_2, o_2, &amp;hellip;, a_N, o_N$}&lt;/li&gt;
+&lt;li&gt;Run $\pi_{\theta}(a|o)$ to get extra observations, $D_{\pi}$ = {$o_1, o_2, &amp;hellip;, o_M$}&lt;/li&gt;
+&lt;li&gt;Let human expert to label all inappropriate observations.&lt;/li&gt;
+&lt;li&gt;Merge the original data and extra data. $D_{new} = D_{\pi} \cup D$&lt;/li&gt;
+&lt;li&gt;Iterate to step 1 until converge&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In this way, the algorithm addresses the error cases to make the controller better. But still, our model may fail to fit human experts.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Non-Markov condition. Sometimes, human expert&amp;rsquo;s may not based on current observation, but a combination of several previous observations. RNN may help in such situation, but it will also make our model exponentially complex.&lt;/li&gt;
+&lt;li&gt;Multi-modal output. Once hearing the word &amp;ldquo;Multi-modal&amp;rdquo;, the first thing come to my mind is always MoG (mixture of Gaussian). We can also use latent variable models or autoregressive discretization. Latent variable models will inject some other distribution at the input od neural network, and let the output use this additional distribution properly. Autoregressive discretization will discretize one dimension at a time instead of discretize the output at a time to avoid the dimensionality explosion. It is a great way to handle high dimensional output. The first network predict $P(d_1|O)$, while next network predict $P(d_2 | d_1, O)$ and so on.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;reinforcement-learning-objective&#34;&gt;Reinforcement learning objective&lt;/h2&gt;
+
+&lt;p&gt;First, we name a trail from time 0 to time step $T$ as a &lt;strong&gt;trajectory&lt;/strong&gt;. So, the probability of the hwole trajectory is:&lt;/p&gt;
+
+&lt;p&gt;$$P(\tau) = P_{\theta}(s_0, a_0, &amp;hellip;, s_T, a_T) = p(s_0) \prod_{t=1}^T \pi_{\theta}(a_t|s_t) p(s_{t+1}|s_t, a_t)$$&lt;/p&gt;
+
+&lt;p&gt;Our objective is to find an optimal $\theta^{\star}$, that maximizes the expection of the trajectory reward:&lt;/p&gt;
+
+&lt;p&gt;$$\theta^{\star} = argmax_{\theta} E_{\tau \sim p(\tau)}[\sum_{t=1}^{T} r(a_t, s_t)]$$&lt;/p&gt;
+
+&lt;p&gt;Note that we still treat this as a Markov process.&lt;/p&gt;
+
+&lt;p&gt;Next step, we will talk about reinforcement learning algorithms. There are a lot of categorical information from CS294 Lecture &lt;a href=&#34;http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-4.pdf&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;policy-gradient&#34;&gt;Policy Gradient&lt;/h2&gt;
+
+&lt;p&gt;The basic idea of policy gradient algorithm is using gradient ascent to optimize policy distribution in order to obtain higher trajectroy reward. Let&amp;rsquo;s start the derivation from RL objective.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/derivation_1.png&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/derivation_2.png&#34; width=900&gt;&lt;/p&gt;
+
+&lt;p&gt;Since the $\nabla_{\theta} log p(s_{t+1}|s_t, a_t)]$ term is zero because $ log p(s_{t+1}|s_t, a_t)]$ is not related to $\theta$. We have the final result:&lt;/p&gt;
+
+&lt;p&gt;$$ \nabla_{\theta} J(\theta) =  E_{\tau \sim p(\tau)} [\sum_{t=1}^{T} log\pi_{\theta} (a_t | s_t) \sum_{t=1}^{T} r(a_t, s_t)] $$&lt;/p&gt;
+
+&lt;p&gt;For N experimental trails, we can approximate the expection:&lt;/p&gt;
+
+&lt;p&gt;$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) \sum_{t=1}^{T} r(a_{t, i}, s_{t, i})]$$&lt;/p&gt;
+
+&lt;p&gt;In this way, we get the REINFORCE algorithm:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Run the policy to obtain a bunch of trajectories: {$\tau_i$}&lt;/li&gt;
+&lt;li&gt;Calculate gradient with above formula: $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i}) \sum_{t=1}^{T} r(a_{t, i}, s_{t, i})]$&lt;/li&gt;
+&lt;li&gt;Gradient ascent: $ J(\theta) =  J(\theta) + \alpha \nabla_{\theta} J(\theta)$&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;If compare to the maximum likelihood:&lt;/p&gt;
+
+&lt;p&gt;$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i})]$$&lt;/p&gt;
+
+&lt;p&gt;The policy gradient is just a reward weighted version of maximum likelihood.&lt;/p&gt;
+
+&lt;p&gt;Seems like that&amp;rsquo;s it. But we are not done yet. Algorithms with policy gradient have a big problem, sometimes even make the whole algorithm
+break down. First, let&amp;rsquo;s analyze why this problem appears, and then find some strategies for this problem.&lt;/p&gt;
+
+&lt;p&gt;There are two reasons for the high variance:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Policy gradient is evaluated on a whole trajectory. This trajectory contains a lot of times steps. Assuming every time step the agent can have A actions, this will bring $A^T$ complexity to the system. In this way, our samples can act dramatically different. And the policy gradient is just an average of gradients of these diverging trajectories. If we have a large enough sample size N, this problem should be OK. But usually N is a much smaller number than time step T, where this problem is significant.&lt;/li&gt;
+&lt;li&gt;The policy update itself can also make policies diverse. A negative reward trajectory may squeeze the distribution probability mass to its left and right, and if we increase reward function to all trajectories, the policy update is different, etc. There are a lot of other situations that increases variance. And most imporvement on policy gradient is on this aspect.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;No surprise, here comes improvements：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Introduce causality. Since policy in time step t cannot affect the reward in time step $t&amp;rsquo;$. So, we can change the formula a little bit: $$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i}) \sum_{t=1}^{T} r(a_{t, i}, s_{t, i})] $$ into $$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T}\nabla_{\theta} log\pi_{\theta}(a_{t, i} | s_{t, i})  [\sum_{t&amp;rsquo;=t}^{T} r(a_{t&amp;rsquo;, i}, s_{t&amp;rsquo;, i})]$$
+Because $\sum_{t&amp;rsquo;=t}^{T} r(a_{t&amp;rsquo;, i}, s_{t&amp;rsquo;, i})$ always has smaller variance than its original form. This  is also called $\hat{Q}_{i,t}$, means reward to go, all reward after time step t. This function is very useful afterwards.&lt;/li&gt;
+&lt;li&gt;Introduce baseline. Actually, policy gradient method want to make the prob of high reward trajectory higher and the prob of low reward trajectory lower. But if both trajectories have positive rewards, the effect on probability distribution will be diluted. We want the prob of low reward trajectory to be lower by make the reward to be negative. How? Using a relative reward.
+$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t=1}^{T} r(a_{t, i}, s_{t, i}) - b] $$
+This $b$can be easily as $\sum_{i=1}^N\sum_{t=1}^{T} r(a_{t, i}, s_{t, i})$, just an average of all trajectory rewards. And this $b$ can some other values to further reduce variance.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;And this is all for policy gradient.&lt;/p&gt;
+
+&lt;h2 id=&#34;actor-critic-algorithm&#34;&gt;Actor-Critic Algorithm&lt;/h2&gt;
+
+&lt;p&gt;Previous, when discussing about casuality in policy gradient, we already have estimated reward to go: $\hat{Q}_{i,t} = \sum_{t&amp;rsquo;=t}^{T} r(a_{t&amp;rsquo;, i}, s_{t&amp;rsquo;, i})$. But if we have the exact reward to go: $Q(s_t, a_t) = E_{\pi_{\theta}}[\sum_{t&amp;rsquo;=t}^{T}r(s_{t&amp;rsquo;}, a_{t&amp;rsquo;})]$, we can further reduce the variance.
+And another thing, the value function for state $s_t$ is a pretty good baseline. Based on the definition of value function: $V^{\pi}(s_t) = E_{a_t \sim \pi(a_t | s_t)} [Q^{\pi} (s_t, a_t)]$, it is an expected average of all possible Qs. And we define $A^{\pi} (s_t, a_t) = Q^{\pi} (s_t, a_t) - V^{\pi}(s_t)$ to estimate how better $Q^{\pi} (s_t, a_t)$ is. So, the policy gradient formula becomes:&lt;/p&gt;
+
+&lt;p&gt;$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i}) A^{\pi} (s_{t, i}, a_{t, i})$$&lt;/p&gt;
+
+&lt;p&gt;Here comes the derivation of actor-critic:&lt;/p&gt;
+
+&lt;p&gt;$$Q^{\pi} (s_t, a_t) = r(s_t, a_t) + E_{s_{t+1} \sim P(s_{t+1} | s_t, a_t)}[V^{\pi} (s_{t+1})]$$
+$$\approx r(s_t, a_t) + V^{\pi} (s_{t+1})$$&lt;/p&gt;
+
+&lt;p&gt;So, $A^{\pi} (s_t, a_t) = r(s_t, a_t) +  + V^{\pi} (s_{t+1}) - V^{\pi} (s_{t})$&lt;/p&gt;
+
+&lt;p&gt;How about fitting the value function?&lt;/p&gt;
+
+&lt;p&gt;$$V^{\pi} (s_{t}) = \sum_{t&amp;rsquo;=t}^{T} E_{\pi_{\theta}}[r(s_{t&amp;rsquo;}, a_{t&amp;rsquo;}) | s_t] $$&lt;/p&gt;
+
+&lt;p&gt;Here are some evaluation methods. For N experimental trails:&lt;/p&gt;
+
+&lt;p&gt;$$V^{\pi} (s_{t}) = \frac{1}{N} \sum_{i=1}^{N} \sum_{t&amp;rsquo;=t}^{T} r(s_{t&amp;rsquo;, i&amp;rsquo;}, a_{t&amp;rsquo;, i&amp;rsquo;}) $$&lt;/p&gt;
+
+&lt;p&gt;But here, we need a lot of trails comes from {$s_t, a_t$}. We may need to reset the simulator. But we can use a function approximator like a neural network. The function approximator have the assumption that the function is smooth. In such cases, we do not need to have a lot of examples from {$s_t, a_t$}, some samples near {$s_t, a_t$} should also be OK. Although it is not as good as direct evaluation, but good enough.&lt;/p&gt;
+
+&lt;p&gt;So, train neural network with supervision $Y_{s_t}$, the evaluated value:&lt;/p&gt;
+
+&lt;p&gt;$$L_{\phi} = \frac{1}{2} ||V_{fit}(s_t) - Y_{s_t}||^2$$&lt;/p&gt;
+
+&lt;p&gt;Another way to evaluate $V^{\pi} (s_{t})$ need some approximation:&lt;/p&gt;
+
+&lt;p&gt;$$Y_{s_t} = \sum_{t&amp;rsquo;=t}^{T} E_{\pi_{\theta}}[r(s_{t&amp;rsquo;}, a_{t&amp;rsquo;}) | s_t] = r(s_{t}, a_{t}) + V^{\pi} (s_{t+1})$$&lt;/p&gt;
+
+&lt;p&gt;Now, we can use $r(s_{t}, a_{t}) + V_{fit}(s_{t+1})$ as a target value to update the neural network. It&amp;rsquo;s like a bootstrapping strategy reusing learned function again and again. After formulizing this, here comes actor-critic algorithm:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Sample {$s_i, a_i$} from policy $\pi_{\theta}(a_t|s_t)$&lt;/li&gt;
+&lt;li&gt;Fit $\hat{V}^{\pi} (s_{i})$ with reward sum&lt;/li&gt;
+&lt;li&gt;Evaluate $\hat{A}(s_{i}, a_{i}) = r(s_{i}, a_{i}) + \hat{V}^{\pi} (s_{i}’) - \hat{V}^{\pi} (s_{i})$&lt;/li&gt;
+&lt;li&gt;Using policy gradient:  $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \nabla log\pi_{\theta} (a_{i} | s_{i}) \hat{A}(s_{i}, a_{i})$&lt;/li&gt;
+&lt;li&gt;Update policy network: $ J(\theta) =  J(\theta) + \alpha \nabla_{\theta} J(\theta)$&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;And a online version:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Take action $a \sim \pi_{\theta}(a|s)$, and get a training sample $(s, a, s&amp;rsquo;, r)$&lt;/li&gt;
+&lt;li&gt;Update $\hat{V}^{\pi} (s_{i})$ with target $r + \hat{V}^{\pi} (s&amp;rsquo;_{i})$&lt;/li&gt;
+&lt;li&gt;Evaluate $\hat{A}(s, a) = r(s, a) + \hat{V}^{\pi} (s&amp;rsquo;) - \hat{V}^{\pi} (s)$&lt;/li&gt;
+&lt;li&gt;Using policy gradient:  $\nabla_{\theta} J(\theta) =  \nabla log\pi_{\theta} (a | s) \hat{A}(s, a)$&lt;/li&gt;
+&lt;li&gt;Update policy network: $ J(\theta) =  J(\theta) + \alpha \nabla_{\theta} J(\theta)$&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Another thing to mention, we can add discount factor like the MDPs. It is pretty straight forward to do.&lt;/p&gt;
+
+&lt;p&gt;Now, we have two major algorithms, policy gradient and actor critic:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Policy gradient: $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t&amp;rsquo;=t}^{T} \gamma^{t&amp;rsquo;-t}r(a_{t&amp;rsquo;, i}, s_{t&amp;rsquo;, i}) - b] $. It is unbiased, but with high variance. This is a Monte Carlo estimation method.&lt;/li&gt;
+&lt;li&gt;Actor-critic: $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [r(s_{i}, a_{i}) + \gamma \hat{V}^{\pi} (s_{i}’) - \hat{V}^{\pi} (s_{i})] $. This method have low variance, since we are not add multiple time steps. But it is not unbiased, because the estimated value function may not be accurate. This is a temporal difference control method, which based on Dynamic Programming, updating result recursively from previous results.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Combining the above two methods, we can build a bridge from TD control method to Monte Carlo method.  $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t&amp;rsquo;=t}^{T} \gamma^{t&amp;rsquo;-t} r(a_{t&amp;rsquo;, i}, s_{t&amp;rsquo;, i}) - \hat{V}^{\pi} (s_{i})] $
+In this way, there is no bias and the variance is smaller than pure policy gradient, but of course, cannot compare to actor-critic.&lt;/p&gt;
+
+&lt;p&gt;To sum up, actor-critic algorithm use function approximator to fit value function and successfully replace large time step reward sum into the sum of current reward and next state reward function. This method deals with the first problem of policy gradient, as mentioned before.
+More things to read:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;N-step return to balance bias and variance. $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t&amp;rsquo;=t}^{t+n} \gamma^{t&amp;rsquo;-t} r(a_{t&amp;rsquo;, i}, s_{t&amp;rsquo;, i}) - \hat{V}^{\pi} (s_{t}) + \gamma^{n} \hat{V}^{\pi} (s_{t+n})] $. N &amp;gt; 1 often works!&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1506.02438&#34; target=&#34;_blank&#34;&gt;General advantage estimator. &lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;temporal-difference-learning&#34;&gt;Temporal Difference Learning&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;If one had to identify one idea as central and novel to reinforcement learning, it would undoubtedly
+be temporal-difference (TD) learning. &amp;ndash; Sutton&amp;rsquo;s RL book&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;At this point, we need to a wrap up before unrolling new stuff. Previous method, like policy gradient, actor-critic, belongs to Monte Carlo (MC) methods, which we sample the trajectory as an episode and make updates based on the rewards. In this way, we have to wait until the whole eposide ends to update our model. While TD learning is a conbination of Monte Carlo method and dynamic programming (DP), and can estimates based on learned estimations, without a final outcome. This bootstrapping fashion makes TD learning usually converge faster than MC methods.&lt;/p&gt;
+
+&lt;p&gt;Actually, the actor critic algorithm also get some essence of TD learning. The update of state value function and advantage is based on previous estimated value function.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s derive TD learning based on MC methods:&lt;/p&gt;
+
+&lt;p&gt;$$V(S_t) = V(S_t) + \alpha [\sum_{t=1}^{T} \gamma ^ t R_{ t} - V(S_t)]$$&lt;/p&gt;
+
+&lt;p&gt;According to Sutton&amp;rsquo;s book, note $\sum_{t&amp;rsquo;=t}^{T} \gamma ^ {t&amp;rsquo;} R_{t&amp;rsquo;}$ as $G_t$. This becomes:&lt;/p&gt;
+
+&lt;p&gt;$$V(S_t) = V(S_t) + \alpha [G_t - V(S_t)]$$&lt;/p&gt;
+
+&lt;p&gt;This is a typical MC value iteration algorithm, updating value function based on MC samples in the end of an eposide. TD learning method only need to wait until next step:&lt;/p&gt;
+
+&lt;p&gt;$$V(S_t) = V(S_t) + \alpha [R_{t+1} + \gamma V(S_{t+1}) - V(S_t)]$$&lt;/p&gt;
+
+&lt;p&gt;This is called one-step TD or TD(0), because it only uses next step estimations. It is more clear written in this way:&lt;/p&gt;
+
+&lt;p&gt;$$V_{\pi} = E_{\pi}[G_t | S_t = s] \\&lt;br /&gt;
+V_{\pi} =  E_{\pi}[R_{t+1} + \gamma G_{t+1} | S_t = s] \\&lt;br /&gt;
+V_{\pi} =  E_{\pi}[R_{t+1} + \gamma V(S_{t+1}) | S_t = s]$$&lt;/p&gt;
+
+&lt;p&gt;MC method uses the first equation, and TD method uses the third equation. And also, MC error can be written as a sum of TD errors (Image from Sutton&amp;rsquo;s book):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/TD_error.jpg&#34; width=1000&gt;&lt;/p&gt;
+
+&lt;p&gt;TD learning is a model-free algorithm, does not require system dynamics. And it has an online, fully incremental update fashion, which is very important when single episode is long. In practice, TD methods are found to converge faster than MC methods. MC method is optimizing on the &lt;strong&gt;training dataset&lt;/strong&gt;, while TD method is optimized to the maximum-likelihood model of the &lt;strong&gt;Markov decision process&lt;/strong&gt; and the reward is averaged on different transitions.&lt;/p&gt;
+
+&lt;h2 id=&#34;sarsa&#34;&gt;Sarsa&lt;/h2&gt;
+
+&lt;p&gt;Sarsa is an on-policy TD control algorithm. Rather tahn learn a state-value function, it learns an action-value fucntion. We gonna estimate quality function $Q_{\pi}(s,a)$ for all state and action pair. Literally, it is the same process as fitting $V_{\pi}$.&lt;/p&gt;
+
+&lt;p&gt;The update rule is very similar:&lt;/p&gt;
+
+&lt;p&gt;$$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)]$$&lt;/p&gt;
+
+&lt;p&gt;Update is done for every transition with their learned estimation and reward, like before. With learned $ Q(S_t, A_t)$, it&amp;rsquo;s easy to find a greedy policy to maximize our reward. But during training time, we need some exploration. Greedy policy may just lead us to a local optimum. So, the policy in Sarsa is &amp;ldquo;$\varepsilon$-greedy&amp;rdquo; policy, which have a prob of $\varepsilon$ to choose some other actions.&lt;/p&gt;
+
+&lt;p&gt;Here is Sarsa: For every steps in one eposide:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;At state S, take action A, get R, and S&amp;rsquo;&lt;/li&gt;
+&lt;li&gt;Choose A&amp;rsquo; from S&amp;rsquo; using $\varepsilon$-greedy policy&lt;/li&gt;
+&lt;li&gt;$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)]$&lt;/li&gt;
+&lt;li&gt;S=S&amp;rsquo;, A=A&amp;rsquo;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;After one eposide, start a new one until termination. This is clearly a on-policy algorithm.&lt;/p&gt;
+
+&lt;h2 id=&#34;q-learning&#34;&gt;Q-learning&lt;/h2&gt;
+
+&lt;p&gt;From Sarsa, if we modify the update rule a little bit, we can easily get Q-learning:&lt;/p&gt;
+
+&lt;p&gt;$$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma max_a Q(S_{t+1}, a) - Q(S_t, A_t)]$$&lt;/p&gt;
+
+&lt;p&gt;Instead of choosing action with &amp;ldquo;$\varepsilon$-greedy&amp;rdquo; policy, Q-learning directly choose $max_a Q(S_{t+1}, a)$. Directly optimizing on optim value can make the algorithm even simpler and converge faster. Here is Q-learning:&lt;/p&gt;
+
+&lt;p&gt;For each step of eposide:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Choose A from S using $\varepsilon$-greedy policy&lt;/li&gt;
+&lt;li&gt;Take action A,  get R, and S&amp;rsquo;&lt;/li&gt;
+&lt;li&gt;$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma max_a Q(S_{t+1}, a) - Q(S_t, A_t)]$&lt;/li&gt;
+&lt;li&gt;S=S&amp;rsquo;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Also, after an eposide, start a new one.&lt;/p&gt;
+
+&lt;p&gt;One thing to note, Q-learning is an off-policy algorithm. It follows current $Q(S_t, A_t)$ to choose actions and proceed, but when updating, it directly choose $argmax_a Q(S_{t+1}, a)$ rather than the chosen action. In another words, it update its Q-values using the Q-value of the next state s′ and the &lt;strong&gt;greedy action&lt;/strong&gt; a′. But it&amp;rsquo;s not following the greedy policy. While Sarsa uses &amp;ldquo;$\varepsilon$-greedy&amp;rdquo; policy to choose action and update Q-values, and has only one action selection each time step.&lt;/p&gt;
+
+&lt;p&gt;From Sutton&amp;rsquo;s book, the cliff walking problem indicate the difference between Sarsa and Q-learning very clearly.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/cliffwalking.jpg&#34; width=900&gt;&lt;/p&gt;
+
+&lt;p&gt;The agent starts from S and the goal is G. Falling to the cliff will result in a -100 reward and start from S and every step have a -1 reward to push the agent to optimal. Q-learning can directly learn the shorter path, while Sarsa learns the safer path. Since we are using a &amp;ldquo;$\varepsilon$-greedy&amp;rdquo; policy, Sarsa will consider the probability of falling, while Q-learing always update with a greedy policy, so the update will ignore the worest falling cases and optimize our model to the shortest path. Of course, Sarsa can get a higher reward expection during training.&lt;/p&gt;
+
+&lt;h2 id=&#34;expected-sarsa&#34;&gt;Expected Sarsa&lt;/h2&gt;
+
+&lt;p&gt;From Q-learning, considering instead of the maximum over next state–action pairs, we take expected value over all possible actions.&lt;/p&gt;
+
+&lt;p&gt;$$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma E_{\pi}[Q(S_{t+1}, A_{t+1})] - Q(S_t, A_t)]$$&lt;/p&gt;
+
+&lt;p&gt;Expected Sarsa moves in expectation while Q-learning moves deterministically. Expected Sarsa is more complex computationally than Sarsa but, in return, it eliminates
+of Q-learning on this problem. Given the same amount of experience we might expect it to perform slightly better than Sarsa, and indeed it generally does. When policy is purely greedy, not exploratory, Expected Sarsa is exactly Q-learning.&lt;/p&gt;
+
+&lt;h2 id=&#34;double-q-learning&#34;&gt;Double Q-Learning&lt;/h2&gt;
+
+&lt;p&gt;Algorithms we discussed above, like Sarsa, Q-learing, involve a maximization over all actions via policy. This maximization operation can lead to a significant positive bias. It is easy to understand. For example, if the true value of Q(s, a) is zero, and it&amp;rsquo;s a Gaussian with some variance. The sample generated should have a mean of zero, but the expected maximum is definitely above 0. Q-learning will consistently choose the maximum and bring in a big bias.&lt;/p&gt;
+
+&lt;p&gt;Double Q-Learning was born to deal with the positive bias. The idea is using two different and independent Q-tables or Q-network to decorrelate the selection of the best action from the evaluation of this action. $max(E[Q_1], E[Q_2]) &amp;lt;= E[max(Q_1, Q_2)]$. Basically, two Q estimation should be both noisy, but if they are noisy in different ways, it should be OK. So, Double Q-learning does not use the same network to choose action and evaluate value:&lt;/p&gt;
+
+&lt;p&gt;$$Q_1(S_t, A_t) = Q_1(S_t, A_t) + \alpha [R_{t+1} + \gamma Q_2(S_{t+1},argmax_a Q_1(S_{t+1},a)) - Q_1(S_t, A_t)]$$&lt;/p&gt;
+
+&lt;p&gt;And for another 50% probability, switch $Q_1$ and $Q_2$ to update $Q_2$. This is the double version of Q-learning. Of course, there are also double versions of Sarsa and Expected Sarsa.&lt;/p&gt;
+
+&lt;h2 id=&#34;n-step-return&#34;&gt;N-step Return&lt;/h2&gt;
+
+&lt;p&gt;N-step return is an intermediate algorithm between MC and TD(0) methods. MC method can be treated as an infinity time steps return algorithm, we ahve to wait until eposide ends. And TD(0) method is one-step return, which directly uses the evaluation of next time step.
+N-step return algorithms can migitate problems of both algorithms when using a proper N.&lt;/p&gt;
+
+&lt;p&gt;Here is a typical backup diagram of MC, TD(0), and N-step algorithms (image from Sutton&amp;rsquo;s book):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/n-step.jpg&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;Originally in MC method,&lt;/p&gt;
+
+&lt;p&gt;$$G_t = R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + &amp;hellip; + \gamma^{T-t-1} R_{T}$$&lt;/p&gt;
+
+&lt;p&gt;And in TD(0),&lt;/p&gt;
+
+&lt;p&gt;$$G_{t:t+1} = R_{t+1} + \gamma V(S_{t+1})$$&lt;/p&gt;
+
+&lt;p&gt;So in N-step:&lt;/p&gt;
+
+&lt;p&gt;$$G_{t:t+n} = R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + &amp;hellip; + \gamma^{n-1} R_{t+n} + \gamma^n V(S_{t+n+1})$$&lt;/p&gt;
+
+&lt;p&gt;And the update rule for state-value TD method:&lt;/p&gt;
+
+&lt;p&gt;$$V_{t+n}(S_t) = V_{t+n-1}(S_t) + \alpha [G_{t:t+n} - V_{t+n-1}(S_t)]$$&lt;/p&gt;
+
+&lt;p&gt;Update rule for action-state TD method, like Sarsa:&lt;/p&gt;
+
+&lt;p&gt;$$Q_{t+n}(S_t, A_t) = Q_{t+n-1}(S_t, A_t) + \alpha [G_{t:t+n} - Q_{t+n-1}(S_t, A_t)]$$&lt;/p&gt;
+
+&lt;p&gt;But for N-step return, we have to wait N steps until getting the update values. It can be viewed as a control over variance and bias trade-off. Also, it gives us more freedom. Bootstrapping works best if it is over a length of time in which a significant and recognizable state change has occurred, and a significant and recognizable state change may takes several time steps. Accordingly, N-step usually works better than pure MC or TD method. But theoritically, this is only correct for online algorithms. We can ignore this difference, and it oftern works well.&lt;/p&gt;
+
+&lt;h2 id=&#34;deep-q-network&#34;&gt;Deep Q network&lt;/h2&gt;
+
+&lt;p&gt;All the TD methods discussed above are tabular methods, in which the state and action spaces are small enough for the approximate value functions to be represented as arrays, or tables. These methods can often find exact solutions, that is, they can often find exactly the optimal value function and the optimal policy.&lt;/p&gt;
+
+&lt;p&gt;But they have problems when the state/action space is combinatorial and enormous, like images. The &amp;ldquo;table&amp;rdquo; in tabular methods would be inefficiently enormous and cannot fit into memory. Generalization is needed for such cases, like function approximation. And neural network is a good tool to do this.&lt;/p&gt;
+
+&lt;p&gt;So, if we change Q table into a deep neural network, the algorithm becomes deep Q network (DQN), the core algorithm of Alpha Go and Alpha Zero. And the update is not directly modification anymore, we can use gradient based algorithm to update the network.&lt;/p&gt;
+
+&lt;p&gt;Here is a neural network based Q-learning:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Take some actions, like &amp;ldquo;$\varepsilon$-greedy&amp;rdquo; policy, and get (s, a, s&amp;rsquo;, r)&lt;/li&gt;
+&lt;li&gt;$\phi = \phi - \alpha \frac{\nabla Q_{\phi} (s, a)}{\nabla \phi}  (Q_{\phi}(s,a) - r(s, a) - \gamma max_{a&amp;rsquo;} Q_{\phi}(s&amp;rsquo;, a&amp;rsquo;))$&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;But the samples are strongly correlated because the policy only changes little in deep neural network training. We tend to locally overfit the samples. For this, we can use a replay buffer to deal with in off-policy algorithms. This replay buffer is easy to use, quite effective, so widely used. Here is a diagram of replay buffer:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/replaybuffer.png&#34; width=1000&gt;&lt;/p&gt;
+
+&lt;p&gt;We keep a lot of transitions in the buffer and keep updating. Every training batch is a random sample of all transition in the buffer.&lt;/p&gt;
+
+&lt;p&gt;The algorithm becomes:
+&lt;img src=&#34;/img/RL/replaybufferalgorithm.png&#34; width=800&gt;&lt;/p&gt;
+
+&lt;p&gt;Actually, the updating step of this algorithm is optimizing over a moving target since we are consistently changing $\phi$ and $max_{a&amp;rsquo;} Q_{\phi}(s&amp;rsquo;, a&amp;rsquo;)$. And we cannot run too much steps in the inner loop because it will overfit. Here is a modification:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/movingtarget.png&#34; width=900&gt;&lt;/p&gt;
+
+&lt;p&gt;$\phi$ is update far less frequently to keep the target still. That&amp;rsquo;s DQN. A more general overview of these algorithms are avaiable &lt;a href=&#34;http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-8.pdf&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;q-learning-with-continuous-action&#34;&gt;Q-learning with continuous action&lt;/h2&gt;
+
+&lt;p&gt;If the action space are continuous, we need a neat method to find the maximum of $Q(s,a)$, since every Q iteration step need to find $argmax_{a&amp;rsquo;} Q_{\phi}(s&amp;rsquo;, a&amp;rsquo;)$. Here are three method:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Optimization methods, like SGD,stochastic optimization. Or easily sample a bunch and choose the best one.&lt;/li&gt;
+&lt;li&gt;Functions wasy to maximize, like quadratic funtions.&lt;/li&gt;
+&lt;li&gt;Learn an approximate maximizer&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;advanced-policy-gradient&#34;&gt;Advanced policy gradient&lt;/h2&gt;
+
+&lt;p&gt;At this point, it&amp;rsquo;s time to wrap up all previous method and go deeper. Learning from previous tabular methods and basic policy gradient, I will make a comparison between policy gradient and action-value or state-value methods, concrete the mathematical theory of policy gradient and go to more advanced policy gradient methods.&lt;/p&gt;
+
+&lt;p&gt;We have talked about basic policy gradient above. Instead of learning action-value or state-value estimations, policy gradient introduces a parameterized policy that can select actions without consulting a value function. Write the policy as: $\pi(a|s, \theta) = P(A=a|S=s, \theta)$ for the porbability that taking action a at state s with parameterized policy P.&lt;/p&gt;
+
+&lt;p&gt;And the update formula looks like:&lt;/p&gt;
+
+&lt;p&gt;$$\theta_{t+1} = \theta_{t} + \alpha \nabla J(\theta_{t})$$&lt;/p&gt;
+
+&lt;p&gt;Here $J(\theta)$ is optimizing objective, $J(\theta) = v_{\pi_{\theta}}(s_0)$, which is the reward of a trajectory from $s_0$. One thing to note, in order to ensure the exploration, the policy should never be deterministic $\pi(a|s, \theta) \in (0, 1)$. And the parameterize policy can make it easier to deal with continuous action and states.&lt;/p&gt;
+
+&lt;p&gt;One advantage of parameterized policy is that it can be nearly deterministic, while $\varepsilon$-greedy policy always has $\varepsilon$ probability to select a random action. But we should prevent it being too deterministic to keep exploration. For example, in softmax function, we need to control the temperature to make sure.&lt;/p&gt;
+
+&lt;p&gt;Another advantage is the parameterized policy can be stochastic, and it can fit arbitrary probability distributions. In some cases, the optimal policy should be stochastic, like poker games.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Perhaps the simplest advantage that policy parameterization may have over action- value parameterization is that the policy may be a simpler function to approximate. Problems vary in the complexity of their policies and action-value functions.  &amp;ndash; From Sutton&amp;rsquo;s book&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;And also, policy gradient has convergence gaurantee, while $\varepsilon$-greedy selection the action probabilities may change dramatically for an arbitrarily small change in the estimated action values, if that change results in a different action having the maximal value.&lt;/p&gt;
+
+&lt;h3 id=&#34;policy-gradient-theorem&#34;&gt;Policy gradient theorem&lt;/h3&gt;
+
+&lt;p&gt;The objective of policy gradient is $\theta_{t+1} = \theta_{t} + \alpha \nabla J(\theta_{t})$. It&amp;rsquo;s kind of tricky to compute this. The problem is the system performance is related to system dynamic $P(s&amp;rsquo; | s, a)$ as well as policy $P(a|s)$. Given a state, the effect of policy parameters are not only on action selection, but also on the system dynamic, which is irrelevant and usually hard to measure. How can we estimate the reward and get the gradient, regardless of the unknown effect of policy changes on system dynamics?&lt;/p&gt;
+
+&lt;p&gt;Thanks to policy gradient theorem, it provides an explicit, excellent answer to this problem.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/policygradienttheorem.jpg&#34; width=1000&gt;&lt;/p&gt;
+
+&lt;p&gt;After unrolling, we give several terms:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/theoremunrolling.jpg&#34; width=1000&gt;&lt;/p&gt;
+
+&lt;p&gt;We can easily find the first half of every unrolling piece is the trajector probability to get to state certain s. And the second half is a a Q function weighted gradient over all action&amp;rsquo;s gradient. So, sum up the unrolling result as:&lt;/p&gt;
+
+&lt;p&gt;$$\nabla J(\theta) = \nabla_{\theta} v_{\pi_{\theta}} = \sum_s d(s) \sum_a \nabla \pi(a|s)q_{\pi}(s,a)$$&lt;/p&gt;
+
+&lt;p&gt;where $d(s)$ is the trajectory probability. This derivation beautifully removes the derivatives of Q function, making it possible to directly update the policy. Also, updating with respect to the policy parameter does not involve th gradient of state distribution $p(s&amp;rsquo;|s,a)$. All policy gradient algorithms are based on this theorem.&lt;/p&gt;
+
+&lt;p&gt;If changing $\nabla \pi(a|s)$ into $ \pi(a|s) \nabla log\pi(a|s)$, the above formula can be further written as:&lt;/p&gt;
+
+&lt;p&gt;$$\nabla J(\theta) = E_{\pi} [\nabla log \pi(a|s)q_{\pi}(s,a)]$$&lt;/p&gt;
+
+&lt;p&gt;We can use a batch of data to approximate the expection. Here is a general form of policy gradient family &lt;a href=&#34;https://arxiv.org/pdf/1506.02438.pdf&#34; target=&#34;_blank&#34;&gt;image source&lt;/a&gt;：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/generalpolicygradient.jpg&#34; width=900&gt;&lt;/p&gt;
+
+&lt;p&gt;There are a lot of poicy gradient algorithms, besides the REINFORCE algorithm and actor-critic algorithm talked above.&lt;/p&gt;
+
+&lt;h3 id=&#34;off-policy-policy-gradient&#34;&gt;Off-policy policy gradient&lt;/h3&gt;
+
+&lt;p&gt;Usually, policy gradient is on-polic, we optimize the exact policy we used to collect data. But off-policy have several advantages：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;We can take advantage of the replay buffer introduced before to avoid sample correlation and improve sample efficiency.&lt;/li&gt;
+&lt;li&gt;Do not need to directly optimize on behavior policy and it can give the model more exploration space.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;But how to make it off-policy? We only need to make a little approximation.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/offpolicygradient.jpg&#34; width=700&gt;&lt;/p&gt;
+
+&lt;p&gt;We need to ignore the second term in the third step. In policy gradient theorem, we unroll the $\nabla_{\theta}Q(s,a)$ term, while here, we just ignore it, since it is usually very hard compute it. As shown in the result, the only difference is an importance sampling weight $\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)}$. Although we make a big approximation, the off-policy policy gradient is also gauranteed to converge to the optimal &lt;a href=&#34;https://arxiv.org/pdf/1205.4839.pdf&#34; target=&#34;_blank&#34;&gt;(proof)&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;So, it is totally ok to make policy gradient off-policy, we only need to add a reweighting ratio of the target policy over behavior policy.&lt;/p&gt;
+
+&lt;h3 id=&#34;asynchronous-advantage-actorcritic-a3c&#34;&gt;asynchronous advantage actorcritic (A3C)&lt;/h3&gt;
+
+&lt;p&gt;Instead of experience replay, A3C asynchronously execute multiple agents in parallel, on multiple instances of the environment. Each process contains an actor that acts in its own copy of the environment, a separate replay memory, and a learner that samples data, updating shared policy parameters are sent to the actor-learners at fixed intervals.&lt;/p&gt;
+
+&lt;p&gt;Run seperately in different threads can introduce exploration into the system, so A3C does not uses replay buffer in order to use some on-policy algorithms, like Sarsa. Here is A3C &lt;a href=&#34;https://arxiv.org/pdf/1602.01783.pdf&#34; target=&#34;_blank&#34;&gt;image source&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/A3C.jpg&#34; width=700&gt;&lt;/p&gt;
+
+&lt;p&gt;A3C enables large scale training in different threads. The algorithm computes gradients for n-step updates for each of the state-value pairs encountered since the last update. This accumulated gradient can alao mkae the model more robust.&lt;/p&gt;
+
+&lt;h3 id=&#34;deterministic-policy-gradient-dpg&#34;&gt;Deterministic Policy Gradient (DPG)&lt;/h3&gt;
+
+&lt;p&gt;The first step of DPG should be building a mathematical foundation: the Deterministic Policy Gradient Theorem.&lt;/p&gt;
+
+&lt;p&gt;Previously, our policy gradient theorem gives:&lt;/p&gt;
+
+&lt;p&gt;$$J(\theta) = \int_\mathcal{S} \rho^\mu(s) Q(s, \mu_\theta(s)) ds$$&lt;/p&gt;
+
+&lt;p&gt;But for deterministic policy gradient:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/dpgt.jpg&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;By convention $\nabla_\theta \mu_\theta(s)$ is a Jacobian matrix such that each
+column is the gradient. In the paper, the authurs claims DPG can be treated as a special case of stochastic policy gradient.
+By parametrising stochastic policies with a Gaussian, DPG is equivalent to the case that $\sigma = 0$. Compared to stochastic policy gradient, DPG should be more sample efficiency because it does not need to fit policy over the whole state and action space.&lt;/p&gt;
+
+&lt;p&gt;So one possible DPG algorithm using Sarsa updates is:
+&lt;img src=&#34;/img/RL/DPG1.jpg&#34; width=500&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that we cannot just use deterministic policies without any exploration. Usually some noise are needed for DPG training. But in the way, DPG is not deterministic anymore&amp;hellip; This is kind of similar to &amp;ldquo;$\varepsilon$-greedy&amp;rdquo; policy.&lt;/p&gt;
+
+&lt;p&gt;In off-policy cases, it&amp;rsquo;s similar to common off-policy policy gradient.
+&lt;img src=&#34;/img/RL/offpolicyDPG.jpg&#34; width=550&gt;&lt;/p&gt;
+
+&lt;p&gt;Similarly, it drops a term that depends on $\nabla_{\theta} Q^\mu(s, a)$. And since the policy is deterministic, $Q^\mu(s, \mu_\theta(s)) = \sum_a \pi_{\theta}(a \vert s) Q^\pi(s, a)$. We don&amp;rsquo;t need to do importance sampling like previous off-policy algorithms.&lt;/p&gt;
+
+&lt;h3 id=&#34;deep-deterministic-policy-gradient-ddpg&#34;&gt;Deep Deterministic Policy Gradient (DDPG)&lt;/h3&gt;
+
+&lt;h3 id=&#34;trust-region-policy-optimization&#34;&gt;Trust region policy optimization&lt;/h3&gt;
+
+&lt;p&gt;In order to stabilize training process, every step the parameters should not change dramatially. We can add some constrains to the distance between old and new parameters or the gradients, like gradient clipping. Trust region policy optimization introduces &lt;strong&gt;KL divergence&lt;/strong&gt; to set a constrain on the distance of every update.&lt;/p&gt;
+
+&lt;p&gt;But the internel idea of TRPO is a little tricky. In policy gradient, we optimize the policy without considering the change of state change. We still assume the state is $s_0, s_1, s_2, &amp;hellip; $ and optimize the policy to maximize reward/advantage based on this series of states. But actually, states in every time step might change with the change of policy. What we should do is to optimize based on the new, optimized policy state distribution. Apparently, this is not easy to do.&lt;/p&gt;
+
+&lt;p&gt;This property is very clear via some derivation &lt;a href=&#34;http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-9.pdf&#34; target=&#34;_blank&#34;&gt;(source)&lt;/a&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/policyiteration.jpg&#34; width=1000&gt;&lt;/p&gt;
+
+&lt;p&gt;Here. $p_{\theta&amp;rsquo;}$ is new policy $p_{\theta}$ is old policy. Decompose $p_{\theta&amp;rsquo;}(\tau)$, we get:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/policyiteration1.jpg&#34; width=800&gt;&lt;/p&gt;
+
+&lt;p&gt;We can use importance sampling to obtain an off-policy fashion to optimize $\pi_{\theta}(a_t|s_t)$ accurately, but we still cannot deal with the new state distribution $p_{\theta&amp;rsquo;}$.&lt;/p&gt;
+
+&lt;p&gt;TRPO claims if new policy and old policy are close enough, we can assume these two states in every time step will also be close enough.&lt;/p&gt;
+
+&lt;p&gt;And we can prove if $|\pi_{\theta&amp;rsquo;}(a_t|s_t) - \pi_{\theta}(a_t|s_t)| &amp;lt;= \epsilon$ for every time step, then $|p_{\theta&amp;rsquo;} - p_{\theta}| &amp;lt;= 2\epsilon t$&lt;/p&gt;
+
+&lt;p&gt;TRPO introduces a more efficient constrain on policy distribution change, $$D_{KL}(\pi_{\theta&amp;rsquo;}(a_t|s_t) || \pi_{\theta}(a_t|s_t)) &amp;lt;= \epsilon $$&lt;/p&gt;
+
+&lt;p&gt;Overall, TRPO is like:
+&lt;img src=&#34;/img/RL/TRPO.jpg&#34; width=700&gt;&lt;/p&gt;
+
+&lt;p&gt;In practice, we can use duel gradient ascent to solve this constrained problem.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Maximize the Lagrangian multiplier: &lt;img src=&#34;/img/RL/lagrange.jpg&#34; width=1000&gt;&lt;/li&gt;
+&lt;li&gt;Optimize $\lambda$ if the constrain is violated. $\lambda = \lambda + \alpha (D_{KL}(\pi_{\theta&amp;rsquo;}(a_t|s_t) || \pi_{\theta}(a_t|s_t)) - \epsilon)$&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;proximal-policy-optimization-ppo&#34;&gt;proximal policy optimization PPO&lt;/h3&gt;
+
+&lt;p&gt;PPO is based on the same idea of TRPO. But compared to TRPO, it is less complicated and compatible with architectures that include noise (such as dropout) or parameter sharing
+(between the policy and value function, or with auxiliary tasks).&lt;/p&gt;
+
+&lt;p&gt;PPO propose a novel objective with clipped probability ratios, which forms a pessimistic estimate
+(i.e., lower bound) of the performance of the policy. Here is the TRPO objective [(image source)[&lt;a href=&#34;https://arxiv.org/pdf/1707.06347.pdf]]:&#34; target=&#34;_blank&#34;&gt;https://arxiv.org/pdf/1707.06347.pdf]]:&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/PPO.jpg&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;If one directly optimizes this objective, it might lead a big change to $r_t (\theta)$, which is not what we want. That&amp;rsquo;s why there is a KL divergence constrain on policy change. While PPO have a different objective:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/PPO1.jpg&#34; width=700&gt;&lt;/p&gt;
+
+&lt;p&gt;It clips $r_t (\theta)$ into a small range, $[1-\epsilon, 1+\epsilon]$, which removes the incentive for moving $r_t$ outside of the
+interval. And also takes a minimum of the clipped and unclipped objective, so the
+final objective is a &lt;strong&gt;lower bound&lt;/strong&gt; (i.e., a pessimistic bound) on the unclipped objective. PPO just want to be very &lt;strong&gt;conservative&lt;/strong&gt; to optimize the policy to some behaviors with a big reward, while for some known bad behaviors, PPO does not put any constrain on it.&lt;/p&gt;
+
+&lt;p&gt;If using a neural network architecture that shares parameters
+between the policy and value function, we must use a loss function that combines the policy
+change constrain and a value function error term.&lt;/p&gt;
+
+&lt;p&gt;$$L_{t}(\theta) = L_{t}^{CLIP}(\theta) - c_1 (V_t^{\theta} - V_t^{target})^2 + c_2 EN[\pi_{\theta}]$$&lt;/p&gt;
+
+&lt;p&gt;We need to include the value function approximation loss, as well as the third policy entropy bonus term, to ensure enough exploration to the algorithm.&lt;/p&gt;
+
+&lt;p&gt;Currently, PPO should be a default algorithm policy gradient algorithm because of its simplicity and effectiveness.&lt;/p&gt;
+
+&lt;h3 id=&#34;actor-critic-with-experience-replay-acer&#34;&gt;actor critic with experience replay (ACER)&lt;/h3&gt;
+
+&lt;h3 id=&#34;soft-actor-critic&#34;&gt;Soft actor-critic&lt;/h3&gt;
+
+&lt;p&gt;Soft actor-critic is based on the maximum entropy reinforcement learning framework, which considers the entropy augmented term inside its objective. Previously, common RL algorithm have this objective:&lt;/p&gt;
+
+&lt;p&gt;$$\pi^* = \arg\max_{\pi} \mathbb{E}_{\pi}\left[ \sum_{t=0}^T r_t \right]$$&lt;/p&gt;
+
+&lt;p&gt;Only consider future reward sum with current policy. But the objective with maximum entropy also optimize the entropy of policy, it goes like this:&lt;/p&gt;
+
+&lt;p&gt;$$ \pi_{\mathrm{MaxEnt}}^* = \arg\max_{\pi} \mathbb{E}_{\pi}\left[ \sum_{t=0}^T r_t + \mathcal{H}(\pi(\cdot | \mathbf{s}_t)) \right] $$&lt;/p&gt;
+
+&lt;p&gt;In this way, out policy not only optimize future reward, but also want to achieve higher entropy, in another words, more diversity. It will automatically make the policy distribution &amp;ldquo;wider&amp;rdquo; to ensure exploration wisely, rather than common some random exploration. A blog from UC berkeley explains this clearly: &lt;a href=&#34;https://bair.berkeley.edu/blog/2017/10/06/soft-q-learning/&#34; target=&#34;_blank&#34;&gt;Learning Diverse Skills via Maximum Entropy Deep Reinforcement Learning
+&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Note that this objective differs qualitatively from the behavior of Boltzmann exploration (Sallans &amp;amp; Hinton, 2004) and PGQ (O’Donoghue et al., 2016),
+which greedily maximize entropy at the current time step,
+but do not explicitly optimize for policies that aim to reach
+states where they will have high entropy in the future.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Different with previous methods, this objective tends to maximize the entropy of the entire trajectory distribution for the policy, rather than greedily maximize current policy.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;Common RL objective&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;maximum entropy RL&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;img src=&#34;/img/unimodal-policy.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;img src=&#34;/img/multimodal_policy.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;With maximum entropy objective, we can explore more widely in a multimodal setting and ensure the agent explores all promising states while prioritizing the more promising ones. This kind of exploration can be very useful for transfer learning as well. If we formalize this idea by defining the policy directly in terms of exponentiated Q-value:&lt;/p&gt;
+
+&lt;p&gt;$$\pi(\mathbf{a}|\mathbf{s}) \propto \exp Q(\mathbf{s}, \mathbf{a})$$&lt;/p&gt;
+
+&lt;p&gt;This is &lt;a href=&#34;https://arxiv.org/pdf/1702.08165.pdf&#34; target=&#34;_blank&#34;&gt;Soft Q-learning&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For &lt;a href=&#34;https://arxiv.org/pdf/1801.01290.pdf&#34; target=&#34;_blank&#34;&gt;soft actor-critic&lt;/a&gt;,we will derive soft policy iteration. Very similar to common policy iteration, only need to replace value function with soft value function:&lt;/p&gt;
+
+&lt;p&gt;Note the actor will sample actions from policy, so the entropy term can be written as $E_{a_t \sim \pi}[- log \pi(a_t|s_t)]$. In this way, the soft value function formula is:&lt;/p&gt;
+
+&lt;p&gt;$$V(s_t) = E_{a_t \sim \pi}[Q(s_t, a_t) - log \pi(a_t|s_t)]$$&lt;/p&gt;
+
+&lt;p&gt;And also, the update of policy uses KL divergence:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/softpolicyupdate.jpg&#34; width=500&gt;&lt;/p&gt;
+
+&lt;p&gt;This $Z^{\pi_{old}}(s_t)$ is just a normalizer.&lt;/p&gt;
+
+&lt;p&gt;In soft actor critic, we will use function approximator to for both Q-function and policy. The soft Q-function can be modeled as expressive neural networks, and the policy as
+a Gaussian with mean and covariance given by neural network.&lt;/p&gt;
+
+&lt;p&gt;First soft value function:
+&lt;img src=&#34;/img/RL/softvaluefunction.jpg&#34; width=600&gt;&lt;/p&gt;
+
+&lt;p&gt;Second, Q-function, same as before, use soft Bellman residual to approximate:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/softbellmanresidual.jpg&#34; width=700&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally, policy update, using KL divengence:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/softpolicyupdate2.jpg&#34; width=700&gt;&lt;/p&gt;
+
+&lt;p&gt;The target
+density is the Q-function, which is represented by a neural
+network an can be differentiated, and it is thus convenient
+to apply the reparameterization trick, resulting in a
+lower variance estimator. To that end, we reparameterize
+the policy using a neural network transformation. The network will provide mean and std for
+Gaussian reparameterization.&lt;/p&gt;
+
+&lt;p&gt;Here is soft actor critic:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/RL/softactorcritic.jpg&#34; width=500&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;sum-up&#34;&gt;Sum up&lt;/h1&gt;
+
+&lt;h1 id=&#34;reference&#34;&gt;Reference&lt;/h1&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;https://see.stanford.edu/materials/aimlcs229/cs229-notes12.pdf&#34; target=&#34;_blank&#34;&gt;Reinforcement learning lecture of CS229 by Andew Ng&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html&#34; target=&#34;_blank&#34;&gt;David Sliver&amp;rsquo;s RL lecture at UCL&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://rail.eecs.berkeley.edu/deeprlcourse/&#34; target=&#34;_blank&#34;&gt;Sergey Levine&amp;rsquo;s RL course at UC Berkeley&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://drive.google.com/file/d/1opPSz5AZ_kVa1uWOdOiveNiBFiEOHjkG/view&#34; target=&#34;_blank&#34;&gt;Sutton&amp;rsquo;s RL book&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/pdf/1506.02438.pdf&#34; target=&#34;_blank&#34;&gt;Generalized Advantage Estimation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1707.06347&#34; target=&#34;_blank&#34;&gt;Proximal Policy Optimization Algorithms&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://proceedings.mlr.press/v32/silver14.pdf&#34; target=&#34;_blank&#34;&gt;Deterministic Policy Gradient (DPG)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1702.08165&#34; target=&#34;_blank&#34;&gt;Reinforcement Learning with Deep Energy-Based Policies&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://arxiv.org/abs/1801.01290&#34; target=&#34;_blank&#34;&gt;Soft Actor-critic&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>CapsNet and dynamic routing</title>
+      <link>/post/capsnet-and-dynamic-routing/</link>
+      <pubDate>Thu, 19 Jul 2018 21:00:00 -0500</pubDate>
+      
+      <guid>/post/capsnet-and-dynamic-routing/</guid>
       <description>
 
 &lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
@@ -43,7 +827,7 @@ level to attend to some active capsules at the level below and to ignore others.
 
 &lt;p&gt;For example, assume we have 5 maxpooling layer in a network, and an object in a 32x32 block of input image. In this way, no matter how we move the object in the image, there will be no change in the final feature map. This will cause problems. The network not cares about what the object is, rather than where the object lies. So, if different parts of an object move a little bit, CNN will stay the same. Here is a famous picture illustrating this point:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet_face.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/capsnet_face.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Every part of human face is tweaked, but CNN still recognizes it as human face. Real world situation is not so extreme, but this example can give us an intuition of this.&lt;/p&gt;
 
@@ -64,17 +848,17 @@ level to attend to some active capsules at the level below and to ignore others.
 
 &lt;p&gt;According to Hinton, the concept of CapsNet comes from the idea of inverse graphics. In computer graphics, if people want to render something, they will first render different parts, and use some vectors to put them in a proper &lt;strong&gt;relative location&lt;/strong&gt;. This process is illustrated in the following figure (image &lt;a href=&#34;https://jhui.github.io/2017/11/03/Dynamic-Routing-Between-Capsules/&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;):&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/inverse_graphics.jpg&#34; alt=&#34;inverse_graphics&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/inverse_graphics.jpg&#34; alt=&#34;inverse_graphics&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;In computer graphics, people do it in the top-down way. For inverse graphics, we need to do it in a bottom-up fashion. First, we detect different small parts and their propertis, represented in the capsule output. And then, if the output &amp;ldquo;agrees&amp;rdquo;, it is reversely equivalent to the process in graphics that assembling different part into a bigger object. So, lower level capsules are more concise for entity location and high-level capsules are more about sementic information, which is the same to CNNs. In the paper, Hinton called the lower level capsule &amp;ldquo;place-encoded&amp;rdquo; and the higher-level capsules &amp;ldquo;rate-encoded&amp;rdquo;.&lt;/p&gt;
 
 &lt;p&gt;The most important part of CapsNet is routed by &amp;ldquo;agreement&amp;rdquo; between capsules. We only care about the &lt;strong&gt;relative&lt;/strong&gt; relationship between capsules. So, the higher level capsules only cares about whether lower level capsules agree or not, rather than what exact consists in the capsule. This is kind of like graphics, rended object is not related to view angle. This can address CNN&amp;rsquo;s weakness in affine transforms like rotation. Capsule will treat the liberty statue in different pictures equally.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/statue.jpg&#34; alt=&#34;statue&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/statue.jpg&#34; alt=&#34;statue&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Also, for occluded object, CapsNet only need the agreement of some parts of an object to predict the object, rather than counting feature appearance to predict the object in CNN. Also, if two objects are overlapped, their feature map in CNN may inference each other, and make prediction inaccurate, while CapsNet can avoid this with &amp;ldquo;agreement routing&amp;rdquo;. So CapsNet has advantage on recognize partly showed object in images, like the occluded faces in the following image (&lt;a href=&#34;http://www.lce.hut.fi/research/eas/object/&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;).&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/occluded_face.png&#34; alt=&#34;occluded_face&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/occluded_face.png&#34; alt=&#34;occluded_face&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Based on my understanding, the inverse graphics idea is quite interesting and mind blowing.&lt;/p&gt;
 
@@ -118,13 +902,13 @@ level to attend to some active capsules at the level below and to ignore others.
 
 &lt;p&gt;The overall algorithm goes like this:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/dynamic_routing.png&#34; alt=&#34;dynamic routing&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/dynamic_routing.png&#34; alt=&#34;dynamic routing&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;loss-function&#34;&gt;Loss function&lt;/h3&gt;
 
 &lt;p&gt;CapsNet uses margin loss for digit existence. The top-level capsules are responsible to present the existence of digits. And also, the loss function should talk care multi-digit cases. The loss function goes like:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/lossfunction.png&#34; alt=&#34;marginloss&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/lossfunction.png&#34; alt=&#34;marginloss&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;where $T_k = 1$ iff a digit of class k is present
 and $m^+$ = 0.9 and $m^-$ = 0.1. The λ down weighting
@@ -135,7 +919,7 @@ digit capsules.&lt;/p&gt;
 &lt;p&gt;And also, they use an additional reconstruction loss to encourage the digit capsules to encode the instantiation
 parameters of the input digit. The reconstruction is quite simple:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet_reconstruction.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/capsnet_reconstruction.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;architecture&#34;&gt;Architecture&lt;/h3&gt;
 
@@ -153,25 +937,46 @@ capsules receives input from all the capsules in the layer below. Dynamic routin
 
 &lt;p&gt;Overall diagram is as follows:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet.png&#34; alt=&#34;capsNet&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/capsnet.png&#34; alt=&#34;capsNet&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;result-comparasion&#34;&gt;Result comparasion&lt;/h2&gt;
 
 &lt;p&gt;I just want to analyze this figure:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/capsnet_result.png&#34; alt=&#34;capsNet&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/capsnet_result.png&#34; alt=&#34;capsNet&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We can clearly see CapsNet surpasses the state-of-the-art network. Amusingly, the improvement from reconstruction loss is larger than capsules and dynamic routing&amp;hellip;&lt;/p&gt;
 
 &lt;h2 id=&#34;advantages&#34;&gt;Advantages&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Robust&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Robust to affine transform&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Experiments show that each DigitCaps capsule learns a more robust representation for each class
+than a traditional convolutional network. Because there is natural variance in skew, rotation, style, etc
+in hand written digits, the trained CapsNet is moderately robust to small affine transformations of the
+training data.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Interpretability&lt;/strong&gt;&lt;/p&gt;
 
+&lt;p&gt;The dimensions of a
+digit capsule should learn to span the space of variations in the way digits of that class are instantiated.
+These variations include stroke thickness, skew and width. They also include digit-specific variations
+such as the length of the tail of a 2.  After computing the activity vector for the correct digit capsule, we can
+feed a perturbed version of this activity vector to the decoder network and see how the perturbation
+affects the reconstruction. We can find that one
+dimension (out of 16) of the capsule almost always represents the width of the digit. While some
+dimensions represent combinations of global variations, there are other dimensions that represent variation in a localized part of the digit. For example, different dimensions are used for the length of
+the ascender of a 6 and the size of the loop.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/img/CapsNet_inter.png&#34; alt=&#34;capsNet&#34; /&gt;&lt;/p&gt;
+
 &lt;h2 id=&#34;problems&#34;&gt;Problems&lt;/h2&gt;
 
-&lt;p&gt;&lt;strong&gt;Computational cost.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Computational cost&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The biggest problem of dynamic routing is of course the computational cost. For each higher level capsule, we need to calculate its agreement with all the lower layer capsules. The complexity is huge (O(N^3)). And that is also the main reason that Capsnet can only used in simple dataset like smallNORB, MNIST. In these dataset, the dimension of single capsule, as well as the network width, do not need to be very large.&lt;/p&gt;
+
+&lt;p&gt;So, the next step must be more advanced and efficient routing method. Lucklily, we already have one now: &lt;a href=&#34;https://openreview.net/pdf?id=HJWLfGWRb&#34; target=&#34;_blank&#34;&gt;EM routing&lt;/a&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;em-routing&#34;&gt;EM routing&lt;/h2&gt;
 
@@ -201,10 +1006,10 @@ capsules receives input from all the capsules in the layer below. Dynamic routin
     
     <item>
       <title>NLP basics - Word2vec: Skip-gram, CBOW, GloVe</title>
-      <link>https://shen338.github.io/post/nlp-basics---word2vec/</link>
-      <pubDate>Fri, 01 Jun 2018 21:00:00 -0400</pubDate>
+      <link>/post/nlp-basics---word2vec/</link>
+      <pubDate>Fri, 01 Jun 2018 21:00:00 -0500</pubDate>
       
-      <guid>https://shen338.github.io/post/nlp-basics---word2vec/</guid>
+      <guid>/post/nlp-basics---word2vec/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -233,7 +1038,7 @@ capsules receives input from all the capsules in the layer below. Dynamic routin
 
 &lt;p&gt;First of all, we need to figure out how do we represent the meaning of a word. A common solution is using WordNet: a    resource containing lists   of synonym  sets and hypernyms (&amp;ldquo;is a&amp;rdquo; relationships).&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/WordNet.png&#34; width=700&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/WordNet.png&#34; width=700&gt;&lt;/p&gt;
 
 &lt;p&gt;But this method is not so good. It is great as a resource but   missing nuance. Also it misses the new meaning of a word.&lt;/p&gt;
 
@@ -254,7 +1059,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;Here is an example of calculating the   probability of c given o:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/wordwindow.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/wordwindow.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;So the total objective function is:&lt;/p&gt;
 
@@ -282,7 +1087,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;The architecture of skip-gram network is simple:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/skip-gram.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/skip-gram.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;There is no activation function on the hidden layer neurons, but the output neurons use softmax to predict the probability of each word&amp;rsquo;s appearance in each nearby location.&lt;/p&gt;
 
@@ -337,7 +1142,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;In the other hand, Continuous   Bag of  Words   (CBOW) does the opposite thing compared to skip-gram. It uses the context words to predict the center word. (image &lt;a href=&#34;https://zhuanlan.zhihu.com/p/35074402&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/CBOW.jpg&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/CBOW.jpg&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;Note the weight matrix for every input is &lt;strong&gt;shared&lt;/strong&gt;. All hidden layer weights are &lt;strong&gt;added&lt;/strong&gt; and send into next layer.&lt;/p&gt;
 
@@ -351,11 +1156,11 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;The example corpus contains three sentences: &amp;ldquo;I like    deep    learning.&amp;rdquo;, &amp;ldquo;I like NLP.&amp;rdquo;, &amp;ldquo;I enjoy flying.&amp;rdquo;. The co-occurrence matrix would be:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/cooccurrence.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/cooccurrence.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;p&gt;Problems of the model is obvious. It&amp;rsquo;s bery high dimensional and may need future process. And the matrix is quite sparse, which makes the model less robust. So, further we can use some dimensionality reduction technique to reduce the dimension of our word vectors, like singular  value   decomposition. However, the computational cost of SVD is quite high($O(mn^2)$), which is not suitable for large vacabulary. The &lt;a href=&#34;http://web.stanford.edu/class/cs224n/lectures/lecture3.pdf&#34; target=&#34;_blank&#34;&gt;cs224 lecture&lt;/a&gt; lecture summarized the pros and cons of Count   based model vs direct   prediction model:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/compare.png&#34; width=800&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/compare.png&#34; width=800&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;glove&#34;&gt;GloVe&lt;/h2&gt;
 
@@ -365,7 +1170,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 
 &lt;p&gt;Where the $u_i$ $v_j$ is the same to skip-gram model, and $P_{ij}$ is the co-occurrent matrix. $F(x)$ is a step-like function:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/glove-fig-1.png&#34; width=400&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/glove-fig-1.png&#34; width=400&gt;&lt;/p&gt;
 
 &lt;p&gt;The cut-off value $x_{max}$ is not sensitive. In experiment choose $x_{max} = 100$. Instead of direct predict center or context words, the GloVe model trains word vectors to fit the log probability of the co-occurrence matrix. The GloVe model utilizes the overall statistical information, and is also scalable for huge corpus. It can achieve good performance with small corpus. But it need to store the co-occurrence matrix, which requires a large storage space. But it is faster than skip-gram with negative sampling. So, the choice of GloVe or prediction model has a trade-off of speed and storage.&lt;/p&gt;
 
@@ -376,7 +1181,7 @@ word vectors. The idea is as follows:&lt;/p&gt;
 &lt;p&gt;One popular method utilize syntactic    analogy to evaluate word vectors. We will evaluate  word    vectors by  how well    their   cosine  distance    after   addition    captures    intuitive   semantic    and
 syntactic   analogy questions. For example, given man over woman, we want the use the mapping to map king to queen. This mapping accuracy (cosine distance) is the key for evaluation. Here is an illustration:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/word2vec/evaluation.png&#34; width=600&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/word2vec/evaluation.png&#34; width=600&gt;&lt;/p&gt;
 
 &lt;p&gt;Our model should uses the differential vector of &amp;ldquo;nephew&amp;rdquo; and &amp;ldquo;niece&amp;rdquo; to find &amp;ldquo;aunt&amp;rdquo; from &amp;ldquo;uncle&amp;rdquo;. A&lt;/p&gt;
 
@@ -412,10 +1217,10 @@ syntactic   analogy questions. For example, given man over woman, we want the us
     
     <item>
       <title>Going Deeper in Batch Normalization</title>
-      <link>https://shen338.github.io/post/going-deeper-into-batch-normalization/</link>
-      <pubDate>Thu, 17 May 2018 21:00:00 -0400</pubDate>
+      <link>/post/going-deeper-into-batch-normalization/</link>
+      <pubDate>Thu, 17 May 2018 21:00:00 -0500</pubDate>
       
-      <guid>https://shen338.github.io/post/going-deeper-into-batch-normalization/</guid>
+      <guid>/post/going-deeper-into-batch-normalization/</guid>
       <description>
 
 &lt;h3 id=&#34;table-of-contents-optimization&#34;&gt;Table of contents/optimization&lt;/h3&gt;
@@ -473,7 +1278,7 @@ from this. But this effect is quite minor.&lt;br /&gt;&lt;/li&gt;
 
 &lt;blockquote&gt;
 &lt;p&gt;Here is the algorithm diagram batch norm.
-&lt;img src=&#34;https://shen338.github.io/img/batch_norm_fp.png&#34; alt=&#34;Batch norm algorithm&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;/img/batch_norm_fp.png&#34; alt=&#34;Batch norm algorithm&#34; /&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;Nothing fancy but extremely practical algorithm. One thing has to mention, &lt;span class=&#34;markup-quote&#34;&gt;the learnable variables
@@ -657,7 +1462,7 @@ as batch norm.&lt;/p&gt;
 
 &lt;p&gt;Just simply replace all batch normalization layers with instance normalization layers. Batch normalization normalizes using the information from the whole batch, while instance normalization normalizes each feature map on its own.&lt;br /&gt;
 Formula comparasion:&lt;br /&gt;
-&lt;img src=&#34;https://shen338.github.io/img/instancenorm.jpg&#34; alt=&#34;instance norm&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;/img/instancenorm.jpg&#34; alt=&#34;instance norm&#34; /&gt;&lt;/p&gt;
 
 &lt;h4 id=&#34;group-normalization&#34;&gt;Group Normalization&lt;/h4&gt;
 
@@ -666,7 +1471,7 @@ Formula comparasion:&lt;br /&gt;
 &lt;p&gt;Instead of normalizing along the batch dimension, GN divides the channels into groups and computes within each group the mean and variance. Therefore, GN&amp;rsquo;s computation is independent of batch sizes, and so does its accuracy.&lt;/p&gt;
 
 &lt;p&gt;Here is a diagram for all these Group techniques:&lt;br /&gt;
-&lt;img src=&#34;https://shen338.github.io/img/GN.jpg&#34; alt=&#34;GN&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;/img/GN.jpg&#34; alt=&#34;GN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The difference is obvious. Batch norm uses data in the same batch to calculate $\mu $ and $\sigma$; Layer norm uses all the neurons in single layer; Instance norm uses all in data in the same batch and channel; Group norm uses only a small piece of batch.&lt;/p&gt;
 
@@ -704,10 +1509,10 @@ to both weight and input: y=(x/|x|)*(w/|w|). Again, manual or automatic differen
     
     <item>
       <title>Amazing GAN - Wasserstein GAN</title>
-      <link>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</link>
-      <pubDate>Sat, 17 Feb 2018 21:00:00 -0500</pubDate>
+      <link>/post/amazing-gan---wasserstein-gan/</link>
+      <pubDate>Sat, 17 Feb 2018 21:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/post/amazing-gan---wasserstein-gan/</guid>
+      <guid>/post/amazing-gan---wasserstein-gan/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -761,7 +1566,7 @@ $$JS(P||Q) = \frac{1}{2} KL(P||\frac{P+Q}{2}) + \frac{1}{2} KL(Q||\frac{P+Q}{2})
 &lt;/ol&gt;
 
 &lt;p&gt;Here is a plot of KL and JS divergence of two normal distributions: N(0, 1) and N(1, 1). Image resource &lt;a href=&#34;https://lilianweng.github.io/lil-log/2017/08/20/from-GAN-to-WGAN.html&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;
-&lt;img src=&#34;https://shen338.github.io/img/KL_JS_divergence.png&#34; alt=&#34;KL-JS&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;/img/KL_JS_divergence.png&#34; alt=&#34;KL-JS&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;As shown in the plot, JS divergence are symmetric while KL divergence is asymmetric. People believe the success of GANs comes from replacing the traditional maximum likelihood with symmetric similarity measure, JS divergence.&lt;/p&gt;
 
@@ -775,7 +1580,7 @@ $$JS(P||Q) = \frac{1}{2} KL(P||\frac{P+Q}{2}) + \frac{1}{2} KL(Q||\frac{P+Q}{2})
 &lt;/ol&gt;
 
 &lt;p&gt;This is a diagram showing how GAN works:
-&lt;img src=&#34;https://shen338.github.io/img/GANs.png&#34; alt=&#34;GAN&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;/img/GANs.png&#34; alt=&#34;GAN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;In one hand, we want the discriminator&amp;rsquo;s output probability over real data to be higher by maximizing $\mathbb{E}_{x \sim p_{data}(x)}[logD(x)]$; In another hand, we want the discriminator&amp;rsquo;s output probability over fake data from generator to be lower by minimizing $\mathbb{E}_{z \sim p_(z)}[log(1-D(G(z)))]$.&lt;/p&gt;
 
@@ -823,7 +1628,7 @@ $$ = -log(4) + 2* JS(p_{data} || p_g)$$&lt;/p&gt;
 
 &lt;p&gt;The loss function for training G is: $\mathbb{E}_{z \sim p(z)}[log(1-D(G(z)))]$. But in the early stage of training, discriminator can be very confident in detecting results from G, $D(G(z))$ is always 0. In this way, the gradient to update G vanishes.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/GAN_gradient_vanishing.png&#34; alt=&#34;gradient vanishing&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/GAN_gradient_vanishing.png&#34; alt=&#34;gradient vanishing&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;With the generator fixed we
 train a discriminator from scratch and measure the gradients with the original cost function. We see
@@ -858,7 +1663,7 @@ sample and when G fails to generate real sample.&lt;/p&gt;
 &lt;p&gt;One method to compensate this is putting regularization on the diversity of generator, forcing it to produce various samples. In practice, this method is still not good enough.&lt;/p&gt;
 
 &lt;p&gt;Here is some result of GAN mode collapse in LSUN dataset:
-&lt;img src=&#34;https://shen338.github.io/img/mode_collapse.png&#34; alt=&#34;mode collapse&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;/img/mode_collapse.png&#34; alt=&#34;mode collapse&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;improved-training-of-gans&#34;&gt;Improved Training of GANs&lt;/h2&gt;
 
@@ -962,7 +1767,7 @@ A real-valued function $f: \mathbb{R} \rightarrow \mathbb{R}$ is called $K$-Lips
 
 &lt;p&gt;The next thing to care about is how to keep the discriminator function satisfying K-Lipschitz continuity. Wasserstein GAN adopts the most simple method, clipping the gradient into a small interval ($[-0.01, 0.01]$), and make the parameter $w$ lies in a compact space and  $f_w$ will preserve its Lipschitz continuity. The modified algorithm is as follows:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/GAN_algorithm.png&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/GAN_algorithm.png&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Compared to original GANs, Wasserstein GAN takes these changes:&lt;/p&gt;
 
@@ -1022,7 +1827,7 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 
 &lt;p&gt;Also, the batch norm layer can make this penalty invalid, so WGAN-GP simply remove the batch norm layers. And WGAN-GP takes two side penalty. Instead of forcing the gradient norm smaller than 1, it encourage gradient norm closer to 1 according to their proof. In practice, this works slightly better. Here is the algorithm of WGAN-GP:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/WGANGP.jpg&#34; alt=&#34;WGAN-GP&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/WGANGP.jpg&#34; alt=&#34;WGAN-GP&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;And the implementation on tensorflow is quite simple with tf.gradient function.&lt;/p&gt;
 
@@ -1073,19 +1878,19 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
     
     <item>
       <title>Microscale two-dimensional (2D) temperature mapping by ratiometric fluorescence imaging under orthogonal excitations</title>
-      <link>https://shen338.github.io/publication/temperature_mapping/</link>
-      <pubDate>Thu, 15 Feb 2018 00:00:00 -0500</pubDate>
+      <link>/publication/temperature_mapping/</link>
+      <pubDate>Thu, 15 Feb 2018 00:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/publication/temperature_mapping/</guid>
+      <guid>/publication/temperature_mapping/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</title>
-      <link>https://shen338.github.io/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
-      <pubDate>Mon, 01 Jan 2018 21:00:00 -0500</pubDate>
+      <link>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
+      <pubDate>Mon, 01 Jan 2018 21:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
+      <guid>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -1202,7 +2007,7 @@ $$L(G, D) = \mathbb{E}_{x \sim p_r}[f_w(x)] - \mathbb{E}_{z \sim p_r(z)}[f_w(g_\
 
 &lt;p&gt;Here is a diagram of famous AlexNet:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/AlexNet.png&#34; alt=&#34;AlexNet&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/AlexNet.png&#34; alt=&#34;AlexNet&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;resnet&#34;&gt;ResNet&lt;/h3&gt;
 
@@ -1213,11 +2018,11 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Here is a diagram of residual blocks (image source: ):&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/residualblock.png&#34; alt=&#34;residual&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/residualblock.png&#34; alt=&#34;residual&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Plus, Resnet uses the bottleneck architecture from Inception network to reduce computation. After $1\times1$ convolution, the feature map channels are greatly reduced in order to save computation for next $3 \times 3$ convolution layer. Another $1\times1$ convolution after that can resume the feature map channels. Amazingly, this operation won&amp;rsquo;t affect the performance. So, this bottleneck architecture is quite popular in modern neural network.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/bottleneck.jpg&#34; alt=&#34;bottleneck&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/bottleneck.jpg&#34; alt=&#34;bottleneck&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;ResNet can be interpreted as ensembles of relatively shallow networks, as described &lt;a href=&#34;https://arxiv.org/abs/1605.06431?context=cs&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
@@ -1225,15 +2030,15 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Inception network series comes from Google. It should be the most well-designed and popular network in image classification community. The architecture becomes very complicated in later version of Inception networks. For example, here is a diagram of InceptionResnetV2, with more than 600 layers:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/image00.png&#34; alt=&#34;inceptionresnetv2&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/image00.png&#34; alt=&#34;inceptionresnetv2&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The core of Inception network is the Inception module. The inspiration comes from the idea that you need to make a decision as to what type of convolution you want to make at each layer: $3 \times 3$ or $5 \times 5$? You may need specific image content to decide. How about use them all together? Here come the Inception module:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/inception_implement.png&#34; alt=&#34;Inceptionmodule&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/inception_implement.png&#34; alt=&#34;Inceptionmodule&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;It uses all $1 \times 1$, $3 \times 3$, $5 \times 5$ convolution and  altogether and concate their result together. Plus, inception module introduces $N \times 1$ and $1 \times N$ convolution instead of traditional $N \times N $ convolution. This puts constraints on convolution kernel (center symmetric), but can greatly reduces computation. And residual connection, bottleneck architecture also appears in modern Inception network. Here is a diagram of Inception modules in InceptionV4:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/inceptionv4.jpeg&#34; alt=&#34;v4&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/inceptionv4.jpeg&#34; alt=&#34;v4&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;deformable-parts-model&#34;&gt;Deformable Parts Model&lt;/h3&gt;
 
@@ -1249,11 +2054,11 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Deformable Part Models model an object as the sum of the geometric deformations of it. So take person model for example:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/DPM.jpeg&#34; alt=&#34;DPM&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/DPM.jpeg&#34; alt=&#34;DPM&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;A root location with high score detects a region with high chances to contain an object, while the locations of the parts with high scores confirm a recognized object hypothesis. The paper adopted latent SVM to model the classifier.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/DPMmodel.png&#34; alt=&#34;DPMmodel&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/DPMmodel.png&#34; alt=&#34;DPMmodel&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Also, DPM and later CNN models are not two different method to object recognition. Actually, DPM can be unrolled and interpreted as several equivalent CNN layers. See Ross&amp;rsquo;s paper &lt;a href=&#34;https://arxiv.org/abs/1409.5403&#34; target=&#34;_blank&#34;&gt;Deformable Part Models are Convolutional Neural Networks&lt;/a&gt;&lt;/p&gt;
 
@@ -1273,7 +2078,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Here is an image of precision and recall:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/precision-recall.jpg&#34; alt=&#34;precision and recall&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/precision-recall.jpg&#34; alt=&#34;precision and recall&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;average-precision&#34;&gt;Average precision&lt;/h3&gt;
 
@@ -1287,7 +2092,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;Here is a table of different corresponding precision and recall ranks:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/precisionrecallrank.png&#34; alt=&#34;prrank&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/precisionrecallrank.png&#34; alt=&#34;prrank&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;AP (average precision) is computed as the average of &lt;strong&gt;maximum precision&lt;/strong&gt; at different recall levels. Here are two kinds of AP calculation:&lt;/p&gt;
 
@@ -1315,7 +2120,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;The goal of &lt;a href=&#34;https://arxiv.org/abs/1311.2524&#34; target=&#34;_blank&#34;&gt;R-CNN&lt;/a&gt; is to take in an image, and correctly identify where are objects (via a bounding box) in the image. The intuition of RCNN is quite simple, just proposing some possible regions, and determine whether they are objects or not. Here is a diagram of RCNN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/RCNN.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/RCNN.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;selective-search&#34;&gt;Selective Search&lt;/h3&gt;
 
@@ -1323,7 +2128,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;This method uses an over-segmentation method to divide the image into small regions (1k to 2k). Merge the two most probable adjacent areas according to the consolidation rules. This is is a hierarchical grouping algorithm by J.R.R. Uijlings.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/grouping.png&#34; alt=&#34;grouping&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/grouping.png&#34; alt=&#34;grouping&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Actually the similarity of regions is determined by their color histogram, texture(gradient histogram) and some other aspects. Note that this method tends to merge relatively small regions to avoid a large area gradually &amp;ldquo;eat&amp;rdquo; other small areas. Also, the method tend to merge the regions whose merged result takes large percentage in its bounding box.&lt;/p&gt;
 
@@ -1335,7 +2140,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 
 &lt;p&gt;So, based on the features obtained at the end of the final pooling layer, the region proposals are regressed. Note that only when region proposals have large IoU(&amp;gt;0.6) with ground truth, we can treat this transformation as linear model and do regression. The bounding box regression process is quite straight forward in RCNN paper.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/bbregression.png&#34; alt=&#34;bbregression&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/bbregression.png&#34; alt=&#34;bbregression&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We directly regress the location $P_x$ and $P_y$, while regress the width $P_w$ and height $P_h$ in log-space which produce better results on the wide range of bounding-box shift.&lt;/p&gt;
 
@@ -1350,7 +2155,7 @@ These networks led to 1st-place winning entries in all five main tracks of the I
 &lt;li&gt;Delete the selected box with the score less than a certain threshold to get this kind of result&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/NMS.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/NMS.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;workflow&#34;&gt;Workflow&lt;/h3&gt;
 
@@ -1380,7 +2185,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Instead of extracting CNN feature vectors independently for each region proposal, this model aggregates them into one CNN forward pass over the entire image and the region proposals share this feature matrix. Then the same feature matrix is branched out to be used for learning the object classifier (No SVM but softmax) and the bounding-box regressor.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/fastrcnn.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/fastrcnn.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;roi-pooling&#34;&gt;ROI pooling&lt;/h3&gt;
 
@@ -1390,7 +2195,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is a diagram of ROI pooling from cs231n Lecture:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/roi-pooling.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/roi-pooling.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;workflow-1&#34;&gt;Workflow&lt;/h3&gt;
 
@@ -1422,7 +2227,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is an illustratioon of Faster RCNN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/faster-RCNN.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/faster-RCNN.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;region-proposal-network&#34;&gt;Region Proposal Network&lt;/h3&gt;
 
@@ -1431,9 +2236,9 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 &lt;ol&gt;
 &lt;li&gt;Feed input image into CNN and get a set of convlutional feature maps on the last convolutional layer.&lt;/li&gt;
 &lt;li&gt;Then a sliding window is running spatially on these feature maps. The size of sliding window is $3 \times 3$. For each sliding window, a set of 9 anchors are generated which all have the same center (the same with sliding window) but with 3 different aspect ratios (1:2, 1:1, 2:1) and 3 different scales. Note that all these coordinates are computed with respect to the original image. (image &lt;a href=&#34;https://www.quora.com/How-does-the-region-proposal-network-RPN-in-Faster-R-CNN-work&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)
-&lt;img src=&#34;https://shen338.github.io/img/anchor.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;/img/anchor.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;li&gt;Finally, the 3×3 spatial features extracted from convolution feature maps are fed to a smaller network which has two tasks: classification (cls) and regression (reg). The output of regressor determines a a predicted bounding box (x,y,w,h), The classification network produces a probability p indicating whether the the predicted box contains an object (1) or it is from background (0 for no object).
-&lt;img src=&#34;https://shen338.github.io/img/rpn-end.jpg&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;/img/rpn-end.jpg&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;So, the output of rpn is similar to selective search method, which is ~2k region proposals. But the speed of RPN is much faster than selective search method. In this way, the last speed bottleneck of RCNN is addressed. Note that if accuracy is not important, RPN can complete object recognition by its own by modify the classification into N classes.&lt;/p&gt;
@@ -1455,11 +2260,11 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Semantic segmentation need to segment and cluster pixels of different object classes in a single graph; while instance segmentation need to locate every single object and cluster pixels of this object. This image shows the difference of semantic and instance segmentation:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/instancesegmentation.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/instancesegmentation.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;So, overall, instance is more difficult than semantic segmentation. And it is highly related to object detection. For semantic segmentation, most modern frameworks are based on &lt;a href=&#34;https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf&#34; target=&#34;_blank&#34;&gt;Fully Convolutional Neural Networks (FCN)&lt;/a&gt;. FCN managed to extract the region of objects in an image but it cannot tell us the exact region of every single object. Here, Mask RCNN combined RCN and Faster RCNN, adding an extra FCN branch to faster RCNN, parallel to localization and classification, to make pixel level prediction and instance segmentation in a single bounding box.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/mask-rcnn.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/mask-rcnn.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;roi-align&#34;&gt;ROI Align&lt;/h3&gt;
 
@@ -1470,7 +2275,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 &lt;li&gt;The quantized region is evenly divided into $k \times k$ cells and the boundaries of each cell are quantized.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/ROIquantize.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/ROIquantize.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;From the diagram above, the ground truth bounding box is $655 \times 655$. And after 5 max pooling operation, the corresponding size on feature map is &lt;sup&gt;655&lt;/sup&gt;&amp;frasl;&lt;sub&gt;32&lt;/sub&gt; = 20.78 , but ROI pooling quantizes it into $20$. After that, we need to divide the bounding box into $7 \times 7$ cells, the size of each cell is &lt;sup&gt;20&lt;/sup&gt;&amp;frasl;&lt;sub&gt;7&lt;/sub&gt; = 2.86 , but ROI pooling quantizes it into $2$. So, the largest quantization error of ROI pooling is about $1.5$ pixels on feature map, which is $50$ pixels on input image.&lt;/p&gt;
 
@@ -1484,7 +2289,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is a figure for ROI align:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/ROIAlignDiagram.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/ROIAlignDiagram.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;And according to the paper, four fixed points in a cell works best, but only use one fixed point in a cell merely hurt the performance. Bilinear interpolation is totally differentiable, so back propogation is also straight forward.&lt;/p&gt;
 
@@ -1494,7 +2299,7 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;In addition, mask RCNN can handle human pose key point detection. We just need to replace the segmentation mask with one-hot key point mask. In mask RCNN, human pose has 17 key points. The result of Mask RCNN is pretty good:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/maskrcnnresult.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/maskrcnnresult.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;single-shot-detector&#34;&gt;Single Shot Detector&lt;/h1&gt;
 
@@ -1512,11 +2317,11 @@ The positive samples are proposed regions with IoU (intersection over union) ove
 
 &lt;p&gt;Here is a diagram of SSD architecture:(image &lt;a href=&#34;https://www.slideshare.net/xavigiro/ssd-single-shot-multibox-detector&#34; target=&#34;_blank&#34;&gt;source&lt;/a&gt;)&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/SSDarchitecture.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/SSDarchitecture.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The main property of SSD is that it uses feature map from different CNN layers with different scale. SSD is built on VGG net and has six feature maps in total, each responsible for a different scale of objects, allowing it to identify objects across a large range of scales.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/ssdwork.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/ssdwork.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;The figure above shows how SSD works. In a convolutional fashion, we evaluate a small set
 of default boxes (like &lt;a href=&#34;#region-proposal-network&#34;&gt;RPN anchor boxes&lt;/a&gt; of different aspect ratios at each location in several feature maps with
@@ -1554,12 +2359,12 @@ between localization loss (e.g. Smooth L1) and confidence loss (e.g. Softmax). I
 
 &lt;p&gt;YOLOv1 is a little bit less precise than R-CNN families, but it is the first work to realize real time detection with CNN. Similar to other single shot detectors, the intuition of YOLOv1 is quite straight forward.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/YOLOv1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/YOLOv1.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;YOLOv1 models detection as a regression problem. It divides the image into an S × S grid and for each grid cell predicts B bounding boxes, confidence for those boxes, and C class probabilities. These predictions are encoded as an S × S × (B × 5 + C) tensor. For example, on PASCAL VOC, S = 7,
 B = 2. PASCAL VOC has 20 labelled classes so C = 20. Our final prediction is a 7 × 7 × 30 tensor.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/YOLOv1arch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/YOLOv1arch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;The figure above is the architecture of YOLOv1. Based on pretrain the convolutional layers on the ImageNet classification
 task at half the resolution (224 × 224 input image) and then double the resolution for detection.&lt;/p&gt;
@@ -1568,7 +2373,7 @@ task at half the resolution (224 × 224 input image) and then double the resolut
 
 &lt;p&gt;Here is the multi-part loss function that we want to optimize:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/YOLOv1lossfunction.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/YOLOv1lossfunction.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;where:&lt;/p&gt;
 
@@ -1633,7 +2438,7 @@ use anchor boxes like &lt;a href=&#34;#faster-rcnn&#34;&gt;faster RCNN&lt;/a&gt;
 &lt;li&gt;&lt;strong&gt;Dimension Clusters&lt;/strong&gt;: The author run K-means algorithm to determine the anchor box sizes. Shown in the following figure, the authors choose
 k = 5 as a good tradeoff between model complexity and
 high recall.
-&lt;img src=&#34;https://shen338.github.io/img/clusterbox.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;/img/clusterbox.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Direct location prediction&lt;/strong&gt;: Instead of predicting offsets we follow the approach of
 YOLO and predict location coordinates relative to the location
 of the grid cell. (Predict coordinates directly and predict scale using archor boxes). Improve YOLO by 5%. The network predicts 5 coordinates
@@ -1641,7 +2446,7 @@ for each bounding box, $t_x, t_y, t_w, t_h$, and $t_o.$ If the cell is
 offset from the top left corner of the image by $(c_x, c_y)$ and
 the bounding box prior has width and height $p_w, p_h$, then
 the predictions correspond to:
-&lt;img src=&#34;https://shen338.github.io/img/YOLOv2direct.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;/img/YOLOv2direct.png&#34; width=&#34;600&#34;&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Fine-Grained Features&lt;/strong&gt;: Similar to faster RCNN and SSD, adding a passthrough layer that brings
 features from an earlier layer at 26 × 26 resolution along with original 13 × 13 resolution. Improve mAP about 1%.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Multi-Scale Training&lt;/strong&gt;: During training, YOLO takes images of size {320, 352, &amp;hellip;, 608} (with a step of 32 = YOLO downsampling rate). For every 10 batches, YOLOv2 randomly selects another image size to train the model. This acts as data augmentation and forces the network to predict well for different input image dimension and scale.&lt;/li&gt;
@@ -1678,7 +2483,7 @@ is only larger by a factor of 4:1. It learns to find objects using the detection
 &lt;p&gt;&lt;a href=&#34;https://arxiv.org/pdf/1612.03144.pdf&#34; target=&#34;_blank&#34;&gt;Feature Pyramid Network (FPN)&lt;/a&gt; extends the idea of feature pyramid, incorprating a topdown architecture with lateral connections to different feature map scales. FPN shows significant improvement as a generic feature extractor
 in several applications.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPN.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/FPN.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;architecture-2&#34;&gt;Architecture&lt;/h3&gt;
 
@@ -1690,7 +2495,7 @@ a 3×3 convolution is appended on each merged map to
 generate the final feature map, which is to reduce the aliasing
 effect of upsampling. Here is an illustration of FPN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPNarch.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/FPNarch.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;feature-pyramid-networks-for-rpn&#34;&gt;Feature Pyramid Networks for RPN&lt;/h3&gt;
 
@@ -1710,7 +2515,7 @@ to assign RoIs of different scales to the pyramid levels. We have to assign ROIs
 width w and height h (on the input image to the network) to
 the level $P_k$ of our feature pyramid by:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPNformula.png&#34; width=&#34;400&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/FPNformula.png&#34; width=&#34;400&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;where:&lt;/p&gt;
 
@@ -1725,15 +2530,15 @@ feature map&lt;/li&gt;
 
 &lt;p&gt;FPN for region proposal network:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPN-RPN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/FPN-RPN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;FPN for faster RCNN:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPN-FasterRCNN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/FPN-FasterRCNN.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;FPN on COCO dateset:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/FPNcoco.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/FPNcoco.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;Top-down pathway plus lateral connections increases 8.0 points over the single-scale RPN
 baseline. For small objects, it improves 12.9 points. Recently, FPN has enabled new top results in all tracks
@@ -1759,7 +2564,7 @@ across an image(~100k), and most of them are easy samples. Detectors can easily 
 
 &lt;p&gt;So, here comes focal loss:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/focalloss.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/focalloss.png&#34; width=&#34;600&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;The focal loss just modify the cross entropy loss into weight cross entropy. The weight is given by the prediction confidence: $(1 − p_t)^{\gamma}$. In this way, the weight for very confident sample will decrease a lot during training, which perfectly addresses the class imbalance problem discussed above. In experiment, the recommended value of $\gamma$ is 2. Also, you can slightly improve the accuracy by using $\alpha$ balanced form ($\alpha$ is weight on rare class, $\gamma = 2$, $\alpha = -0.25$ works best):&lt;/p&gt;
 
@@ -1772,7 +2577,7 @@ while running at 5 fps, surpassing current all single stage and two stage detect
 
 &lt;p&gt;Here is a diagram for RetinaNet architecture:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/retinanetarch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/retinanetarch.png&#34; width=&#34;800&#34;&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;implementation-details-1&#34;&gt;Implementation Details&lt;/h3&gt;
 
@@ -1792,7 +2597,7 @@ to $b = − log((1 − π)/π)$.&lt;/p&gt;
 
 &lt;h3 id=&#34;results&#34;&gt;Results&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/retinanetresult.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/retinanetresult.png&#34; width=&#34;1000&#34;&gt;&lt;/p&gt;
 
 &lt;p&gt;According this figure, RetinaNet achieves top results,
 outperforming both one-stage and two-stage models. Plus, compared to existing
@@ -1836,10 +2641,10 @@ DSSD.&lt;/p&gt;
     
     <item>
       <title> Fine-Grained Visual Categorization on iNaturalist dataset</title>
-      <link>https://shen338.github.io/project/fine-grained-visual-categorization-inaturalist/</link>
-      <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
+      <link>/project/fine-grained-visual-categorization-inaturalist/</link>
+      <pubDate>Mon, 27 Nov 2017 00:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/project/fine-grained-visual-categorization-inaturalist/</guid>
+      <guid>/project/fine-grained-visual-categorization-inaturalist/</guid>
       <description>
 
 &lt;h2 id=&#34;table-of-content&#34;&gt;Table of Content&lt;/h2&gt;
@@ -2020,8 +2825,8 @@ image and prevent the background from affecting the classification result. That&
 
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;img src=&#34;https://shen338.github.io/img/weak1.jpg&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
-&lt;td&gt;&lt;img src=&#34;https://shen338.github.io/img/weak2.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src=&#34;/img/weak1.jpg&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src=&#34;/img/weak2.png&#34; alt=&#34;&#34; /&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -2039,7 +2844,7 @@ eases the gradient vanishing problem when training deep neural nets. And the tot
 
 &lt;p&gt;The first trail is directly classification over 8142 categories. Here is an architecture diagram of Inception Resnet V2:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/InceptionResnetv2.jpg&#34; alt=&#34;InceptionResnetv2.jpg&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/InceptionResnetv2.jpg&#34; alt=&#34;InceptionResnetv2.jpg&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We first freeze the CNN feature extraction part, and train our own classifier - the final layers
 of the network. Note that we have to training two classifier, one at the end of network, the auxiliary one at the middle. The middle one is used to provide additional
@@ -2058,7 +2863,7 @@ After 5 epoches of training, the accurarcy goes up to 40%.&lt;/p&gt;
 
 &lt;p&gt;Here is a diagram of image space:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/Figure_1.png&#34; alt=&#34;Diagram of image space&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/Figure_1.png&#34; alt=&#34;Diagram of image space&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;It would be more efficient to classify ABC and DE first. In this way, the class distance variance would be much less, we can use relatively less resource to achieve comparable performance to direct classification.&lt;/p&gt;
 
@@ -2074,7 +2879,7 @@ After 5 epoches of training, the accurarcy goes up to 40%.&lt;/p&gt;
 Here attention model comes to the rescue. With attention model, we can determine which part of images matters for the network to make predictions, which should be the object we want to localize. Since we already have the network of super-category classification, its feature map can be utilized to generate class activation map &lt;a href=&#34;http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf&#34; target=&#34;_blank&#34;&gt;(CAM)&lt;/a&gt; to represent the attention level of input images.
 Here is a diagram of CAM:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/CAM.png&#34; alt=&#34;CAM&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/CAM.png&#34; alt=&#34;CAM&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;As shown in the diagram, we can use the feature map and fc layer weight to generate the attention map for images with super-category network. Put an image into the network, we can get a feature map $[H, W, C]$ and a prediction. In order to map the global pooling layers
 to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the output class number. If the prediction is $j$, CAM is calculated as follows:&lt;/p&gt;
@@ -2087,7 +2892,7 @@ to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the ou
 
 &lt;p&gt;First column is original images and generated bounding box; second column is CAM heatmap; third column is the binary image after OSTU algorithm and the biggest contour.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://shen338.github.io/img/CAM_result.png&#34; alt=&#34;drawing&#34; style=&#34;width: 500px;&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/CAM_result.png&#34; alt=&#34;drawing&#34; style=&#34;width: 500px;&#34;/&gt;&lt;/p&gt;
 
 &lt;p&gt;The result is pretty amazing. Regardless of the type of objects, like plants, birds, insects, we can accurately locate them.&lt;/p&gt;
 
@@ -2107,10 +2912,10 @@ to predictions, the FC layer weight is $W \in R^{C \times N}$, where N is the ou
     
     <item>
       <title>Obfuscated/Blurred Human Face Reconstruction</title>
-      <link>https://shen338.github.io/project/obfuscatedblurred-human-face-reconstruction/</link>
-      <pubDate>Mon, 27 Nov 2017 00:00:00 -0500</pubDate>
+      <link>/project/obfuscatedblurred-human-face-reconstruction/</link>
+      <pubDate>Mon, 27 Nov 2017 00:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/project/obfuscatedblurred-human-face-reconstruction/</guid>
+      <guid>/project/obfuscatedblurred-human-face-reconstruction/</guid>
       <description>
 
 &lt;h1 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h1&gt;
@@ -2258,7 +3063,7 @@ The whole model can easily crash due to a small shift of a single hyperparameter
 Although still have imperfections, WGAN almost totally solve issues like training instability, failure to converge or model collapse.&lt;/p&gt;
 
 &lt;p&gt;Here is the algorithm of WGAN:
-&lt;img src=&#34;https://shen338.github.io/img/WGAN.jpg&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
+&lt;img src=&#34;/img/WGAN.jpg&#34; alt=&#34;WGAN&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Just minor modification from original GAN algorithm, how amazing is that! In Wasserstein GAN paper, the author thoroughly analyzed the weakness and holes on
 original GANs. For details of the mathematics and implementation about WGAN, see my &lt;a href=&#34;https://shen338.github.io/post/amazing-gan---wasserstein-gan/&#34; target=&#34;_blank&#34;&gt;another blog&lt;/a&gt;. Here I will only list the modification from original GAN to WGAN:&lt;/p&gt;
@@ -2414,10 +3219,10 @@ Some of them are funny and some of them are just scary&amp;hellip;&lt;/p&gt;
     
     <item>
       <title>Subwavelength focusing by binary multi-annular plates: design theory and experiment</title>
-      <link>https://shen338.github.io/publication/map/</link>
-      <pubDate>Sun, 15 Feb 2015 00:00:00 -0500</pubDate>
+      <link>/publication/map/</link>
+      <pubDate>Sun, 15 Feb 2015 00:00:00 -0600</pubDate>
       
-      <guid>https://shen338.github.io/publication/map/</guid>
+      <guid>/publication/map/</guid>
       <description></description>
     </item>
     

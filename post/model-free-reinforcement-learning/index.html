@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="theme" content="hugo-academic">
+  <meta name="generator" content="Hugo 0.42" />
+  <meta name="author" content="Tong Shen">
+
+  
+  
+  
+  
+    
+      
+    
+  
+  <meta name="description" content="What is reinforcement learning? In supervised learning, we saw algorithms that tried to make their outputs mimic the labels y given in the training set. In that setting, the labels gave an unambiguous “right answer” for each of the inputs x. In contrast, for many sequential decision making and control problems, it is very difficult to provide this type of explicit supervision to a learning algorithm. For example, if we have just built a four-legged robot and are trying to program it to walk, then initially we have no idea what the “correct” actions to take are to make it walk, and so do not know how to provide explicit supervision for a learning algorithm to try to mimic.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/model-free-reinforcement-learning/">
+
+  
+
+
+  
+
+  
+  
+  <meta name="theme-color" content="#0095eb">
+  
+  
+  
+  
+    
+  
+  
+    
+    
+      
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+      
+    
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha512-6MXa8B6uaO18Hid6blRMetEIoPqHf7Ux1tnyIQdpt9qI5OACx7C+O3IVTr98vwGnlcg0LOLa02i9Y1HpVhlfiw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+  
+  
+  
+  
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:400,700%7cMerriweather%7cRoboto&#43;Mono%7cPermanent&#43;Marker%7cPrata">
+  
+  <link rel="stylesheet" href="/styles.css">
+  
+
+  
+
+  
+  <link rel="alternate" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  <link rel="feed" href="/index.xml" type="application/rss+xml" title="Tong Shen">
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/model-free-reinforcement-learning/">
+
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="og:site_name" content="Tong Shen">
+  <meta property="og:url" content="/post/model-free-reinforcement-learning/">
+  <meta property="og:title" content="Reinforcement Learning: Markov Decision Process and Model-free Algorithms | Tong Shen">
+  <meta property="og:description" content="What is reinforcement learning? In supervised learning, we saw algorithms that tried to make their outputs mimic the labels y given in the training set. In that setting, the labels gave an unambiguous “right answer” for each of the inputs x. In contrast, for many sequential decision making and control problems, it is very difficult to provide this type of explicit supervision to a learning algorithm. For example, if we have just built a four-legged robot and are trying to program it to walk, then initially we have no idea what the “correct” actions to take are to make it walk, and so do not know how to provide explicit supervision for a learning algorithm to try to mimic.">
+  <meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2018-12-01T21:00:00-06:00">
+  
+  <meta property="article:modified_time" content="2018-12-01T21:00:00-06:00">
+  
+
+  
+  
+
+  <title>Reinforcement Learning: Markov Decision Process and Model-free Algorithms | Tong Shen</title>
+
+</head>
+<body id="top" data-spy="scroll" data-target="#toc" data-offset="71" >
+
+<nav class="navbar navbar-default navbar-fixed-top" id="navbar-main">
+  <div class="container">
+
+    
+    <div class="navbar-header">
+      
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+              data-target=".navbar-collapse" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      
+      <a class="navbar-brand" href="/">Tong Shen</a>
+    </div>
+
+    
+    <div class="collapse navbar-collapse">
+
+      
+      
+      <ul class="nav navbar-nav navbar-right">
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#about">
+            
+            <span>Home</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#myself">
+            
+            <span>CV</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#projects">
+            
+            <span>Projects</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#posts">
+            
+            <span>Posts</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#publications_selected">
+            
+            <span>Publications</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+        
+        
+        
+        
+          
+        
+
+        <li class="nav-item">
+          <a href="/#contact">
+            
+            <span>Contact</span>
+            
+          </a>
+        </li>
+
+        
+        
+      
+
+      
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+<article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+  <div class="article-container">
+    <h1 itemprop="name">Reinforcement Learning: Markov Decision Process and Model-free Algorithms</h1>
+
+    
+
+<div class="article-metadata">
+
+  <span class="article-date">
+    
+    <time datetime="2018-12-01 21:00:00 -0600 CST" itemprop="datePublished dateModified">
+      Dec 1, 2018
+    </time>
+  </span>
+  <span itemscope itemprop="author publisher" itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Tong Shen">
+  </span>
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    35 min read
+  </span>
+  
+
+  
+  
+
+  
+
+  
+  
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    <li>
+      <a class="twitter"
+         href="https://twitter.com/intent/tweet?text=Reinforcement%20Learning%3a%20Markov%20Decision%20Process%20and%20Model-free%20Algorithms&amp;url=%2fpost%2fmodel-free-reinforcement-learning%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-twitter"></i>
+      </a>
+    </li>
+    <li>
+      <a class="facebook"
+         href="https://www.facebook.com/sharer.php?u=%2fpost%2fmodel-free-reinforcement-learning%2f"
+         target="_blank" rel="noopener">
+        <i class="fa fa-facebook"></i>
+      </a>
+    </li>
+    <li>
+      <a class="linkedin"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fmodel-free-reinforcement-learning%2f&amp;title=Reinforcement%20Learning%3a%20Markov%20Decision%20Process%20and%20Model-free%20Algorithms"
+         target="_blank" rel="noopener">
+        <i class="fa fa-linkedin"></i>
+      </a>
+    </li>
+    <li>
+      <a class="weibo"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fmodel-free-reinforcement-learning%2f&amp;title=Reinforcement%20Learning%3a%20Markov%20Decision%20Process%20and%20Model-free%20Algorithms"
+         target="_blank" rel="noopener">
+        <i class="fa fa-weibo"></i>
+      </a>
+    </li>
+    <li>
+      <a class="email"
+         href="mailto:?subject=Reinforcement%20Learning%3a%20Markov%20Decision%20Process%20and%20Model-free%20Algorithms&amp;body=%2fpost%2fmodel-free-reinforcement-learning%2f">
+        <i class="fa fa-envelope"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+<h1 id="what-is-reinforcement-learning">What is reinforcement learning?</h1>
+
+<p>In supervised learning, we saw algorithms that tried to make their outputs
+mimic the labels y given in the training set. In that setting, the labels gave
+an unambiguous “right answer” for each of the inputs x. In contrast, for
+many sequential decision making and control problems, it is very difficult to
+provide this type of explicit supervision to a learning algorithm. For example,
+if we have just built a four-legged robot and are trying to program it to walk,
+then initially we have no idea what the “correct” actions to take are to make
+it walk, and so do not know how to provide explicit supervision for a learning
+algorithm to try to mimic.</p>
+
+<p><img src="/img/RL/RL_image.png" width=600></p>
+
+<p>A typical RL problem diagram is shown above. The agent &ldquo;mouse&rdquo; is frequently
+interacting with environment &ldquo;maze&rdquo; with different actions,
+and a reward from outside environment works as a guideline for the agent to achieve the optimum. Different to
+supervised learning problem, the reward cannot be directly used as supervision. The RL alogrithms act like the mouse, learn proper actions from observations and rewards to approach the final goal &ldquo;cake&rdquo;.</p>
+
+<p>To sum up, the goal of reinforcement learning is to find a good strategy for the agent in such environment by
+taking experimental trails and optimize the reward.
+And a better strategy means a higher <strong>expection</strong> of overall reward with this strategy.</p>
+
+<h2 id="model">Model</h2>
+
+<p><img src="/img/RL/RL1.jpg" width=680></p>
+
+<p>The agent is acting in an environment (Image <a href="http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching_files/intro_RL.pdf" target="_blank">source</a>). The environment can have many different conditions/states, called <strong>state</strong>$(s \in S)$. And the agent can have a lot of different behaviors, called <strong>action</strong>$(a \in A)$. In the agent&rsquo;s perspective, it observes the environment state as an <strong>observation</strong>$(o \in O)$. The RL algorithms give agent a guidance to follow in different states and usually it is a probability distribution, $P(a|s)$, called <strong>policy</strong>. After the agent takes an action, the environment state can change accordingly.</p>
+
+<p>Also, after taking an action, the agent will receive a reward with state: $(r \in R : S × A)$ as a feedback. The system itself can be
+stochastic: the probability of the next state $(s&rsquo;)$ on current state $(s)$ and with action $(a)$ is: $P(s&rsquo;|s, a)$ (System Dynamics).</p>
+
+<p>Divided by this probability, there are two main categories of RL algorithm:</p>
+
+<ol>
+<li>Model-free algorithms. In model-free algorithm, we do not need to optimize over state dynamics models $P(s&rsquo;|s, a)$, like policy gradient algorithm, directly optimizing policy with gradient descent or deep Q-learning to build neural network to fit expected value of the total reward over all successive steps.</li>
+<li>Model-based algorithms. In this setting, we already know the system dynamics, like $P(s&rsquo;|s, a)$ or we can learn a good model to simulate the environment. It might be hard to learning system dynamics and good strategy at the same time. So, it can be particularly effective if we can hand-engineer a dynamics representation using our knowledge of physics, and fit just a few parameters.</li>
+</ol>
+
+<p>At this blog, we only care about model-free algorithms. And we will talk about model-based algorithm in next blog.</p>
+
+<h2 id="markov-decision-process">Markov Decision Process</h2>
+
+<p>Markov decision process(MDP) is a simplified sequential decision making process, in which RL problems are usually posed. Here are two main assumptions hold for MDP:</p>
+
+<ol>
+<li>The whole system is fully observed.</li>
+<li>System state transition is a Markov process. $P(S_t | S_{t-1}, S_{t-2} , &hellip; ,  S_{1}) = P(S_t | S_{t-1})$</li>
+</ol>
+
+<p>Basically, markov decision process is just a tuple: {$ S, A, P, \gamma, r $}. Here, $\gamma$ is a discount factor, it will discount the reward with time step increases, which can make RL algorithms get the reward as soon as possible.</p>
+
+<p>The dynamics of an MDP proceeds as follows: We start in some state $S_0$, and get to choose some action $a_0 \in A$ to take in the MDP. As a result of our choice, the state of the MDP randomly transitions to some successor state $s_1$. And from $s_1$, continue this process on and on. So, this process goes like:</p>
+
+<p>$$s_0 \xrightarrow[]{a_0} s_1 \xrightarrow[]{a_1} s_2 \xrightarrow[]{a_2} &hellip; $$</p>
+
+<p>In such a sequence, the reward is given as:</p>
+
+<p>$$R(s_0, a_0) + \gamma R(s_1, a_1)  + \gamma^2 R(s_2, a_2)  + \gamma^3 R(s_3, a_3) &hellip;$$</p>
+
+<p>For Markov decision process, our goal is to find a good action strategy to maximize the reward expection:</p>
+
+<p><img src="/img/RL/MDP_expection.jpg" width=680></p>
+
+<p>Here, $\pi$ means a union of all policies. And the reward at timestep t is discounted by a factor of $\gamma$
+. Thus, to
+make this expectation large, we would like to accrue positive rewards as soon
+as possible.</p>
+
+<p>With this, we define the <strong>Value Function</strong> as:</p>
+
+<p>$$V_{\pi}(s) = E[R(s_0, a_0) + \gamma R(s_1, a_1)  + \gamma^2 R(s_2, a_2)  + \gamma^3 R(s_3, a_3) &hellip; | s_0, \pi]$$</p>
+
+<p>$V_{\pi}(s)$ is just a simple expection over all the future reward with a start state $s$.</p>
+
+<p>Given a stationary policy, we have the <strong>Bellman equation</strong>:</p>
+
+<p>$$V_{\pi}(s) = R(s) + \gamma \sum_{s&rsquo; \in S} P(s&rsquo;|s, a) V_{\pi}(s&rsquo;)$$</p>
+
+<p>And here, $V_{\pi}(s)$ is equal to current state reward plus the value function of all possible next state with a discount.</p>
+
+<p>So, the optimal value function should be the value function obtained by optimal policy:</p>
+
+<p>$$ V^{\star}(s) = max_{\pi} V_{\pi}(s) = R(s) + \gamma max_{a \in A} \sum_{s&rsquo; \in S} P(s&rsquo;|s, a) V^{\star}(s&rsquo;) $$</p>
+
+<p>The second term
+is the maximum over all actions $a$ of the expected future sum of discounted
+rewards we’ll get upon after action $a$. It is very easy to understand, just go with the optimal policy and the value function will also be optimal.</p>
+
+<p>From this equation, the optimal policy will guarantee the largest future reward from certain state. This means that we can use the same policy $\pi^{\star}$ no matter what the initial state of our MDP is.</p>
+
+<h2 id="policy-value-iteration">Policy/Value iteration</h2>
+
+<p>We now describe two efficient algorithms for solving finite-state MDPs, $|S| &lt; \infty$, $|A| &lt; \infty$.</p>
+
+<p>The frist one is <strong>value iteration</strong>:</p>
+
+<ol>
+<li>For each state s, initialize V (s) := 0.</li>
+<li>Repeat until convergence
+{<br />
+For every state, update $V (s) := R(s) + max_{a \in A} \gamma \sum_{s&rsquo; \in S} P(s&rsquo;|a, s) V(s&rsquo;)$<br />
+}</li>
+</ol>
+
+<p>This algorithm iteratively update estimated value function using Bellman equation.There are two kinds of value iteration, asynchronous or synchronous. The first one will update value function for every step, while the second one will overwrite all value functions after one iteration. After the algorithm converges, we can easily get optimal policies with value functions.</p>
+
+<p>Another algorithm is <strong>policy iteration</strong>:</p>
+
+<ol>
+<li>Initialize $\pi$ randomly.</li>
+<li>Repeat until convergence {<br />
+(a) Let $V := V_{\pi}$<br />
+(b) For each state s, let $π(s) := argmax_{a \in A} P(s&rsquo;|s, a) V(s)$<br />
+}</li>
+</ol>
+
+<p>Thus, the inner-loop repeatedly computes the value function for the current
+policy, and then updates the policy using the current value function.</p>
+
+<p>Note that step (a) can be done via solving Bellman’s equations
+as described earlier, which in the case of a fixed policy, is just a set of |S|
+linear equations in |S| variables.</p>
+
+<blockquote>
+<p>Both value iteration and policy iteration are standard algorithms for solving
+MDPs, and there isn’t currently universal agreement over which algorithm
+is better. For small MDPs, policy iteration is often very fast and
+converges with very few iterations. However, for MDPs with large state
+spaces, solving for $V_{\pi}$
+explicitly would involve solving a large system of linear
+equations, and could be difficult. In these problems, value iteration may
+be preferred. For this reason, in practice value iteration seems to be used
+more often than policy iteration. &ndash; From CS229 by Andrew Ng</p>
+</blockquote>
+
+<p>All above derivation does not learn the state transition dynamics, $P(s|s&rsquo;, a)$. In many realistic problems,
+we are not given state transition probabilities and rewards explicitly,
+but must instead estimate them from data.</p>
+
+<p>The most naive approach is just counting:</p>
+
+<p>$$P(s|s&rsquo;, a) = \frac{times \space took \space we \space action \space a  \space in \space state  \space s \space and \space got \space to \space s_0}{times \space took \space we \space action \space a \space in \space state \space s}$$</p>
+
+<p>Note that the $0/0$ situation may happen, a little smooth is necessary.</p>
+
+<p>So, here comes a easy algorithm:</p>
+
+<ol>
+<li>Initialize π randomly.</li>
+<li>Repeat {<br />
+a. Execute $\pi$ in the MDP for some number of trials.<br />
+b. Using the accumulated experience in the MDP, update our estimates
+for $P(s|s&rsquo;, a)$<br />
+c. Apply value iteration with the estimated state transition probabilities
+and rewards to get a new estimated value function V .<br />
+d. For each state s, let $π(s) := argmax_{a \in A} P(s|s&rsquo;, a) V(s)$<br />
+}</li>
+</ol>
+
+<p>MDP provides a mathematical framework for modeling decision making. MDPs are useful for studying optimization problems solved via dynamic programming and reinforcement learning. It can be used in many disciplines, including robotics, automatic control, economics and manufacturing. Next part, we wil dive into reinforcement learning algorithms.</p>
+
+<h2 id="imitation-learning">Imitation Learning</h2>
+
+<p>In the beginning, we may let the machine mimic human behaviors. In this way, it is easy to give human supervision. Just let the human expert complete the task, and their hehavior should be the label to train algorithms.</p>
+
+<p>For example, we can easily train a neural network to fit human expert&rsquo;s behaviors, like shown in the following diagram:</p>
+
+<p><img src="/img/RL/imitation_learning.png" width=800></p>
+
+<p>But this method has two main drawbacks:</p>
+
+<ol>
+<li>Since human experts seldom make mistake, the training samples of some extreme cases will be rare. But such extreme situations is critical for a controller. For example, an autonomous vehice should be able to deal with some unexpected obstacles, but such training sample is not efficient to draw from human experts.</li>
+<li>Errors are accumulative. Every state, the controller might make some mistakes, and for next state the controller will make decision based on current state. So, if the controller make some mistakes in some early stages, the whole trajectory should be totally different and the error will be bigger and bigger, as shown in the following figure.</li>
+</ol>
+
+<p><img src="/img/RL/error_accumulate.jpg" width=600></p>
+
+<p>One possible algorithm to mitigate this problem: DAgger (Dataset Aggregation). The main idea is using human expert to correct the wrong behavior rather than using human supervision all the time.</p>
+
+<p>DAgger:</p>
+
+<ol>
+<li>train $\pi_{\theta}(a|o)$ with small amount of training data, $D = $ {$a_1, o_1, a_2, o_2, &hellip;, a_N, o_N$}</li>
+<li>Run $\pi_{\theta}(a|o)$ to get extra observations, $D_{\pi}$ = {$o_1, o_2, &hellip;, o_M$}</li>
+<li>Let human expert to label all inappropriate observations.</li>
+<li>Merge the original data and extra data. $D_{new} = D_{\pi} \cup D$</li>
+<li>Iterate to step 1 until converge</li>
+</ol>
+
+<p>In this way, the algorithm addresses the error cases to make the controller better. But still, our model may fail to fit human experts.</p>
+
+<ol>
+<li>Non-Markov condition. Sometimes, human expert&rsquo;s may not based on current observation, but a combination of several previous observations. RNN may help in such situation, but it will also make our model exponentially complex.</li>
+<li>Multi-modal output. Once hearing the word &ldquo;Multi-modal&rdquo;, the first thing come to my mind is always MoG (mixture of Gaussian). We can also use latent variable models or autoregressive discretization. Latent variable models will inject some other distribution at the input od neural network, and let the output use this additional distribution properly. Autoregressive discretization will discretize one dimension at a time instead of discretize the output at a time to avoid the dimensionality explosion. It is a great way to handle high dimensional output. The first network predict $P(d_1|O)$, while next network predict $P(d_2 | d_1, O)$ and so on.</li>
+</ol>
+
+<h2 id="reinforcement-learning-objective">Reinforcement learning objective</h2>
+
+<p>First, we name a trail from time 0 to time step $T$ as a <strong>trajectory</strong>. So, the probability of the hwole trajectory is:</p>
+
+<p>$$P(\tau) = P_{\theta}(s_0, a_0, &hellip;, s_T, a_T) = p(s_0) \prod_{t=1}^T \pi_{\theta}(a_t|s_t) p(s_{t+1}|s_t, a_t)$$</p>
+
+<p>Our objective is to find an optimal $\theta^{\star}$, that maximizes the expection of the trajectory reward:</p>
+
+<p>$$\theta^{\star} = argmax_{\theta} E_{\tau \sim p(\tau)}[\sum_{t=1}^{T} r(a_t, s_t)]$$</p>
+
+<p>Note that we still treat this as a Markov process.</p>
+
+<p>Next step, we will talk about reinforcement learning algorithms. There are a lot of categorical information from CS294 Lecture <a href="http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-4.pdf" target="_blank">here</a>.</p>
+
+<h2 id="policy-gradient">Policy Gradient</h2>
+
+<p>The basic idea of policy gradient algorithm is using gradient ascent to optimize policy distribution in order to obtain higher trajectroy reward. Let&rsquo;s start the derivation from RL objective.</p>
+
+<p><img src="/img/RL/derivation_1.png" width=600></p>
+
+<p><img src="/img/RL/derivation_2.png" width=900></p>
+
+<p>Since the $\nabla_{\theta} log p(s_{t+1}|s_t, a_t)]$ term is zero because $ log p(s_{t+1}|s_t, a_t)]$ is not related to $\theta$. We have the final result:</p>
+
+<p>$$ \nabla_{\theta} J(\theta) =  E_{\tau \sim p(\tau)} [\sum_{t=1}^{T} log\pi_{\theta} (a_t | s_t) \sum_{t=1}^{T} r(a_t, s_t)] $$</p>
+
+<p>For N experimental trails, we can approximate the expection:</p>
+
+<p>$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) \sum_{t=1}^{T} r(a_{t, i}, s_{t, i})]$$</p>
+
+<p>In this way, we get the REINFORCE algorithm:</p>
+
+<ol>
+<li>Run the policy to obtain a bunch of trajectories: {$\tau_i$}</li>
+<li>Calculate gradient with above formula: $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i}) \sum_{t=1}^{T} r(a_{t, i}, s_{t, i})]$</li>
+<li>Gradient ascent: $ J(\theta) =  J(\theta) + \alpha \nabla_{\theta} J(\theta)$</li>
+</ol>
+
+<p>If compare to the maximum likelihood:</p>
+
+<p>$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i})]$$</p>
+
+<p>The policy gradient is just a reward weighted version of maximum likelihood.</p>
+
+<p>Seems like that&rsquo;s it. But we are not done yet. Algorithms with policy gradient have a big problem, sometimes even make the whole algorithm
+break down. First, let&rsquo;s analyze why this problem appears, and then find some strategies for this problem.</p>
+
+<p>There are two reasons for the high variance:</p>
+
+<ol>
+<li>Policy gradient is evaluated on a whole trajectory. This trajectory contains a lot of times steps. Assuming every time step the agent can have A actions, this will bring $A^T$ complexity to the system. In this way, our samples can act dramatically different. And the policy gradient is just an average of gradients of these diverging trajectories. If we have a large enough sample size N, this problem should be OK. But usually N is a much smaller number than time step T, where this problem is significant.</li>
+<li>The policy update itself can also make policies diverse. A negative reward trajectory may squeeze the distribution probability mass to its left and right, and if we increase reward function to all trajectories, the policy update is different, etc. There are a lot of other situations that increases variance. And most imporvement on policy gradient is on this aspect.</li>
+</ol>
+
+<p>No surprise, here comes improvements：</p>
+
+<ol>
+<li>Introduce causality. Since policy in time step t cannot affect the reward in time step $t&rsquo;$. So, we can change the formula a little bit: $$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N [\sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i}) \sum_{t=1}^{T} r(a_{t, i}, s_{t, i})] $$ into $$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T}\nabla_{\theta} log\pi_{\theta}(a_{t, i} | s_{t, i})  [\sum_{t&rsquo;=t}^{T} r(a_{t&rsquo;, i}, s_{t&rsquo;, i})]$$
+Because $\sum_{t&rsquo;=t}^{T} r(a_{t&rsquo;, i}, s_{t&rsquo;, i})$ always has smaller variance than its original form. This  is also called $\hat{Q}_{i,t}$, means reward to go, all reward after time step t. This function is very useful afterwards.</li>
+<li>Introduce baseline. Actually, policy gradient method want to make the prob of high reward trajectory higher and the prob of low reward trajectory lower. But if both trajectories have positive rewards, the effect on probability distribution will be diluted. We want the prob of low reward trajectory to be lower by make the reward to be negative. How? Using a relative reward.
+$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t=1}^{T} r(a_{t, i}, s_{t, i}) - b] $$
+This $b$can be easily as $\sum_{i=1}^N\sum_{t=1}^{T} r(a_{t, i}, s_{t, i})$, just an average of all trajectory rewards. And this $b$ can some other values to further reduce variance.</li>
+</ol>
+
+<p>And this is all for policy gradient.</p>
+
+<h2 id="actor-critic-algorithm">Actor-Critic Algorithm</h2>
+
+<p>Previous, when discussing about casuality in policy gradient, we already have estimated reward to go: $\hat{Q}_{i,t} = \sum_{t&rsquo;=t}^{T} r(a_{t&rsquo;, i}, s_{t&rsquo;, i})$. But if we have the exact reward to go: $Q(s_t, a_t) = E_{\pi_{\theta}}[\sum_{t&rsquo;=t}^{T}r(s_{t&rsquo;}, a_{t&rsquo;})]$, we can further reduce the variance.
+And another thing, the value function for state $s_t$ is a pretty good baseline. Based on the definition of value function: $V^{\pi}(s_t) = E_{a_t \sim \pi(a_t | s_t)} [Q^{\pi} (s_t, a_t)]$, it is an expected average of all possible Qs. And we define $A^{\pi} (s_t, a_t) = Q^{\pi} (s_t, a_t) - V^{\pi}(s_t)$ to estimate how better $Q^{\pi} (s_t, a_t)$ is. So, the policy gradient formula becomes:</p>
+
+<p>$$\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} \nabla_{\theta} log\pi_{\theta} (a_{t, i} | s_{t, i}) A^{\pi} (s_{t, i}, a_{t, i})$$</p>
+
+<p>Here comes the derivation of actor-critic:</p>
+
+<p>$$Q^{\pi} (s_t, a_t) = r(s_t, a_t) + E_{s_{t+1} \sim P(s_{t+1} | s_t, a_t)}[V^{\pi} (s_{t+1})]$$
+$$\approx r(s_t, a_t) + V^{\pi} (s_{t+1})$$</p>
+
+<p>So, $A^{\pi} (s_t, a_t) = r(s_t, a_t) +  + V^{\pi} (s_{t+1}) - V^{\pi} (s_{t})$</p>
+
+<p>How about fitting the value function?</p>
+
+<p>$$V^{\pi} (s_{t}) = \sum_{t&rsquo;=t}^{T} E_{\pi_{\theta}}[r(s_{t&rsquo;}, a_{t&rsquo;}) | s_t] $$</p>
+
+<p>Here are some evaluation methods. For N experimental trails:</p>
+
+<p>$$V^{\pi} (s_{t}) = \frac{1}{N} \sum_{i=1}^{N} \sum_{t&rsquo;=t}^{T} r(s_{t&rsquo;, i&rsquo;}, a_{t&rsquo;, i&rsquo;}) $$</p>
+
+<p>But here, we need a lot of trails comes from {$s_t, a_t$}. We may need to reset the simulator. But we can use a function approximator like a neural network. The function approximator have the assumption that the function is smooth. In such cases, we do not need to have a lot of examples from {$s_t, a_t$}, some samples near {$s_t, a_t$} should also be OK. Although it is not as good as direct evaluation, but good enough.</p>
+
+<p>So, train neural network with supervision $Y_{s_t}$, the evaluated value:</p>
+
+<p>$$L_{\phi} = \frac{1}{2} ||V_{fit}(s_t) - Y_{s_t}||^2$$</p>
+
+<p>Another way to evaluate $V^{\pi} (s_{t})$ need some approximation:</p>
+
+<p>$$Y_{s_t} = \sum_{t&rsquo;=t}^{T} E_{\pi_{\theta}}[r(s_{t&rsquo;}, a_{t&rsquo;}) | s_t] = r(s_{t}, a_{t}) + V^{\pi} (s_{t+1})$$</p>
+
+<p>Now, we can use $r(s_{t}, a_{t}) + V_{fit}(s_{t+1})$ as a target value to update the neural network. It&rsquo;s like a bootstrapping strategy reusing learned function again and again. After formulizing this, here comes actor-critic algorithm:</p>
+
+<ol>
+<li>Sample {$s_i, a_i$} from policy $\pi_{\theta}(a_t|s_t)$</li>
+<li>Fit $\hat{V}^{\pi} (s_{i})$ with reward sum</li>
+<li>Evaluate $\hat{A}(s_{i}, a_{i}) = r(s_{i}, a_{i}) + \hat{V}^{\pi} (s_{i}’) - \hat{V}^{\pi} (s_{i})$</li>
+<li>Using policy gradient:  $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \nabla log\pi_{\theta} (a_{i} | s_{i}) \hat{A}(s_{i}, a_{i})$</li>
+<li>Update policy network: $ J(\theta) =  J(\theta) + \alpha \nabla_{\theta} J(\theta)$</li>
+</ol>
+
+<p>And a online version:</p>
+
+<ol>
+<li>Take action $a \sim \pi_{\theta}(a|s)$, and get a training sample $(s, a, s&rsquo;, r)$</li>
+<li>Update $\hat{V}^{\pi} (s_{i})$ with target $r + \hat{V}^{\pi} (s&rsquo;_{i})$</li>
+<li>Evaluate $\hat{A}(s, a) = r(s, a) + \hat{V}^{\pi} (s&rsquo;) - \hat{V}^{\pi} (s)$</li>
+<li>Using policy gradient:  $\nabla_{\theta} J(\theta) =  \nabla log\pi_{\theta} (a | s) \hat{A}(s, a)$</li>
+<li>Update policy network: $ J(\theta) =  J(\theta) + \alpha \nabla_{\theta} J(\theta)$</li>
+</ol>
+
+<p>Another thing to mention, we can add discount factor like the MDPs. It is pretty straight forward to do.</p>
+
+<p>Now, we have two major algorithms, policy gradient and actor critic:</p>
+
+<ol>
+<li>Policy gradient: $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t&rsquo;=t}^{T} \gamma^{t&rsquo;-t}r(a_{t&rsquo;, i}, s_{t&rsquo;, i}) - b] $. It is unbiased, but with high variance. This is a Monte Carlo estimation method.</li>
+<li>Actor-critic: $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [r(s_{i}, a_{i}) + \gamma \hat{V}^{\pi} (s_{i}’) - \hat{V}^{\pi} (s_{i})] $. This method have low variance, since we are not add multiple time steps. But it is not unbiased, because the estimated value function may not be accurate. This is a temporal difference control method, which based on Dynamic Programming, updating result recursively from previous results.</li>
+</ol>
+
+<p>Combining the above two methods, we can build a bridge from TD control method to Monte Carlo method.  $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t&rsquo;=t}^{T} \gamma^{t&rsquo;-t} r(a_{t&rsquo;, i}, s_{t&rsquo;, i}) - \hat{V}^{\pi} (s_{i})] $
+In this way, there is no bias and the variance is smaller than pure policy gradient, but of course, cannot compare to actor-critic.</p>
+
+<p>To sum up, actor-critic algorithm use function approximator to fit value function and successfully replace large time step reward sum into the sum of current reward and next state reward function. This method deals with the first problem of policy gradient, as mentioned before.
+More things to read:</p>
+
+<ol>
+<li>N-step return to balance bias and variance. $\nabla_{\theta} J(\theta) = \frac{1}{N} \sum_{i=1}^N \sum_{t=1}^{T} log\pi_{\theta} (a_{t, i} | s_{t, i}) [\sum_{t&rsquo;=t}^{t+n} \gamma^{t&rsquo;-t} r(a_{t&rsquo;, i}, s_{t&rsquo;, i}) - \hat{V}^{\pi} (s_{t}) + \gamma^{n} \hat{V}^{\pi} (s_{t+n})] $. N &gt; 1 often works!</li>
+<li><a href="https://arxiv.org/abs/1506.02438" target="_blank">General advantage estimator. </a></li>
+</ol>
+
+<h2 id="temporal-difference-learning">Temporal Difference Learning</h2>
+
+<blockquote>
+<p>If one had to identify one idea as central and novel to reinforcement learning, it would undoubtedly
+be temporal-difference (TD) learning. &ndash; Sutton&rsquo;s RL book</p>
+</blockquote>
+
+<p>At this point, we need to a wrap up before unrolling new stuff. Previous method, like policy gradient, actor-critic, belongs to Monte Carlo (MC) methods, which we sample the trajectory as an episode and make updates based on the rewards. In this way, we have to wait until the whole eposide ends to update our model. While TD learning is a conbination of Monte Carlo method and dynamic programming (DP), and can estimates based on learned estimations, without a final outcome. This bootstrapping fashion makes TD learning usually converge faster than MC methods.</p>
+
+<p>Actually, the actor critic algorithm also get some essence of TD learning. The update of state value function and advantage is based on previous estimated value function.</p>
+
+<p>Let&rsquo;s derive TD learning based on MC methods:</p>
+
+<p>$$V(S_t) = V(S_t) + \alpha [\sum_{t=1}^{T} \gamma ^ t R_{ t} - V(S_t)]$$</p>
+
+<p>According to Sutton&rsquo;s book, note $\sum_{t&rsquo;=t}^{T} \gamma ^ {t&rsquo;} R_{t&rsquo;}$ as $G_t$. This becomes:</p>
+
+<p>$$V(S_t) = V(S_t) + \alpha [G_t - V(S_t)]$$</p>
+
+<p>This is a typical MC value iteration algorithm, updating value function based on MC samples in the end of an eposide. TD learning method only need to wait until next step:</p>
+
+<p>$$V(S_t) = V(S_t) + \alpha [R_{t+1} + \gamma V(S_{t+1}) - V(S_t)]$$</p>
+
+<p>This is called one-step TD or TD(0), because it only uses next step estimations. It is more clear written in this way:</p>
+
+<p>$$V_{\pi} = E_{\pi}[G_t | S_t = s] \\<br />
+V_{\pi} =  E_{\pi}[R_{t+1} + \gamma G_{t+1} | S_t = s] \\<br />
+V_{\pi} =  E_{\pi}[R_{t+1} + \gamma V(S_{t+1}) | S_t = s]$$</p>
+
+<p>MC method uses the first equation, and TD method uses the third equation. And also, MC error can be written as a sum of TD errors (Image from Sutton&rsquo;s book):</p>
+
+<p><img src="/img/RL/TD_error.jpg" width=1000></p>
+
+<p>TD learning is a model-free algorithm, does not require system dynamics. And it has an online, fully incremental update fashion, which is very important when single episode is long. In practice, TD methods are found to converge faster than MC methods. MC method is optimizing on the <strong>training dataset</strong>, while TD method is optimized to the maximum-likelihood model of the <strong>Markov decision process</strong> and the reward is averaged on different transitions.</p>
+
+<h2 id="sarsa">Sarsa</h2>
+
+<p>Sarsa is an on-policy TD control algorithm. Rather tahn learn a state-value function, it learns an action-value fucntion. We gonna estimate quality function $Q_{\pi}(s,a)$ for all state and action pair. Literally, it is the same process as fitting $V_{\pi}$.</p>
+
+<p>The update rule is very similar:</p>
+
+<p>$$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)]$$</p>
+
+<p>Update is done for every transition with their learned estimation and reward, like before. With learned $ Q(S_t, A_t)$, it&rsquo;s easy to find a greedy policy to maximize our reward. But during training time, we need some exploration. Greedy policy may just lead us to a local optimum. So, the policy in Sarsa is &ldquo;$\varepsilon$-greedy&rdquo; policy, which have a prob of $\varepsilon$ to choose some other actions.</p>
+
+<p>Here is Sarsa: For every steps in one eposide:</p>
+
+<ol>
+<li>At state S, take action A, get R, and S&rsquo;</li>
+<li>Choose A&rsquo; from S&rsquo; using $\varepsilon$-greedy policy</li>
+<li>$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t)]$</li>
+<li>S=S&rsquo;, A=A&rsquo;</li>
+</ol>
+
+<p>After one eposide, start a new one until termination. This is clearly a on-policy algorithm.</p>
+
+<h2 id="q-learning">Q-learning</h2>
+
+<p>From Sarsa, if we modify the update rule a little bit, we can easily get Q-learning:</p>
+
+<p>$$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma max_a Q(S_{t+1}, a) - Q(S_t, A_t)]$$</p>
+
+<p>Instead of choosing action with &ldquo;$\varepsilon$-greedy&rdquo; policy, Q-learning directly choose $max_a Q(S_{t+1}, a)$. Directly optimizing on optim value can make the algorithm even simpler and converge faster. Here is Q-learning:</p>
+
+<p>For each step of eposide:</p>
+
+<ol>
+<li>Choose A from S using $\varepsilon$-greedy policy</li>
+<li>Take action A,  get R, and S&rsquo;</li>
+<li>$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma max_a Q(S_{t+1}, a) - Q(S_t, A_t)]$</li>
+<li>S=S&rsquo;</li>
+</ol>
+
+<p>Also, after an eposide, start a new one.</p>
+
+<p>One thing to note, Q-learning is an off-policy algorithm. It follows current $Q(S_t, A_t)$ to choose actions and proceed, but when updating, it directly choose $argmax_a Q(S_{t+1}, a)$ rather than the chosen action. In another words, it update its Q-values using the Q-value of the next state s′ and the <strong>greedy action</strong> a′. But it&rsquo;s not following the greedy policy. While Sarsa uses &ldquo;$\varepsilon$-greedy&rdquo; policy to choose action and update Q-values, and has only one action selection each time step.</p>
+
+<p>From Sutton&rsquo;s book, the cliff walking problem indicate the difference between Sarsa and Q-learning very clearly.</p>
+
+<p><img src="/img/RL/cliffwalking.jpg" width=900></p>
+
+<p>The agent starts from S and the goal is G. Falling to the cliff will result in a -100 reward and start from S and every step have a -1 reward to push the agent to optimal. Q-learning can directly learn the shorter path, while Sarsa learns the safer path. Since we are using a &ldquo;$\varepsilon$-greedy&rdquo; policy, Sarsa will consider the probability of falling, while Q-learing always update with a greedy policy, so the update will ignore the worest falling cases and optimize our model to the shortest path. Of course, Sarsa can get a higher reward expection during training.</p>
+
+<h2 id="expected-sarsa">Expected Sarsa</h2>
+
+<p>From Q-learning, considering instead of the maximum over next state–action pairs, we take expected value over all possible actions.</p>
+
+<p>$$Q(S_t, A_t) = Q(S_t, A_t) + \alpha [R_{t+1} + \gamma E_{\pi}[Q(S_{t+1}, A_{t+1})] - Q(S_t, A_t)]$$</p>
+
+<p>Expected Sarsa moves in expectation while Q-learning moves deterministically. Expected Sarsa is more complex computationally than Sarsa but, in return, it eliminates
+of Q-learning on this problem. Given the same amount of experience we might expect it to perform slightly better than Sarsa, and indeed it generally does. When policy is purely greedy, not exploratory, Expected Sarsa is exactly Q-learning.</p>
+
+<h2 id="double-q-learning">Double Q-Learning</h2>
+
+<p>Algorithms we discussed above, like Sarsa, Q-learing, involve a maximization over all actions via policy. This maximization operation can lead to a significant positive bias. It is easy to understand. For example, if the true value of Q(s, a) is zero, and it&rsquo;s a Gaussian with some variance. The sample generated should have a mean of zero, but the expected maximum is definitely above 0. Q-learning will consistently choose the maximum and bring in a big bias.</p>
+
+<p>Double Q-Learning was born to deal with the positive bias. The idea is using two different and independent Q-tables or Q-network to decorrelate the selection of the best action from the evaluation of this action. $max(E[Q_1], E[Q_2]) &lt;= E[max(Q_1, Q_2)]$. Basically, two Q estimation should be both noisy, but if they are noisy in different ways, it should be OK. So, Double Q-learning does not use the same network to choose action and evaluate value:</p>
+
+<p>$$Q_1(S_t, A_t) = Q_1(S_t, A_t) + \alpha [R_{t+1} + \gamma Q_2(S_{t+1},argmax_a Q_1(S_{t+1},a)) - Q_1(S_t, A_t)]$$</p>
+
+<p>And for another 50% probability, switch $Q_1$ and $Q_2$ to update $Q_2$. This is the double version of Q-learning. Of course, there are also double versions of Sarsa and Expected Sarsa.</p>
+
+<h2 id="n-step-return">N-step Return</h2>
+
+<p>N-step return is an intermediate algorithm between MC and TD(0) methods. MC method can be treated as an infinity time steps return algorithm, we ahve to wait until eposide ends. And TD(0) method is one-step return, which directly uses the evaluation of next time step.
+N-step return algorithms can migitate problems of both algorithms when using a proper N.</p>
+
+<p>Here is a typical backup diagram of MC, TD(0), and N-step algorithms (image from Sutton&rsquo;s book):</p>
+
+<p><img src="/img/RL/n-step.jpg" width=600></p>
+
+<p>Originally in MC method,</p>
+
+<p>$$G_t = R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + &hellip; + \gamma^{T-t-1} R_{T}$$</p>
+
+<p>And in TD(0),</p>
+
+<p>$$G_{t:t+1} = R_{t+1} + \gamma V(S_{t+1})$$</p>
+
+<p>So in N-step:</p>
+
+<p>$$G_{t:t+n} = R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + &hellip; + \gamma^{n-1} R_{t+n} + \gamma^n V(S_{t+n+1})$$</p>
+
+<p>And the update rule for state-value TD method:</p>
+
+<p>$$V_{t+n}(S_t) = V_{t+n-1}(S_t) + \alpha [G_{t:t+n} - V_{t+n-1}(S_t)]$$</p>
+
+<p>Update rule for action-state TD method, like Sarsa:</p>
+
+<p>$$Q_{t+n}(S_t, A_t) = Q_{t+n-1}(S_t, A_t) + \alpha [G_{t:t+n} - Q_{t+n-1}(S_t, A_t)]$$</p>
+
+<p>But for N-step return, we have to wait N steps until getting the update values. It can be viewed as a control over variance and bias trade-off. Also, it gives us more freedom. Bootstrapping works best if it is over a length of time in which a significant and recognizable state change has occurred, and a significant and recognizable state change may takes several time steps. Accordingly, N-step usually works better than pure MC or TD method. But theoritically, this is only correct for online algorithms. We can ignore this difference, and it oftern works well.</p>
+
+<h2 id="deep-q-network">Deep Q network</h2>
+
+<p>All the TD methods discussed above are tabular methods, in which the state and action spaces are small enough for the approximate value functions to be represented as arrays, or tables. These methods can often find exact solutions, that is, they can often find exactly the optimal value function and the optimal policy.</p>
+
+<p>But they have problems when the state/action space is combinatorial and enormous, like images. The &ldquo;table&rdquo; in tabular methods would be inefficiently enormous and cannot fit into memory. Generalization is needed for such cases, like function approximation. And neural network is a good tool to do this.</p>
+
+<p>So, if we change Q table into a deep neural network, the algorithm becomes deep Q network (DQN), the core algorithm of Alpha Go and Alpha Zero. And the update is not directly modification anymore, we can use gradient based algorithm to update the network.</p>
+
+<p>Here is a neural network based Q-learning:</p>
+
+<ol>
+<li>Take some actions, like &ldquo;$\varepsilon$-greedy&rdquo; policy, and get (s, a, s&rsquo;, r)</li>
+<li>$\phi = \phi - \alpha \frac{\nabla Q_{\phi} (s, a)}{\nabla \phi}  (Q_{\phi}(s,a) - r(s, a) - \gamma max_{a&rsquo;} Q_{\phi}(s&rsquo;, a&rsquo;))$</li>
+</ol>
+
+<p>But the samples are strongly correlated because the policy only changes little in deep neural network training. We tend to locally overfit the samples. For this, we can use a replay buffer to deal with in off-policy algorithms. This replay buffer is easy to use, quite effective, so widely used. Here is a diagram of replay buffer:</p>
+
+<p><img src="/img/RL/replaybuffer.png" width=1000></p>
+
+<p>We keep a lot of transitions in the buffer and keep updating. Every training batch is a random sample of all transition in the buffer.</p>
+
+<p>The algorithm becomes:
+<img src="/img/RL/replaybufferalgorithm.png" width=800></p>
+
+<p>Actually, the updating step of this algorithm is optimizing over a moving target since we are consistently changing $\phi$ and $max_{a&rsquo;} Q_{\phi}(s&rsquo;, a&rsquo;)$. And we cannot run too much steps in the inner loop because it will overfit. Here is a modification:</p>
+
+<p><img src="/img/RL/movingtarget.png" width=900></p>
+
+<p>$\phi$ is update far less frequently to keep the target still. That&rsquo;s DQN. A more general overview of these algorithms are avaiable <a href="http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-8.pdf" target="_blank">here</a>.</p>
+
+<h2 id="q-learning-with-continuous-action">Q-learning with continuous action</h2>
+
+<p>If the action space are continuous, we need a neat method to find the maximum of $Q(s,a)$, since every Q iteration step need to find $argmax_{a&rsquo;} Q_{\phi}(s&rsquo;, a&rsquo;)$. Here are three method:</p>
+
+<ol>
+<li>Optimization methods, like SGD,stochastic optimization. Or easily sample a bunch and choose the best one.</li>
+<li>Functions wasy to maximize, like quadratic funtions.</li>
+<li>Learn an approximate maximizer</li>
+</ol>
+
+<h2 id="advanced-policy-gradient">Advanced policy gradient</h2>
+
+<p>At this point, it&rsquo;s time to wrap up all previous method and go deeper. Learning from previous tabular methods and basic policy gradient, I will make a comparison between policy gradient and action-value or state-value methods, concrete the mathematical theory of policy gradient and go to more advanced policy gradient methods.</p>
+
+<p>We have talked about basic policy gradient above. Instead of learning action-value or state-value estimations, policy gradient introduces a parameterized policy that can select actions without consulting a value function. Write the policy as: $\pi(a|s, \theta) = P(A=a|S=s, \theta)$ for the porbability that taking action a at state s with parameterized policy P.</p>
+
+<p>And the update formula looks like:</p>
+
+<p>$$\theta_{t+1} = \theta_{t} + \alpha \nabla J(\theta_{t})$$</p>
+
+<p>Here $J(\theta)$ is optimizing objective, $J(\theta) = v_{\pi_{\theta}}(s_0)$, which is the reward of a trajectory from $s_0$. One thing to note, in order to ensure the exploration, the policy should never be deterministic $\pi(a|s, \theta) \in (0, 1)$. And the parameterize policy can make it easier to deal with continuous action and states.</p>
+
+<p>One advantage of parameterized policy is that it can be nearly deterministic, while $\varepsilon$-greedy policy always has $\varepsilon$ probability to select a random action. But we should prevent it being too deterministic to keep exploration. For example, in softmax function, we need to control the temperature to make sure.</p>
+
+<p>Another advantage is the parameterized policy can be stochastic, and it can fit arbitrary probability distributions. In some cases, the optimal policy should be stochastic, like poker games.</p>
+
+<blockquote>
+<p>Perhaps the simplest advantage that policy parameterization may have over action- value parameterization is that the policy may be a simpler function to approximate. Problems vary in the complexity of their policies and action-value functions.  &ndash; From Sutton&rsquo;s book</p>
+</blockquote>
+
+<p>And also, policy gradient has convergence gaurantee, while $\varepsilon$-greedy selection the action probabilities may change dramatically for an arbitrarily small change in the estimated action values, if that change results in a different action having the maximal value.</p>
+
+<h3 id="policy-gradient-theorem">Policy gradient theorem</h3>
+
+<p>The objective of policy gradient is $\theta_{t+1} = \theta_{t} + \alpha \nabla J(\theta_{t})$. It&rsquo;s kind of tricky to compute this. The problem is the system performance is related to system dynamic $P(s&rsquo; | s, a)$ as well as policy $P(a|s)$. Given a state, the effect of policy parameters are not only on action selection, but also on the system dynamic, which is irrelevant and usually hard to measure. How can we estimate the reward and get the gradient, regardless of the unknown effect of policy changes on system dynamics?</p>
+
+<p>Thanks to policy gradient theorem, it provides an explicit, excellent answer to this problem.</p>
+
+<p><img src="/img/RL/policygradienttheorem.jpg" width=1000></p>
+
+<p>After unrolling, we give several terms:</p>
+
+<p><img src="/img/RL/theoremunrolling.jpg" width=1000></p>
+
+<p>We can easily find the first half of every unrolling piece is the trajector probability to get to state certain s. And the second half is a a Q function weighted gradient over all action&rsquo;s gradient. So, sum up the unrolling result as:</p>
+
+<p>$$\nabla J(\theta) = \nabla_{\theta} v_{\pi_{\theta}} = \sum_s d(s) \sum_a \nabla \pi(a|s)q_{\pi}(s,a)$$</p>
+
+<p>where $d(s)$ is the trajectory probability. This derivation beautifully removes the derivatives of Q function, making it possible to directly update the policy. Also, updating with respect to the policy parameter does not involve th gradient of state distribution $p(s&rsquo;|s,a)$. All policy gradient algorithms are based on this theorem.</p>
+
+<p>If changing $\nabla \pi(a|s)$ into $ \pi(a|s) \nabla log\pi(a|s)$, the above formula can be further written as:</p>
+
+<p>$$\nabla J(\theta) = E_{\pi} [\nabla log \pi(a|s)q_{\pi}(s,a)]$$</p>
+
+<p>We can use a batch of data to approximate the expection. Here is a general form of policy gradient family <a href="https://arxiv.org/pdf/1506.02438.pdf" target="_blank">image source</a>：</p>
+
+<p><img src="/img/RL/generalpolicygradient.jpg" width=900></p>
+
+<p>There are a lot of poicy gradient algorithms, besides the REINFORCE algorithm and actor-critic algorithm talked above.</p>
+
+<h3 id="off-policy-policy-gradient">Off-policy policy gradient</h3>
+
+<p>Usually, policy gradient is on-polic, we optimize the exact policy we used to collect data. But off-policy have several advantages：</p>
+
+<ol>
+<li>We can take advantage of the replay buffer introduced before to avoid sample correlation and improve sample efficiency.</li>
+<li>Do not need to directly optimize on behavior policy and it can give the model more exploration space.</li>
+</ol>
+
+<p>But how to make it off-policy? We only need to make a little approximation.</p>
+
+<p><img src="/img/RL/offpolicygradient.jpg" width=700></p>
+
+<p>We need to ignore the second term in the third step. In policy gradient theorem, we unroll the $\nabla_{\theta}Q(s,a)$ term, while here, we just ignore it, since it is usually very hard compute it. As shown in the result, the only difference is an importance sampling weight $\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)}$. Although we make a big approximation, the off-policy policy gradient is also gauranteed to converge to the optimal <a href="https://arxiv.org/pdf/1205.4839.pdf" target="_blank">(proof)</a>.</p>
+
+<p>So, it is totally ok to make policy gradient off-policy, we only need to add a reweighting ratio of the target policy over behavior policy.</p>
+
+<h3 id="asynchronous-advantage-actorcritic-a3c">asynchronous advantage actorcritic (A3C)</h3>
+
+<p>Instead of experience replay, A3C asynchronously execute multiple agents in parallel, on multiple instances of the environment. Each process contains an actor that acts in its own copy of the environment, a separate replay memory, and a learner that samples data, updating shared policy parameters are sent to the actor-learners at fixed intervals.</p>
+
+<p>Run seperately in different threads can introduce exploration into the system, so A3C does not uses replay buffer in order to use some on-policy algorithms, like Sarsa. Here is A3C <a href="https://arxiv.org/pdf/1602.01783.pdf" target="_blank">image source</a>:</p>
+
+<p><img src="/img/RL/A3C.jpg" width=700></p>
+
+<p>A3C enables large scale training in different threads. The algorithm computes gradients for n-step updates for each of the state-value pairs encountered since the last update. This accumulated gradient can alao mkae the model more robust.</p>
+
+<h3 id="deterministic-policy-gradient-dpg">Deterministic Policy Gradient (DPG)</h3>
+
+<p>The first step of DPG should be building a mathematical foundation: the Deterministic Policy Gradient Theorem.</p>
+
+<p>Previously, our policy gradient theorem gives:</p>
+
+<p>$$J(\theta) = \int_\mathcal{S} \rho^\mu(s) Q(s, \mu_\theta(s)) ds$$</p>
+
+<p>But for deterministic policy gradient:</p>
+
+<p><img src="/img/RL/dpgt.jpg" width=600></p>
+
+<p>By convention $\nabla_\theta \mu_\theta(s)$ is a Jacobian matrix such that each
+column is the gradient. In the paper, the authurs claims DPG can be treated as a special case of stochastic policy gradient.
+By parametrising stochastic policies with a Gaussian, DPG is equivalent to the case that $\sigma = 0$. Compared to stochastic policy gradient, DPG should be more sample efficiency because it does not need to fit policy over the whole state and action space.</p>
+
+<p>So one possible DPG algorithm using Sarsa updates is:
+<img src="/img/RL/DPG1.jpg" width=500></p>
+
+<p>Note that we cannot just use deterministic policies without any exploration. Usually some noise are needed for DPG training. But in the way, DPG is not deterministic anymore&hellip; This is kind of similar to &ldquo;$\varepsilon$-greedy&rdquo; policy.</p>
+
+<p>In off-policy cases, it&rsquo;s similar to common off-policy policy gradient.
+<img src="/img/RL/offpolicyDPG.jpg" width=550></p>
+
+<p>Similarly, it drops a term that depends on $\nabla_{\theta} Q^\mu(s, a)$. And since the policy is deterministic, $Q^\mu(s, \mu_\theta(s)) = \sum_a \pi_{\theta}(a \vert s) Q^\pi(s, a)$. We don&rsquo;t need to do importance sampling like previous off-policy algorithms.</p>
+
+<h3 id="deep-deterministic-policy-gradient-ddpg">Deep Deterministic Policy Gradient (DDPG)</h3>
+
+<h3 id="trust-region-policy-optimization">Trust region policy optimization</h3>
+
+<p>In order to stabilize training process, every step the parameters should not change dramatially. We can add some constrains to the distance between old and new parameters or the gradients, like gradient clipping. Trust region policy optimization introduces <strong>KL divergence</strong> to set a constrain on the distance of every update.</p>
+
+<p>But the internel idea of TRPO is a little tricky. In policy gradient, we optimize the policy without considering the change of state change. We still assume the state is $s_0, s_1, s_2, &hellip; $ and optimize the policy to maximize reward/advantage based on this series of states. But actually, states in every time step might change with the change of policy. What we should do is to optimize based on the new, optimized policy state distribution. Apparently, this is not easy to do.</p>
+
+<p>This property is very clear via some derivation <a href="http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-9.pdf" target="_blank">(source)</a>:</p>
+
+<p><img src="/img/RL/policyiteration.jpg" width=1000></p>
+
+<p>Here. $p_{\theta&rsquo;}$ is new policy $p_{\theta}$ is old policy. Decompose $p_{\theta&rsquo;}(\tau)$, we get:</p>
+
+<p><img src="/img/RL/policyiteration1.jpg" width=800></p>
+
+<p>We can use importance sampling to obtain an off-policy fashion to optimize $\pi_{\theta}(a_t|s_t)$ accurately, but we still cannot deal with the new state distribution $p_{\theta&rsquo;}$.</p>
+
+<p>TRPO claims if new policy and old policy are close enough, we can assume these two states in every time step will also be close enough.</p>
+
+<p>And we can prove if $|\pi_{\theta&rsquo;}(a_t|s_t) - \pi_{\theta}(a_t|s_t)| &lt;= \epsilon$ for every time step, then $|p_{\theta&rsquo;} - p_{\theta}| &lt;= 2\epsilon t$</p>
+
+<p>TRPO introduces a more efficient constrain on policy distribution change, $$D_{KL}(\pi_{\theta&rsquo;}(a_t|s_t) || \pi_{\theta}(a_t|s_t)) &lt;= \epsilon $$</p>
+
+<p>Overall, TRPO is like:
+<img src="/img/RL/TRPO.jpg" width=700></p>
+
+<p>In practice, we can use duel gradient ascent to solve this constrained problem.</p>
+
+<ol>
+<li>Maximize the Lagrangian multiplier: <img src="/img/RL/lagrange.jpg" width=1000></li>
+<li>Optimize $\lambda$ if the constrain is violated. $\lambda = \lambda + \alpha (D_{KL}(\pi_{\theta&rsquo;}(a_t|s_t) || \pi_{\theta}(a_t|s_t)) - \epsilon)$</li>
+</ol>
+
+<h3 id="proximal-policy-optimization-ppo">proximal policy optimization PPO</h3>
+
+<p>PPO is based on the same idea of TRPO. But compared to TRPO, it is less complicated and compatible with architectures that include noise (such as dropout) or parameter sharing
+(between the policy and value function, or with auxiliary tasks).</p>
+
+<p>PPO propose a novel objective with clipped probability ratios, which forms a pessimistic estimate
+(i.e., lower bound) of the performance of the policy. Here is the TRPO objective [(image source)[<a href="https://arxiv.org/pdf/1707.06347.pdf]]:" target="_blank">https://arxiv.org/pdf/1707.06347.pdf]]:</a></p>
+
+<p><img src="/img/RL/PPO.jpg" width=600></p>
+
+<p>If one directly optimizes this objective, it might lead a big change to $r_t (\theta)$, which is not what we want. That&rsquo;s why there is a KL divergence constrain on policy change. While PPO have a different objective:</p>
+
+<p><img src="/img/RL/PPO1.jpg" width=700></p>
+
+<p>It clips $r_t (\theta)$ into a small range, $[1-\epsilon, 1+\epsilon]$, which removes the incentive for moving $r_t$ outside of the
+interval. And also takes a minimum of the clipped and unclipped objective, so the
+final objective is a <strong>lower bound</strong> (i.e., a pessimistic bound) on the unclipped objective. PPO just want to be very <strong>conservative</strong> to optimize the policy to some behaviors with a big reward, while for some known bad behaviors, PPO does not put any constrain on it.</p>
+
+<p>If using a neural network architecture that shares parameters
+between the policy and value function, we must use a loss function that combines the policy
+change constrain and a value function error term.</p>
+
+<p>$$L_{t}(\theta) = L_{t}^{CLIP}(\theta) - c_1 (V_t^{\theta} - V_t^{target})^2 + c_2 EN[\pi_{\theta}]$$</p>
+
+<p>We need to include the value function approximation loss, as well as the third policy entropy bonus term, to ensure enough exploration to the algorithm.</p>
+
+<p>Currently, PPO should be a default algorithm policy gradient algorithm because of its simplicity and effectiveness.</p>
+
+<h3 id="actor-critic-with-experience-replay-acer">actor critic with experience replay (ACER)</h3>
+
+<h3 id="soft-actor-critic">Soft actor-critic</h3>
+
+<p>Soft actor-critic is based on the maximum entropy reinforcement learning framework, which considers the entropy augmented term inside its objective. Previously, common RL algorithm have this objective:</p>
+
+<p>$$\pi^* = \arg\max_{\pi} \mathbb{E}_{\pi}\left[ \sum_{t=0}^T r_t \right]$$</p>
+
+<p>Only consider future reward sum with current policy. But the objective with maximum entropy also optimize the entropy of policy, it goes like this:</p>
+
+<p>$$ \pi_{\mathrm{MaxEnt}}^* = \arg\max_{\pi} \mathbb{E}_{\pi}\left[ \sum_{t=0}^T r_t + \mathcal{H}(\pi(\cdot | \mathbf{s}_t)) \right] $$</p>
+
+<p>In this way, out policy not only optimize future reward, but also want to achieve higher entropy, in another words, more diversity. It will automatically make the policy distribution &ldquo;wider&rdquo; to ensure exploration wisely, rather than common some random exploration. A blog from UC berkeley explains this clearly: <a href="https://bair.berkeley.edu/blog/2017/10/06/soft-q-learning/" target="_blank">Learning Diverse Skills via Maximum Entropy Deep Reinforcement Learning
+</a>:</p>
+
+<blockquote>
+<p>Note that this objective differs qualitatively from the behavior of Boltzmann exploration (Sallans &amp; Hinton, 2004) and PGQ (O’Donoghue et al., 2016),
+which greedily maximize entropy at the current time step,
+but do not explicitly optimize for policies that aim to reach
+states where they will have high entropy in the future.</p>
+</blockquote>
+
+<p>Different with previous methods, this objective tends to maximize the entropy of the entire trajectory distribution for the policy, rather than greedily maximize current policy.</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">Common RL objective</th>
+<th align="center">maximum entropy RL</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/unimodal-policy.png" alt="" /></td>
+<td align="center"><img src="/img/multimodal_policy.png" alt="" /></td>
+</tr>
+</tbody>
+</table>
+
+<p>With maximum entropy objective, we can explore more widely in a multimodal setting and ensure the agent explores all promising states while prioritizing the more promising ones. This kind of exploration can be very useful for transfer learning as well. If we formalize this idea by defining the policy directly in terms of exponentiated Q-value:</p>
+
+<p>$$\pi(\mathbf{a}|\mathbf{s}) \propto \exp Q(\mathbf{s}, \mathbf{a})$$</p>
+
+<p>This is <a href="https://arxiv.org/pdf/1702.08165.pdf" target="_blank">Soft Q-learning</a>.</p>
+
+<p>For <a href="https://arxiv.org/pdf/1801.01290.pdf" target="_blank">soft actor-critic</a>,we will derive soft policy iteration. Very similar to common policy iteration, only need to replace value function with soft value function:</p>
+
+<p>Note the actor will sample actions from policy, so the entropy term can be written as $E_{a_t \sim \pi}[- log \pi(a_t|s_t)]$. In this way, the soft value function formula is:</p>
+
+<p>$$V(s_t) = E_{a_t \sim \pi}[Q(s_t, a_t) - log \pi(a_t|s_t)]$$</p>
+
+<p>And also, the update of policy uses KL divergence:</p>
+
+<p><img src="/img/RL/softpolicyupdate.jpg" width=500></p>
+
+<p>This $Z^{\pi_{old}}(s_t)$ is just a normalizer.</p>
+
+<p>In soft actor critic, we will use function approximator to for both Q-function and policy. The soft Q-function can be modeled as expressive neural networks, and the policy as
+a Gaussian with mean and covariance given by neural network.</p>
+
+<p>First soft value function:
+<img src="/img/RL/softvaluefunction.jpg" width=600></p>
+
+<p>Second, Q-function, same as before, use soft Bellman residual to approximate:</p>
+
+<p><img src="/img/RL/softbellmanresidual.jpg" width=700></p>
+
+<p>Finally, policy update, using KL divengence:</p>
+
+<p><img src="/img/RL/softpolicyupdate2.jpg" width=700></p>
+
+<p>The target
+density is the Q-function, which is represented by a neural
+network an can be differentiated, and it is thus convenient
+to apply the reparameterization trick, resulting in a
+lower variance estimator. To that end, we reparameterize
+the policy using a neural network transformation. The network will provide mean and std for
+Gaussian reparameterization.</p>
+
+<p>Here is soft actor critic:</p>
+
+<p><img src="/img/RL/softactorcritic.jpg" width=500></p>
+
+<h1 id="sum-up">Sum up</h1>
+
+<h1 id="reference">Reference</h1>
+
+<ol>
+<li><a href="https://see.stanford.edu/materials/aimlcs229/cs229-notes12.pdf" target="_blank">Reinforcement learning lecture of CS229 by Andew Ng</a></li>
+<li><a href="http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html" target="_blank">David Sliver&rsquo;s RL lecture at UCL</a></li>
+<li><a href="http://rail.eecs.berkeley.edu/deeprlcourse/" target="_blank">Sergey Levine&rsquo;s RL course at UC Berkeley</a></li>
+<li><a href="https://drive.google.com/file/d/1opPSz5AZ_kVa1uWOdOiveNiBFiEOHjkG/view" target="_blank">Sutton&rsquo;s RL book</a></li>
+<li><a href="https://arxiv.org/pdf/1506.02438.pdf" target="_blank">Generalized Advantage Estimation</a></li>
+<li><a href="https://arxiv.org/abs/1707.06347" target="_blank">Proximal Policy Optimization Algorithms</a></li>
+<li><a href="http://proceedings.mlr.press/v32/silver14.pdf" target="_blank">Deterministic Policy Gradient (DPG)</a></li>
+<li><a href="https://arxiv.org/abs/1702.08165" target="_blank">Reinforcement Learning with Deep Energy-Based Policies</a></li>
+<li><a href="https://arxiv.org/abs/1801.01290" target="_blank">Soft Actor-critic</a></li>
+</ol>
+
+    </div>
+
+    
+
+
+<div class="article-tags">
+  
+  <a class="btn btn-primary btn-outline" href="/tags/reinforcement-learning/">reinforcement learning</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/markov-decision-process/">markov decision process</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/deep-learning/">deep learning</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/policy-gradient/">policy gradient</a>
+  
+  <a class="btn btn-primary btn-outline" href="/tags/q-learning/">Q-learning</a>
+  
+</div>
+
+
+
+
+    
+    
+    <div class="article-widget">
+      <div class="hr-light"></div>
+      <h3>Related</h3>
+      <ul>
+        
+        <li><a href="/post/capsnet-and-dynamic-routing/">CapsNet and dynamic routing</a></li>
+        
+        <li><a href="/post/nlp-basics---word2vec/">NLP basics - Word2vec: Skip-gram, CBOW, GloVe</a></li>
+        
+        <li><a href="/post/going-deeper-into-batch-normalization/">Going Deeper in Batch Normalization</a></li>
+        
+        <li><a href="/post/amazing-gan---wasserstein-gan/">Amazing GAN - Wasserstein GAN</a></li>
+        
+        <li><a href="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</a></li>
+        
+      </ul>
+    </div>
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p class="powered-by">
+
+      &copy; 2018 &middot; 
+
+      Powered by
+      
+      <a href="https://shen338.github.io/" target="_blank" rel="noopener">Tong Shen</a>. 
+	  
+	  All rights reserved.
+
+      <span class="pull-right" aria-hidden="true">
+        <a href="#" id="back_to_top">
+          <span class="button_icon">
+            <i class="fa fa-chevron-up fa-2x"></i>
+          </span>
+        </a>
+      </span>
+
+    </p>
+  </div>
+</footer>
+
+
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close btn-large" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Cite</h4>
+      </div>
+      <div>
+        <pre><code class="modal-body tex"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-primary btn-outline js-copy-cite" href="#" target="_blank">
+          <i class="fa fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-primary btn-outline js-download-cite" href="#" target="_blank">
+          <i class="fa fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+    
+
+    
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha512-3P8rXCuGJdNZOnUx/03c1jOTnMn3rP63nBip5gOP2qmUh5YAdVAvFZ1E+QLZZbC1rtMrQb+mah3AfYW11RUrWA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.3/imagesloaded.pkgd.min.js" integrity="sha512-umsR78NN0D23AzgoZ11K7raBD+R6hqKojyBZs1w8WvYlsI+QuKRGBx3LFCwhatzBunCjDuJpDHwxD13sLMbpRA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha512-iztkobsvnjKfAtTNdHkGVjAYTrrtlC7mGp/54c40wowO7LhURYl3gVzzcEqGl/qKXQltJ2HwMrdLcNUdo+N/RQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.4/isotope.pkgd.min.js" integrity="sha512-VDBOIlDbuC4VWxGJNmuFRQ0Li0SKkDpmGyuhAG5LTDLd/dJ/S0WMVxriR2Y+CyPL5gzjpN4f/6iqWVBJlht0tQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+    
+    
+    <script src="/js/hugo-academic.js"></script>
+    
+
+    
+    
+      
+      
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+      
+
+      
+
+      
+
+      <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_CHTML" integrity="sha512-tOav5w1OjvsSJzePRtt2uQPFwBoHt1VZcUq8l8nm5284LEKE9FSJBQryzMBzHxY5P0zRdNqEcpLIRVYFNgu1jw==" crossorigin="anonymous"></script>
+    
+    
+
+  </body>
+</html>
+

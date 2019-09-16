@@ -18,7 +18,7 @@
       <pubDate>Sat, 01 Dec 2018 21:00:00 -0600</pubDate>
       
       <guid>/post/model-free-reinforcement-learning/</guid>
-      <description>What is reinforcement learning? In supervised learning, we saw algorithms that tried to make their outputs mimic the labels y given in the training set. In that setting, the labels gave an unambiguous “right answer” for each of the inputs x. In contrast, for many sequential decision making and control problems, it is very difficult to provide this type of explicit supervision to a learning algorithm. For example, if we have just built a four-legged robot and are trying to program it to walk, then initially we have no idea what the “correct” actions to take are to make it walk, and so do not know how to provide explicit supervision for a learning algorithm to try to mimic.</description>
+      <description>Table of Contents  What is reinforcement learning?  Model Reinforcement learning objective  Markov Decision Process  Policy/Value iteration  Imitation Learning Basics  Policy Gradient Actor-Critic Algorithm  Temporal Difference Learning  Sarsa Q-learning Expected Sarsa Double Q-Learning N-step Return Eligibility Trace and TD($\lambda$) Deep Q network Q-learning with continuous action  Advanced policy gradient  Policy gradient theorem Off-policy policy gradient A3C DPG DDPG TD3 TRPO PPO ACER Soft Actor-critic  Sum up Reference  What is reinforcement learning?</description>
     </item>
     
   </channel>

@@ -17,7 +17,7 @@
       
     
   
-  <meta name="description" content="What is reinforcement learning? In supervised learning, we saw algorithms that tried to make their outputs mimic the labels y given in the training set. In that setting, the labels gave an unambiguous “right answer” for each of the inputs x. In contrast, for many sequential decision making and control problems, it is very difficult to provide this type of explicit supervision to a learning algorithm. For example, if we have just built a four-legged robot and are trying to program it to walk, then initially we have no idea what the “correct” actions to take are to make it walk, and so do not know how to provide explicit supervision for a learning algorithm to try to mimic.">
+  <meta name="description" content="Table of Contents  What is reinforcement learning?  Model Reinforcement learning objective  Markov Decision Process  Policy/Value iteration  Imitation Learning Basics  Policy Gradient Actor-Critic Algorithm  Temporal Difference Learning  Sarsa Q-learning Expected Sarsa Double Q-Learning N-step Return Eligibility Trace and TD($\lambda$) Deep Q network Q-learning with continuous action  Advanced policy gradient  Policy gradient theorem Off-policy policy gradient A3C DPG DDPG TD3 TRPO PPO ACER Soft Actor-critic  Sum up Reference  What is reinforcement learning?">
 
   
   <link rel="alternate" hreflang="en-us" href="/post/model-free-reinforcement-learning/">
@@ -76,7 +76,7 @@
   <meta property="og:site_name" content="Tong Shen">
   <meta property="og:url" content="/post/model-free-reinforcement-learning/">
   <meta property="og:title" content="Reinforcement Learning: Markov Decision Process and Model-free Algorithms | Tong Shen">
-  <meta property="og:description" content="What is reinforcement learning? In supervised learning, we saw algorithms that tried to make their outputs mimic the labels y given in the training set. In that setting, the labels gave an unambiguous “right answer” for each of the inputs x. In contrast, for many sequential decision making and control problems, it is very difficult to provide this type of explicit supervision to a learning algorithm. For example, if we have just built a four-legged robot and are trying to program it to walk, then initially we have no idea what the “correct” actions to take are to make it walk, and so do not know how to provide explicit supervision for a learning algorithm to try to mimic.">
+  <meta property="og:description" content="Table of Contents  What is reinforcement learning?  Model Reinforcement learning objective  Markov Decision Process  Policy/Value iteration  Imitation Learning Basics  Policy Gradient Actor-Critic Algorithm  Temporal Difference Learning  Sarsa Q-learning Expected Sarsa Double Q-Learning N-step Return Eligibility Trace and TD($\lambda$) Deep Q network Q-learning with continuous action  Advanced policy gradient  Policy gradient theorem Off-policy policy gradient A3C DPG DDPG TD3 TRPO PPO ACER Soft Actor-critic  Sum up Reference  What is reinforcement learning?">
   <meta property="og:locale" content="en-us">
   
   <meta property="article:published_time" content="2018-12-01T21:00:00-06:00">
@@ -265,7 +265,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    35 min read
+    42 min read
   </span>
   
 
@@ -324,6 +324,57 @@
     <div class="article-style" itemprop="articleBody">
       
 
+<h1 id="table-of-contents">Table of Contents</h1>
+
+<ul>
+<li><a href="#what-is-reinforcement-learning-">What is reinforcement learning?</a>
+
+<ul>
+<li><a href="#model">Model</a></li>
+<li><a href="#reinforcement-learning-objective">Reinforcement learning objective</a></li>
+</ul></li>
+<li><a href="#markov-decision-process">Markov Decision Process</a>
+
+<ul>
+<li><a href="#policy-value-iteration">Policy/Value iteration</a></li>
+</ul></li>
+<li><a href="#imitation-learning">Imitation Learning</a></li>
+<li><a href="#basics">Basics</a>
+
+<ul>
+<li><a href="#policy-gradient">Policy Gradient</a></li>
+<li><a href="#actor-critic-algorithm">Actor-Critic Algorithm</a></li>
+</ul></li>
+<li><a href="#temporal-difference-learning">Temporal Difference Learning</a>
+
+<ul>
+<li><a href="#sarsa">Sarsa</a></li>
+<li><a href="#q-learning">Q-learning</a></li>
+<li><a href="#expected-sarsa">Expected Sarsa</a></li>
+<li><a href="#double-q-learning">Double Q-Learning</a></li>
+<li><a href="#n-step-return">N-step Return</a></li>
+<li><a href="#eligibility-trace-and-td---lambda--">Eligibility Trace and TD($\lambda$)</a></li>
+<li><a href="#deep-q-network">Deep Q network</a></li>
+<li><a href="#q-learning-with-continuous-action">Q-learning with continuous action</a></li>
+</ul></li>
+<li><a href="#advanced-policy-gradient">Advanced policy gradient</a>
+
+<ul>
+<li><a href="#policy-gradient-theorem">Policy gradient theorem</a></li>
+<li><a href="#off-policy-policy-gradient">Off-policy policy gradient</a></li>
+<li><a href="#a3c">A3C</a></li>
+<li><a href="#dpg">DPG</a></li>
+<li><a href="#ddpg">DDPG</a></li>
+<li><a href="#td3">TD3</a></li>
+<li><a href="#trpo">TRPO</a></li>
+<li><a href="#ppo">PPO</a></li>
+<li><a href="#acer">ACER</a></li>
+<li><a href="#soft-actor-critic">Soft Actor-critic</a></li>
+</ul></li>
+<li><a href="#sum-up">Sum up</a></li>
+<li><a href="#reference">Reference</a></li>
+</ul>
+
 <h1 id="what-is-reinforcement-learning">What is reinforcement learning?</h1>
 
 <p>In supervised learning, we saw algorithms that tried to make their outputs
@@ -363,9 +414,21 @@ stochastic: the probability of the next state $(s&rsquo;)$ on current state $(s)
 <li>Model-based algorithms. In this setting, we already know the system dynamics, like $P(s&rsquo;|s, a)$ or we can learn a good model to simulate the environment. It might be hard to learning system dynamics and good strategy at the same time. So, it can be particularly effective if we can hand-engineer a dynamics representation using our knowledge of physics, and fit just a few parameters.</li>
 </ol>
 
-<p>At this blog, we only care about model-free algorithms. And we will talk about model-based algorithm in next blog.</p>
+<h2 id="reinforcement-learning-objective">Reinforcement learning objective</h2>
 
-<h2 id="markov-decision-process">Markov Decision Process</h2>
+<p>First, we name a trail from time 0 to time step $T$ as a <strong>trajectory</strong>. So, the probability of the hwole trajectory is:</p>
+
+<p>$$P(\tau) = P_{\theta}(s_0, a_0, &hellip;, s_T, a_T) = p(s_0) \prod_{t=1}^T \pi_{\theta}(a_t|s_t) p(s_{t+1}|s_t, a_t)$$</p>
+
+<p>Our objective is to find an optimal $\theta^{\star}$, that maximizes the expection of the trajectory reward:</p>
+
+<p>$$\theta^{\star} = argmax_{\theta} E_{\tau \sim p(\tau)}[\sum_{t=1}^{T} r(a_t, s_t)]$$</p>
+
+<p>Note that we still treat this as a Markov process.</p>
+
+<p>Next step, we will talk about reinforcement learning algorithms. There are a lot of categorical information from CS294 Lecture <a href="http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-4.pdf" target="_blank">here</a>.</p>
+
+<h1 id="markov-decision-process">Markov Decision Process</h1>
 
 <p>Markov decision process(MDP) is a simplified sequential decision making process, in which RL problems are usually posed. Here are two main assumptions hold for MDP:</p>
 
@@ -486,7 +549,7 @@ d. For each state s, let $π(s) := argmax_{a \in A} P(s|s&rsquo;, a) V(s)$<br />
 
 <p>MDP provides a mathematical framework for modeling decision making. MDPs are useful for studying optimization problems solved via dynamic programming and reinforcement learning. It can be used in many disciplines, including robotics, automatic control, economics and manufacturing. Next part, we wil dive into reinforcement learning algorithms.</p>
 
-<h2 id="imitation-learning">Imitation Learning</h2>
+<h1 id="imitation-learning">Imitation Learning</h1>
 
 <p>In the beginning, we may let the machine mimic human behaviors. In this way, it is easy to give human supervision. Just let the human expert complete the task, and their hehavior should be the label to train algorithms.</p>
 
@@ -522,19 +585,7 @@ d. For each state s, let $π(s) := argmax_{a \in A} P(s|s&rsquo;, a) V(s)$<br />
 <li>Multi-modal output. Once hearing the word &ldquo;Multi-modal&rdquo;, the first thing come to my mind is always MoG (mixture of Gaussian). We can also use latent variable models or autoregressive discretization. Latent variable models will inject some other distribution at the input od neural network, and let the output use this additional distribution properly. Autoregressive discretization will discretize one dimension at a time instead of discretize the output at a time to avoid the dimensionality explosion. It is a great way to handle high dimensional output. The first network predict $P(d_1|O)$, while next network predict $P(d_2 | d_1, O)$ and so on.</li>
 </ol>
 
-<h2 id="reinforcement-learning-objective">Reinforcement learning objective</h2>
-
-<p>First, we name a trail from time 0 to time step $T$ as a <strong>trajectory</strong>. So, the probability of the hwole trajectory is:</p>
-
-<p>$$P(\tau) = P_{\theta}(s_0, a_0, &hellip;, s_T, a_T) = p(s_0) \prod_{t=1}^T \pi_{\theta}(a_t|s_t) p(s_{t+1}|s_t, a_t)$$</p>
-
-<p>Our objective is to find an optimal $\theta^{\star}$, that maximizes the expection of the trajectory reward:</p>
-
-<p>$$\theta^{\star} = argmax_{\theta} E_{\tau \sim p(\tau)}[\sum_{t=1}^{T} r(a_t, s_t)]$$</p>
-
-<p>Note that we still treat this as a Markov process.</p>
-
-<p>Next step, we will talk about reinforcement learning algorithms. There are a lot of categorical information from CS294 Lecture <a href="http://rail.eecs.berkeley.edu/deeprlcourse/static/slides/lec-4.pdf" target="_blank">here</a>.</p>
+<h1 id="basics">Basics</h1>
 
 <h2 id="policy-gradient">Policy Gradient</h2>
 
@@ -660,7 +711,7 @@ More things to read:</p>
 <li><a href="https://arxiv.org/abs/1506.02438" target="_blank">General advantage estimator. </a></li>
 </ol>
 
-<h2 id="temporal-difference-learning">Temporal Difference Learning</h2>
+<h1 id="temporal-difference-learning">Temporal Difference Learning</h1>
 
 <blockquote>
 <p>If one had to identify one idea as central and novel to reinforcement learning, it would undoubtedly
@@ -675,7 +726,7 @@ be temporal-difference (TD) learning. &ndash; Sutton&rsquo;s RL book</p>
 
 <p>$$V(S_t) = V(S_t) + \alpha [\sum_{t=1}^{T} \gamma ^ t R_{ t} - V(S_t)]$$</p>
 
-<p>According to Sutton&rsquo;s book, note $\sum_{t&rsquo;=t}^{T} \gamma ^ {t&rsquo;} R_{t&rsquo;}$ as $G_t$. This becomes:</p>
+<p>According to Sutton&rsquo;s book, note $\sum_{k=t+1}^{T} \gamma ^ {k-t-1} R_{k}$ as $G_t$. This becomes:</p>
 
 <p>$$V(S_t) = V(S_t) + \alpha [G_t - V(S_t)]$$</p>
 
@@ -754,7 +805,21 @@ of Q-learning on this problem. Given the same amount of experience we might expe
 
 <h2 id="double-q-learning">Double Q-Learning</h2>
 
-<p>Algorithms we discussed above, like Sarsa, Q-learing, involve a maximization over all actions via policy. This maximization operation can lead to a significant positive bias. It is easy to understand. For example, if the true value of Q(s, a) is zero, and it&rsquo;s a Gaussian with some variance. The sample generated should have a mean of zero, but the expected maximum is definitely above 0. Q-learning will consistently choose the maximum and bring in a big bias.</p>
+<p>Algorithms we discussed above, like Sarsa, Q-learing, involve a maximization over all actions via policy. This maximization operation can lead to a significant positive bias. It is easy to understand. For example, if the true value of Q(s, a) is zero, and it&rsquo;s a Gaussian with some variance. The sample generated should have a mean of zero, but the expected maximum is definitely above 0. Q-learning will consistently choose the maximum and bring in a big bias. In math:  $$\mathbb{E}_{\epsilon}\left[\max _{a^{\prime}}\left(Q\left(s^{\prime}, a^{\prime}\right)+\epsilon\right)\right] \geq \max _{a^{\prime}} Q\left(s^{\prime}, a^{\prime}\right) $$ Accordingly, the estimated max will generally be greater than true maximum, and this bias will be propagated through Bellman equation.</p>
+
+<p>From another perspective, we can consider Jensen&rsquo;s inequality in the Bellman backup. We already know the following equation:</p>
+
+<p>$$Q(\mathbf{s}, \mathbf{a}) \leftarrow r(\mathbf{s}, \mathbf{a})+\gamma  \mathbb{E}_{\mathbf{s}^{\prime} \sim p\left(\mathbf{s}^{\prime} | \mathbf{s}, \mathbf{a}\right)}\left[V\left(\mathbf{s}^{\prime}\right)\right]$$</p>
+
+<p>In Q learning, we use greedy policy, the equation becomes:</p>
+
+<p>$$Q(\mathbf{s}, \mathbf{a}) \leftarrow r(\mathbf{s}, \mathbf{a})+\gamma \max _{\mathbf{a}^{\prime}} \mathbb{E}_{\mathbf{s}^{\prime} \sim p\left(\mathbf{s}^{\prime} | \mathbf{s}, \mathbf{a}\right)}\left[Q\left(\mathbf{s}^{\prime}, \mathbf{a}^{\prime}\right)\right]$$</p>
+
+<p>But in real implementation, we use:</p>
+
+<p>$$Q(\mathbf{s}, \mathbf{a}) \leftarrow r(\mathbf{s}, \mathbf{a})+\gamma  \mathbb{E}_{\mathbf{s}^{\prime} \sim p\left(\mathbf{s}^{\prime} | \mathbf{s}, \mathbf{a}\right)}\left[\max _{\mathbf{a}^{\prime}} Q\left(\mathbf{s}^{\prime}, \mathbf{a}^{\prime}\right)\right]$$</p>
+
+<p>Apparently, there is a bias since we know the following Jenson Inequality: $$\mathbb{E}_{\mathbf{s}^{\prime} \sim p\left(\mathbf{s}^{\prime} | \mathbf{s}, \mathbf{a}\right)}\left[\max _{\mathbf{a}^{\prime}} Q\left(\mathbf{s}^{\prime}, \mathbf{a}^{\prime}\right)\right] \geq \max _{\mathbf{a}^{\prime}} \mathbb{E}_{\mathbf{s}^{\prime} \sim p\left(\mathbf{s}^{\prime} | \mathbf{s}, \mathbf{a}\right)}\left[Q\left(\mathbf{s}^{\prime}, \mathbf{a}^{\prime}\right)\right]$$</p>
 
 <p>Double Q-Learning was born to deal with the positive bias. The idea is using two different and independent Q-tables or Q-network to decorrelate the selection of the best action from the evaluation of this action. $max(E[Q_1], E[Q_2]) &lt;= E[max(Q_1, Q_2)]$. Basically, two Q estimation should be both noisy, but if they are noisy in different ways, it should be OK. So, Double Q-learning does not use the same network to choose action and evaluate value:</p>
 
@@ -792,6 +857,34 @@ N-step return algorithms can migitate problems of both algorithms when using a p
 <p>$$Q_{t+n}(S_t, A_t) = Q_{t+n-1}(S_t, A_t) + \alpha [G_{t:t+n} - Q_{t+n-1}(S_t, A_t)]$$</p>
 
 <p>But for N-step return, we have to wait N steps until getting the update values. It can be viewed as a control over variance and bias trade-off. Also, it gives us more freedom. Bootstrapping works best if it is over a length of time in which a significant and recognizable state change has occurred, and a significant and recognizable state change may takes several time steps. Accordingly, N-step usually works better than pure MC or TD method. But theoritically, this is only correct for online algorithms. We can ignore this difference, and it oftern works well.</p>
+
+<h2 id="eligibility-trace-and-td-lambda">Eligibility Trace and TD($\lambda$)</h2>
+
+<p>At this point, the N-step return method has been defined. It averages N step return in the future for a compound update. one could average one-step and infinite-step returns to obtain another way of interrelating TD and Monte Carlo methods.</p>
+
+<p>In practice, one may want to limit the length of the longest component update because of the corresponding delay. When the delay gets longer, the update component seems less correlated to current update since the trajectory probability from current step to far away step is getting smaller.</p>
+
+<p>The TD(λ) algorithm can be understood as one particular way of averaging n-step
+updates. This average contains all the n-step updates, each weighted proportional to $\lambda ^{n-1}$. The resulting update is toward a return, called the λ-return,
+defined in its state-based form by:</p>
+
+<p>$$G_{t}^{\lambda} \doteq(1-\lambda) \sum_{n=1}^{\infty} \lambda^{n-1} G_{t : t+n}$$</p>
+
+<p>This is called λ-return method, and it&rsquo;s an offline algorithm since one have to wait until trajectory ends to update. Sutton&rsquo;s book provides perfect diagram to illustrate this:</p>
+
+<p><img src="/img/RL/lambda-return.jpg" width=500></p>
+
+<p>Right now, the method is a forward view algorithm. Basically, when processing time step t, we stay at time t and collection TD error from all time steps in the future and make update for current step. The disgram from Sutton&rsquo;s book is very good:</p>
+
+<p><img src="/img/RL/forward-lambda.jpg" width=900></p>
+
+<p>Essentailly, this method is not quite efficient. We don&rsquo;t want to wait several steps until making updates. So, usually backward view TD(λ) is widely used. In backward view TD(λ), TD error of every time step will be propagate to future time step with a fade away of $\gamma \lambda$. And the propagated error will also be updated at each step, which can be considered as an update for all previous steps. For example, standing at time step t, we have all previous time step $(0~t-1)$ TD error accumulated. The update will updat all TD errors from time step 0 to t-1. Here is a diagram for the backward view method:</p>
+
+<p><img src="/img/RL/backward-lambda.jpg" width=900></p>
+
+<p>If considered in a whole trajectory, backward view and forward view is equivalent but more efficient. In Sutton&rsquo;s book, value gradient is propagated, which is the same strategy:</p>
+
+<p><img src="/img/RL/TD-lambda.jpg" width=700></p>
 
 <h2 id="deep-q-network">Deep Q network</h2>
 
@@ -833,7 +926,7 @@ N-step return algorithms can migitate problems of both algorithms when using a p
 <li>Learn an approximate maximizer</li>
 </ol>
 
-<h2 id="advanced-policy-gradient">Advanced policy gradient</h2>
+<h1 id="advanced-policy-gradient">Advanced policy gradient</h1>
 
 <p>At this point, it&rsquo;s time to wrap up all previous method and go deeper. Learning from previous tabular methods and basic policy gradient, I will make a comparison between policy gradient and action-value or state-value methods, concrete the mathematical theory of policy gradient and go to more advanced policy gradient methods.</p>
 
@@ -900,7 +993,7 @@ N-step return algorithms can migitate problems of both algorithms when using a p
 
 <p>So, it is totally ok to make policy gradient off-policy, we only need to add a reweighting ratio of the target policy over behavior policy.</p>
 
-<h3 id="asynchronous-advantage-actorcritic-a3c">asynchronous advantage actorcritic (A3C)</h3>
+<h3 id="a3c">A3C</h3>
 
 <p>Instead of experience replay, A3C asynchronously execute multiple agents in parallel, on multiple instances of the environment. Each process contains an actor that acts in its own copy of the environment, a separate replay memory, and a learner that samples data, updating shared policy parameters are sent to the actor-learners at fixed intervals.</p>
 
@@ -910,7 +1003,7 @@ N-step return algorithms can migitate problems of both algorithms when using a p
 
 <p>A3C enables large scale training in different threads. The algorithm computes gradients for n-step updates for each of the state-value pairs encountered since the last update. This accumulated gradient can alao mkae the model more robust.</p>
 
-<h3 id="deterministic-policy-gradient-dpg">Deterministic Policy Gradient (DPG)</h3>
+<h3 id="dpg">DPG</h3>
 
 <p>The first step of DPG should be building a mathematical foundation: the Deterministic Policy Gradient Theorem.</p>
 
@@ -934,11 +1027,47 @@ By parametrising stochastic policies with a Gaussian, DPG is equivalent to the c
 <p>In off-policy cases, it&rsquo;s similar to common off-policy policy gradient.
 <img src="/img/RL/offpolicyDPG.jpg" width=550></p>
 
-<p>Similarly, it drops a term that depends on $\nabla_{\theta} Q^\mu(s, a)$. And since the policy is deterministic, $Q^\mu(s, \mu_\theta(s)) = \sum_a \pi_{\theta}(a \vert s) Q^\pi(s, a)$. We don&rsquo;t need to do importance sampling like previous off-policy algorithms.</p>
+<p>Basically, we are using TD error to update Q function and use deterministic policy gradient algorithm to update policy. Similarly, it drops a term that depends on $\nabla_{\theta} Q^\mu(s, a)$. And since the policy is deterministic, $Q^\mu(s, \mu_\theta(s)) = \pi_{\theta}(a \vert s) Q^\pi(s, a)$. We don&rsquo;t need to do importance sampling like previous off-policy algorithms.</p>
 
-<h3 id="deep-deterministic-policy-gradient-ddpg">Deep Deterministic Policy Gradient (DDPG)</h3>
+<h3 id="ddpg">DDPG</h3>
 
-<h3 id="trust-region-policy-optimization">Trust region policy optimization</h3>
+<p>DDPG is a combination of DPG and DQN. It adopts replay buffer and target network from DQN and extend DQN to continuous action space. Also, it uses delayed update for both policy and critic.</p>
+
+<p>Since deterministic policy cannot explore around, DDPG inject noise to the deterministic action to ensure exploration:</p>
+
+<p>$$a_{t}=\mu\left(s_{t} | \theta^{\mu}\right)+\mathcal{N}_{t}$$</p>
+
+<p>Overall, DDPG is self exploratory:</p>
+
+<p><img src="/img/RL/DDPG.jpg" width=800></p>
+
+<p>Note that when updating critic, we don&rsquo;t want to flow gradient into $y_i$, which is just the target for critic update. So, when calculating $y_i$, tf.stop_gradient() should be used to restrict gradient.</p>
+
+<h3 id="td3">TD3</h3>
+
+<p>Like discussed before in <a href="#double-q-learning">Double Q-learning</a>, we find Q-learning suffer a lot from its overestimation of Q values. And this bias propagate through Bellman equation and further affect the whole trajectory. <a href="#double-q-learning">Double Q-learning</a> tries to mitigate this bias with decoupled Q functions. The authors of TD3 also observed significant overestimation in DDPG since it also adopts Q network. In order to address this problem, they added a series of tricks into DDPG and created TD3. Actually, there are only two main difference compared to DDPG:</p>
+
+<ol>
+<li>Chipping Double Q-learning. In practice the target network strategy in DQN does not work with actor-critic because of the slow changing policy, and Double Q-learning cannot eliminate the bias. So, they took a kind of extreme way:
+$$y_{1}=r+\gamma \min _{i=1,2} Q_{\theta_{i}^{\prime}}\left(s^{\prime}, \pi_{\phi_{1}}\left(s^{\prime}\right)\right)$$
+While this update rule may induce
+an underestimation bias, this is far preferable to overestimation bias, as unlike overestimated actions, the value of
+underestimated actions will not be explicitly propagated
+through the policy update.</li>
+<li>Target Policy Smoothing Regularization. This approach enforces
+the notion that similar actions should have similar value. They fit
+the value of a small area around the target action:
+$$y=r+\mathbb{E}_{\epsilon}\left[Q_{\theta^{\prime}}\left(s^{\prime}, \pi_{\phi^{\prime}}\left(s^{\prime}\right)+\epsilon\right)\right]$$
+where $\epsilon \sim \operatorname{clip}(\mathcal{N}(0, \sigma),-c, c)$</li>
+</ol>
+
+<p>So, here is TD3 overall:</p>
+
+<p><img src="/img/RL/TD3.jpg" width=500></p>
+
+<p>It&rsquo;s quite similar to DDPG, with two critic network and a policy smooth regularization.</p>
+
+<h3 id="trpo">TRPO</h3>
 
 <p>In order to stabilize training process, every step the parameters should not change dramatially. We can add some constrains to the distance between old and new parameters or the gradients, like gradient clipping. Trust region policy optimization introduces <strong>KL divergence</strong> to set a constrain on the distance of every update.</p>
 
@@ -970,7 +1099,7 @@ By parametrising stochastic policies with a Gaussian, DPG is equivalent to the c
 <li>Optimize $\lambda$ if the constrain is violated. $\lambda = \lambda + \alpha (D_{KL}(\pi_{\theta&rsquo;}(a_t|s_t) || \pi_{\theta}(a_t|s_t)) - \epsilon)$</li>
 </ol>
 
-<h3 id="proximal-policy-optimization-ppo">proximal policy optimization PPO</h3>
+<h3 id="ppo">PPO</h3>
 
 <p>PPO is based on the same idea of TRPO. But compared to TRPO, it is less complicated and compatible with architectures that include noise (such as dropout) or parameter sharing
 (between the policy and value function, or with auxiliary tasks).</p>
@@ -998,9 +1127,43 @@ change constrain and a value function error term.</p>
 
 <p>Currently, PPO should be a default algorithm policy gradient algorithm because of its simplicity and effectiveness.</p>
 
-<h3 id="actor-critic-with-experience-replay-acer">actor critic with experience replay (ACER)</h3>
+<h3 id="acer">ACER</h3>
 
-<h3 id="soft-actor-critic">Soft actor-critic</h3>
+<p>off-policy methods can greatly increase the sample efficient and decrease the correlation in training. A3C works great, but it&rsquo;s on-policy. ACER is the off-policy version of A3C. It&rsquo;s not as easy as it sounds, ACER takes a lot of effort to keep the training stable with off-policy data. Overall, it uses three major tricks to make it work:</p>
+
+<ol>
+<li>Multi-step estimation of the state-action value function using Retrace.</li>
+<li>Importance weight truncation with bias correction</li>
+<li>Efficient TPRO</li>
+</ol>
+
+<p>In off-policy setting, Importance Sampling (IS) is commonly used to compensate the policy difference for different trajectories. Q function update can be generalized like this:</p>
+
+<p>$$ Q(x, a) :=Q(x, a)+\mathbb{E}_{\mu}\left[\sum_{t \geq 0} \gamma^{t}\left(\prod_{s=1}^{t} c_{s}\right)\left(r_{t}+\gamma \mathbb{E}_{\pi} Q\left(x_{t+1}, \cdot\right)-Q\left(x_{t}, a_{t}\right)\right)\right]$$</p>
+
+<p>For importance sampling, $\mathcal{C}_{\mathcal{S}}=\frac{\pi\left(a_{s} | x_{s}\right)}{\mu\left(a_{s} | x_{s}\right)}$. . It is well known that IS estimates can suffer from large – even possibly infinite – variance, like scenarios $\mu\left(a_{s} | x_{s}\right)$ is very small.</p>
+
+<p>In Retrace($\lambda$), $c_{s}=\lambda \min \left(1, \frac{\pi\left(a_{s} | x_{s}\right)}{\mu\left(a_{s} | x_{s}\right)}\right)$. Retrace(λ) uses an importance sampling ratio truncated
+at 1. Compared to IS, it does not suffer from the variance explosion of the product of IS ratio.</p>
+
+<p>ACER interprete Retrace in a recursive fashion. Rearrange terms from above Retrace equation:</p>
+
+<p>$$Q^{\mathrm{ret}}\left(x_{t}, a_{t}\right)=r_{t}+\gamma \overline{\rho}_{t+1}\left[Q^{\mathrm{ret}}\left(x_{t+1}, a_{t+1}\right)-Q\left(x_{t+1}, a_{t+1}\right)\right]+\gamma V\left(x_{t+1}\right)$$</p>
+
+<p>where $\overline{\rho} = \lambda \min \left(1, \frac{\pi\left(a_{s} | x_{s}\right)}{\mu\left(a_{s} | x_{s}\right)}\right)$ and $V(x)=\mathbb{E}_{a \sim \pi} Q(x, a)$. After recursively calculate $Q^{ret}(s,a)$ over older Q functions, ACER uses $Q^{ret}(s,a)$ to fit Q network with MSE. And note that ACER uses two head network to calcuate policy and Q values jointly.</p>
+
+<p>After a hard clipping in Retrace, the estimator becomes biased, so ACER introduces a correction term for this.</p>
+
+<p>$$\widehat{g}_{t}^{\text {acer }}=\overline{\rho}_{t} \nabla_{\theta} \log \pi_{\theta}\left(a_{t} | x_{t}\right)\left[Q^{\text {ret }}\left(x_{t}, a_{t}\right)-V_{\theta_{v}}\left(x_{t}\right)\right] + \underset{a \sim \pi}{\mathbb{E}}\left(\left[\frac{\rho_{t}(a)-c}{\rho_{t}(a)}\right]_{+} \nabla_{\theta} \log \pi_{\theta}\left(a | x_{t}\right)\left[Q_{\theta_{v}}\left(x_{t}, a\right)-V_{\theta_{v}}\left(x_{t}\right)\right]\right)$$</p>
+
+<p>where $\overline{\rho} = \lambda \min \left(1, \rho\right)$ and $\rho_{t}=\frac{\pi\left(a_{t} | x_{t}\right)}{\mu\left(a_{t} | x_{t}\right)}$ as before. The second term is the correction to make it unbiased.</p>
+
+<p>ACER is also not satisfied with the effectiveness of TPRO because of its Fisher-vector products for each update. Instead of putting complex constrains to policy update, ACER propose to maintain an average policy network that represents a running average of past policies
+and forces the updated policy to not deviate far from this average.</p>
+
+<p>The three tricks seems straight forward, but they are not. The authors really took effort to realize off-policy and the ACER paper is quite dense. It&rsquo;s not easy at all to bridge on-policy and off-policy RL algorithms.</p>
+
+<h3 id="soft-actor-critic">Soft Actor-critic</h3>
 
 <p>Soft actor-critic is based on the maximum entropy reinforcement learning framework, which considers the entropy augmented term inside its objective. Previously, common RL algorithm have this objective:</p>
 
@@ -1044,6 +1207,8 @@ states where they will have high entropy in the future.</p>
 
 <p>This is <a href="https://arxiv.org/pdf/1702.08165.pdf" target="_blank">Soft Q-learning</a>.</p>
 
+<p>And Soft Actor-critic, the authors adopted this &ldquo;soft&rdquo; function to ensure enough exploration. Overall, soft actor critic has three main advantages: 1. Actor Critic; 2. Off policy; 3. Better exploration with soft function.</p>
+
 <p>For <a href="https://arxiv.org/pdf/1801.01290.pdf" target="_blank">soft actor-critic</a>,we will derive soft policy iteration. Very similar to common policy iteration, only need to replace value function with soft value function:</p>
 
 <p>Note the actor will sample actions from policy, so the entropy term can be written as $E_{a_t \sim \pi}[- log \pi(a_t|s_t)]$. In this way, the soft value function formula is:</p>
@@ -1054,10 +1219,10 @@ states where they will have high entropy in the future.</p>
 
 <p><img src="/img/RL/softpolicyupdate.jpg" width=500></p>
 
-<p>This $Z^{\pi_{old}}(s_t)$ is just a normalizer.</p>
+<p>This $Z^{\pi_{old}}(s_t)$ is just a normalizer, with nothing to do with gradient. Soft policy iteration works fine in tabular cases because the Q-values can be calculated exactly. But for continuous domains, we have to use approximator to represent Q-values, which make the optimization computationally too expensive (make one neural network close to exponential of another). This gives rise to Soft Actor Critic.</p>
 
-<p>In soft actor critic, we will use function approximator to for both Q-function and policy. The soft Q-function can be modeled as expressive neural networks, and the policy as
-a Gaussian with mean and covariance given by neural network.</p>
+<p>In soft actor critic, we will use function approximator to for both Q-function and policy. The soft Q-function and soft state value can be modeled as expressive neural networks, and the policy as
+a Gaussian with mean and covariance, or any parameterized family of distributions, given by neural network (reparameterization trick).</p>
 
 <p>First soft value function:
 <img src="/img/RL/softvaluefunction.jpg" width=600></p>
@@ -1066,19 +1231,38 @@ a Gaussian with mean and covariance given by neural network.</p>
 
 <p><img src="/img/RL/softbellmanresidual.jpg" width=700></p>
 
-<p>Finally, policy update, using KL divengence:</p>
+<p>Finally, policy update, minimizing KL divengence, updating the policy towards the exponential of the new Q-function:</p>
 
 <p><img src="/img/RL/softpolicyupdate2.jpg" width=700></p>
 
 <p>The target
 density is the Q-function, which is represented by a neural
-network an can be differentiated, and it is thus convenient
-to apply the reparameterization trick, resulting in a
-lower variance estimator. To that end, we reparameterize
-the policy using a neural network transformation. The network will provide mean and std for
-Gaussian reparameterization.</p>
+network an can be differentiated. To that end, we reparameterize
+the policy using a neural network transformation:</p>
 
-<p>Here is soft actor critic:</p>
+<p>$$\mathbf{a}_{t}=f_{\phi}\left(\epsilon_{t} ; \mathbf{s}_{t}\right)$$</p>
+
+<p>Rewrite the policy update objective:</p>
+
+<p>$$J_{\pi}(\phi)=\mathbb{E}_{\mathbf{s}_{t} \sim \mathcal{D}, \epsilon_{t} \sim \mathcal{N}}\left[\log \pi_{\phi}\left(f_{\phi}\left(\epsilon_{t} ; \mathbf{s}_{t}\right) | \mathbf{s}_{t}\right)-Q_{\theta}\left(\mathbf{s}_{t}, f_{\phi}\left(\epsilon_{t} ; \mathbf{s}_{t}\right)\right)\right]$$</p>
+
+<p>The gradient is obvious:</p>
+
+<p>$$\hat{\nabla}_{\phi} J_{\pi}(\phi)=\nabla_{\phi} \log \pi_{\phi}\left(\mathbf{a}_{t} | \mathbf{s}_{t}\right) +\left(\nabla_{\mathbf{a}_{t}} \log \pi_{\phi}\left(\mathbf{a}_{t} | \mathbf{s}_{t}\right)-\nabla_{\mathbf{a}_{t}} Q\left(\mathbf{s}_{t}, \mathbf{a}_{t}\right)\right) \nabla_{\phi} f_{\phi}\left(\epsilon_{t} ; \mathbf{s}_{t}\right)$$</p>
+
+<p>With reparameterization trick applied, we can estimate policy for any tractable stochastic policy. It also extend the policy update style of DDPG, which only works for deterministic policy.</p>
+
+<p>Alternatively, we can use REINFORCE style policy update:</p>
+
+<p>$$ J_{\pi}(\phi)=\mathbb{E}_{\mathbf{s} \sim \mathcal{D}}\left[\mathbb{E}_{\mathbf{a} \sim \pi_{\phi}(\mathbf{a} | \mathbf{s})}\left[ \left(\color{red} {\alpha \log \pi_{\phi}(\mathbf{a} | \mathbf{s})-Q_{\theta}(\mathbf{s}, \mathbf{a})}+b(\mathbf{s})\right) | \mathbf{s}\right]\right]$$</p>
+
+<p>$b(s)$ is baseline. The red part is the new objective for REINFORCE to minimize KL divergence, replacing the role of rewards in original policy gradient method. The gradient is:</p>
+
+<p>$$\nabla_{\phi} J_{\pi}(\phi)=\mathbb{E}_{\mathbf{s} \sim \mathcal{D}}\left[\mathbb{E}_{\mathbf{a} \sim \pi_{\phi}(\mathbf{a} | \mathbf{s})}\left[\nabla_{\phi} \log \pi(\mathbf{a} | \mathbf{s})\left&lt;\alpha \log \pi_{\phi}(\mathbf{a} | \mathbf{s})-Q_{\theta}(\mathbf{s}, \mathbf{a})+b(\mathbf{s})\right&gt; | \mathbf{s}\right]\right]$$</p>
+
+<p>Note that gradient should not flow inside the $&lt; &gt;$ notation because the inside policy is just used for sample action (tf.stop_gradient()).</p>
+
+<p>After formulized all loss functions above, Soft actor critic is straight forward. Here is soft actor critic:</p>
 
 <p><img src="/img/RL/softactorcritic.jpg" width=500></p>
 
@@ -1127,6 +1311,8 @@ Gaussian reparameterization.</p>
       <h3>Related</h3>
       <ul>
         
+        <li><a href="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</a></li>
+        
         <li><a href="/post/capsnet-and-dynamic-routing/">CapsNet and dynamic routing</a></li>
         
         <li><a href="/post/nlp-basics---word2vec/">NLP basics - Word2vec: Skip-gram, CBOW, GloVe</a></li>
@@ -1134,8 +1320,6 @@ Gaussian reparameterization.</p>
         <li><a href="/post/going-deeper-into-batch-normalization/">Going Deeper in Batch Normalization</a></li>
         
         <li><a href="/post/amazing-gan---wasserstein-gan/">Amazing GAN - Wasserstein GAN</a></li>
-        
-        <li><a href="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</a></li>
         
       </ul>
     </div>

@@ -28,7 +28,8 @@
       <pubDate>Wed, 20 Apr 2016 00:00:00 -0500</pubDate>
       
       <guid>/home/about/</guid>
-      <description>Hello! I was born and grew up in a small mountain town, Xixia. I spent four years at Xi&amp;rsquo;an, Shannxi, and obtained my Bachelor degree at Xi&amp;rsquo;an Jiaotong University(2012-2016). And I received my Master degree at Purdue University, concentrating on Deep Learning and Computer Vision. I was an intern of AIsense Inc at 2018, working on automatic speech recognition (ASR). Currently, I am a Research Engineer on Computer Vision at Zebra technologies corportation.</description>
+      <description>Hello! I was born and grew up in a small mountain town, Xixia. I spent four years at Xi&amp;rsquo;an, Shannxi, and obtained my Bachelor degree at Xi&amp;rsquo;an Jiaotong University(2012-2016). And I received my Master degree at Purdue University, concentrating on Deep Learning and Computer Vision. I always keep track of cutting-edge AI/Robotics/RL progress. Right now, I am exploring probabilistic graph models, SLAM and RL.
+I play basketball as a three point shooter.</description>
     </item>
     
     <item>
@@ -37,17 +38,8 @@
       <pubDate>Wed, 20 Apr 2016 00:00:00 -0500</pubDate>
       
       <guid>/home/myself/</guid>
-      <description>Deep Learning and Computer Vision Professional I am currently working at Zebra Technologies, as a Research Engineer of the Chief Technologies Office (CTO), developing computer/machine vision algorithms, spanning to SLAM, Object Detection, Image Classification, Pattern Recognition, etc.
+      <description>Deep Learning and Computer Vision Professional I am currently working at Zebra technologies corportation, as a Research Engineer of the Chief Technologies Office (CTO), developing computer/machine vision algorithms, spanning to SLAM, Object Detection, Image Classification, Pattern Recognition, etc.
 From 2016 to 2018, I was a member of Prof. Liang Pan’s lab. My research interest lied in machine learning and Computer Vision and focused on Fine-Grained Visual Categorization (FGVC) and image super-resolution.</description>
-    </item>
-    
-    <item>
-      <title>Projects</title>
-      <link>/home/projects/</link>
-      <pubDate>Wed, 20 Apr 2016 00:00:00 -0500</pubDate>
-      
-      <guid>/home/projects/</guid>
-      <description></description>
     </item>
     
     <item>
@@ -56,6 +48,15 @@ From 2016 to 2018, I was a member of Prof. Liang Pan’s lab. My research intere
       <pubDate>Wed, 20 Apr 2016 00:00:00 -0500</pubDate>
       
       <guid>/home/posts/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/home/projects/</link>
+      <pubDate>Wed, 20 Apr 2016 00:00:00 -0500</pubDate>
+      
+      <guid>/home/projects/</guid>
       <description></description>
     </item>
     

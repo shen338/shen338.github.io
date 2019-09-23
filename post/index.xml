@@ -22,12 +22,12 @@
     </item>
     
     <item>
-      <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</title>
+      <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, YOLO, RetinaNet to CenterNet</title>
       <link>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</link>
       <pubDate>Wed, 01 Aug 2018 21:00:00 -0500</pubDate>
       
       <guid>/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/</guid>
-      <description>Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision Mean Average Precision  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN  Region Proposal Network Workflow  Mask-RCNN  ROI Align Key Point Detection   Single Shot Detector  Single Shot MultiBox Detector  Architecture Implementation Details  YOLOv1  Architecture Loss function Workflow Limitation  YOLOv2  Improvements  YOLOv3 Feature Pyramid Network (FPN)  Architecture Feature Pyramid Networks for RPN Feature Pyramid Networks for Faster/Mask R-CNN Experimental Result  Focal Loss and RetinaNet  Class Imbalance RetinaNet Implementation Details Results   Summary Reference Materials  It&amp;rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.</description>
+      <description>Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision Mean Average Precision  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN  Region Proposal Network Workflow  Mask-RCNN  ROI Align Key Point Detection   Single Shot Detector  Single Shot MultiBox Detector  Architecture Implementation Details  YOLOv1  Architecture Loss function Workflow Limitation  YOLOv2  Improvements  YOLOv3 Feature Pyramid Network (FPN)  Architecture Feature Pyramid Networks for RPN Feature Pyramid Networks for Faster/Mask R-CNN Experimental Result  Focal Loss and RetinaNet  Class Imbalance RetinaNet Implementation Details Results   Anchor Free Detector  CornerNet Corner and Center Net CenterNet  2d Object Detection 3D object detection and human pose   Summary Reference Materials  It&amp;rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.</description>
     </item>
     
     <item>

@@ -17,7 +17,7 @@
       
     
   
-  <meta name="description" content="Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision Mean Average Precision  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN  Region Proposal Network Workflow  Mask-RCNN  ROI Align Key Point Detection   Single Shot Detector  Single Shot MultiBox Detector  Architecture Implementation Details  YOLOv1  Architecture Loss function Workflow Limitation  YOLOv2  Improvements  YOLOv3 Feature Pyramid Network (FPN)  Architecture Feature Pyramid Networks for RPN Feature Pyramid Networks for Faster/Mask R-CNN Experimental Result  Focal Loss and RetinaNet  Class Imbalance RetinaNet Implementation Details Results   Summary Reference Materials  It&rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.">
+  <meta name="description" content="Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision Mean Average Precision  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN  Region Proposal Network Workflow  Mask-RCNN  ROI Align Key Point Detection   Single Shot Detector  Single Shot MultiBox Detector  Architecture Implementation Details  YOLOv1  Architecture Loss function Workflow Limitation  YOLOv2  Improvements  YOLOv3 Feature Pyramid Network (FPN)  Architecture Feature Pyramid Networks for RPN Feature Pyramid Networks for Faster/Mask R-CNN Experimental Result  Focal Loss and RetinaNet  Class Imbalance RetinaNet Implementation Details Results   Anchor Free Detector  CornerNet Corner and Center Net CenterNet  2d Object Detection 3D object detection and human pose   Summary Reference Materials  It&rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.">
 
   
   <link rel="alternate" hreflang="en-us" href="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">
@@ -75,8 +75,8 @@
   
   <meta property="og:site_name" content="Tong Shen">
   <meta property="og:url" content="/post/neural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo/">
-  <meta property="og:title" content="Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet | Tong Shen">
-  <meta property="og:description" content="Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision Mean Average Precision  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN  Region Proposal Network Workflow  Mask-RCNN  ROI Align Key Point Detection   Single Shot Detector  Single Shot MultiBox Detector  Architecture Implementation Details  YOLOv1  Architecture Loss function Workflow Limitation  YOLOv2  Improvements  YOLOv3 Feature Pyramid Network (FPN)  Architecture Feature Pyramid Networks for RPN Feature Pyramid Networks for Faster/Mask R-CNN Experimental Result  Focal Loss and RetinaNet  Class Imbalance RetinaNet Implementation Details Results   Summary Reference Materials  It&rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.">
+  <meta property="og:title" content="Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, YOLO, RetinaNet to CenterNet | Tong Shen">
+  <meta property="og:description" content="Table of Content  History  AlexNet ResNet Inception Network Series Deformable Parts Model Overfeat  Metrics: mAP  Precision and Recall Average precision Mean Average Precision  R-CNN Families  RCNN  Selective Search Bounding Box Regression Non Maximum Suppression Workflow Speed Bottleneck  Fast-RCNN  ROI pooling Workflow  Faster-RCNN  Region Proposal Network Workflow  Mask-RCNN  ROI Align Key Point Detection   Single Shot Detector  Single Shot MultiBox Detector  Architecture Implementation Details  YOLOv1  Architecture Loss function Workflow Limitation  YOLOv2  Improvements  YOLOv3 Feature Pyramid Network (FPN)  Architecture Feature Pyramid Networks for RPN Feature Pyramid Networks for Faster/Mask R-CNN Experimental Result  Focal Loss and RetinaNet  Class Imbalance RetinaNet Implementation Details Results   Anchor Free Detector  CornerNet Corner and Center Net CenterNet  2d Object Detection 3D object detection and human pose   Summary Reference Materials  It&rsquo;s well known that deep learning has been a real game changer in machine learning, especially in computer vision.">
   <meta property="og:locale" content="en-us">
   
   <meta property="article:published_time" content="2018-08-01T21:00:00-05:00">
@@ -87,7 +87,7 @@
   
   
 
-  <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet | Tong Shen</title>
+  <title>Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, YOLO, RetinaNet to CenterNet | Tong Shen</title>
 
 </head>
 <body id="top" data-spy="scroll" data-target="#toc" data-offset="71" >
@@ -246,7 +246,7 @@
 
 
   <div class="article-container">
-    <h1 itemprop="name">Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, SSD, YOLO and RetinaNet</h1>
+    <h1 itemprop="name">Neural Network based Object Recognition: Fast/Faster/Mask R-CNN, YOLO, RetinaNet to CenterNet</h1>
 
     
 
@@ -265,7 +265,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    30 min read
+    37 min read
   </span>
   
 
@@ -280,7 +280,7 @@
   <ul class="share">
     <li>
       <a class="twitter"
-         href="https://twitter.com/intent/tweet?text=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20YOLO%20and%20RetinaNet&amp;url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f"
+         href="https://twitter.com/intent/tweet?text=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20YOLO%2c%20RetinaNet%20to%20CenterNet&amp;url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f"
          target="_blank" rel="noopener">
         <i class="fa fa-twitter"></i>
       </a>
@@ -294,21 +294,21 @@
     </li>
     <li>
       <a class="linkedin"
-         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f&amp;title=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20YOLO%20and%20RetinaNet"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f&amp;title=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20YOLO%2c%20RetinaNet%20to%20CenterNet"
          target="_blank" rel="noopener">
         <i class="fa fa-linkedin"></i>
       </a>
     </li>
     <li>
       <a class="weibo"
-         href="http://service.weibo.com/share/share.php?url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f&amp;title=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20YOLO%20and%20RetinaNet"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f&amp;title=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20YOLO%2c%20RetinaNet%20to%20CenterNet"
          target="_blank" rel="noopener">
         <i class="fa fa-weibo"></i>
       </a>
     </li>
     <li>
       <a class="email"
-         href="mailto:?subject=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20SSD%2c%20YOLO%20and%20RetinaNet&amp;body=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f">
+         href="mailto:?subject=Neural%20Network%20based%20Object%20Recognition%3a%20Fast%2fFaster%2fMask%20R-CNN%2c%20YOLO%2c%20RetinaNet%20to%20CenterNet&amp;body=%2fpost%2fneural-network-based-object-recognition-fast-faster-mask-r-cnn-ssd-and-yolo%2f">
         <i class="fa fa-envelope"></i>
       </a>
     </li>
@@ -412,6 +412,18 @@
 <li><a href="#retinanet">RetinaNet</a></li>
 <li><a href="#implementation-details-1">Implementation Details</a></li>
 <li><a href="#results">Results</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#anchor-free-detector">Anchor Free Detector</a>
+
+<ul>
+<li><a href="#cornernet">CornerNet</a></li>
+<li><a href="#corner-and-center-net">Corner and Center Net</a></li>
+<li><a href="#centernet">CenterNet</a>
+
+<ul>
+<li><a href="#2d-object-detection">2d Object Detection</a></li>
+<li><a href="#3d-object-detection-and-human-pose">3D object detection and human pose</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#summary">Summary</a></li>
@@ -1036,6 +1048,137 @@ one-stage methods, RetinaNet achieves a healthy
 5.9 point AP gap (39.1 vs. 33.2) with the closest competitor,
 DSSD.</p>
 
+<h1 id="anchor-free-detector">Anchor Free Detector</h1>
+
+<p>Anchor-based object detectors have two main drawbacks:</p>
+
+<ol>
+<li>It typically use large amount of anchors, and only a tiny fraction of them are classified as target objects and the majority of them is abandoned in classification and NMS.</li>
+<li>It introduces a lot of hyperparameters, like anchor sizes, aspect ratios. Faster-RCNN chooses these parameters in certain fashion, and YOLO use K-means to find most frequent anchor box sizes. This will make the detector only concentrate on certain dataset/scenario, not good for generalization.<br /></li>
+</ol>
+
+<p>So, how about anchor-free detectors?</p>
+
+<h2 id="cornernet">CornerNet</h2>
+
+<p><a href="https://arxiv.org/pdf/1808.01244.pdf" target="_blank">CornerNet</a> is the first anchor free detector invented recently. It introduced a novel idea: how about detect the upper-left and bottom-right corner of an object instead of using anchor boxes to fit certain object? Since the two corners can determine a bounding box, detect corner is equivalent to detect boxes directly.</p>
+
+<p><img src="/img/cornetnet.jpg" width="800"></p>
+
+<p>To make this idea work, the authors implemented a key point detection network with a few tricks:</p>
+
+<ol>
+<li>The detected corner points have embeddings. The embeddings serve to group a pair of
+corners that belong to the same object, the network is
+trained to predict similar embeddings for them. And the embedding also contains necessary info to classify this object.</li>
+<li>The corners are frequently not lies on the object. So, normal pooling techniques won&rsquo;t be able to find the correct corner coordinates. The authors introduces corner pooling: for upper-left corner,  look horizontally towards the right for the
+topmost boundary of the object, and look vertically towards the bottom for the leftmost boundary. This technique is efficient to find all the max values in lower and right (like figure below). But it only concerns about the boundary features on the objects, this may cause problems.</li>
+</ol>
+
+<p><img src="/img/cornerpooling.jpg" width="600"></p>
+
+<p>For detailed implementation, the author designed three categories of loss functions:</p>
+
+<ol>
+<li>Detect corners. The authors used unnormalized 2D Gaussian $ e^{-\frac{x^{2}+y^{2}}{2 \sigma^{2}}} $to penalize negative/wrong corner locations to allow small error and make the objective differentiable. Also, since the majority of candidate corner location will be negative, focal loss would be helpful for this imbalance.<img src="/img/cornerloss_1.jpg" width="600">
+where $p_{cij}$ be the score at location (i, j) for class c
+in the predicted heatmaps, and let $y_{cij}$ be the “groundtruth” heatmap augmented with the unnormalized Gaussians. N is the number of objects in an image, and
+α and β are the hyper-parameters for focal loss.</li>
+<li>The output feature map is typically smaller than original image. Some bounding box location errors may occur in the downsampling process since we are predicting on feature map for bounding boxes in the original image. So, the correction term is necessary:
+$$L_{o f f}=\frac{1}{N} \sum_{k=1}^{N} \text { SmoothL1 } \operatorname{Loss}\left(\boldsymbol{o}_{k}, \hat{\boldsymbol{o}}_{k}\right)$$
+where $\boldsymbol{o}_{k}$ is the ground truth corner location shift. a location (x, y) in the image is mapped to the location $\left(\left\lfloor\frac{x}{n}\right\rfloor,\left\lfloor\frac{y}{n}\right\rfloor\right)$
+in the heatmaps, where n is the downsampling factor.  So, the ground truth corner shift is: $\boldsymbol{o}_{k}=\left(\frac{x_{k}}{n}-\left\lfloor\frac{x_{k}}{n}\right\rfloor, \frac{y_{k}}{n}-\left\lfloor\frac{y_{k}}{n}\right\rfloor\right)$</li>
+<li>Group corner pairs. There will be a lot of corner points on the feature map, how todetermine if a pair of the top-left corner and
+bottom-right corner is from the same bounding? The authors uses embedding similarity to find paired corners. There will be a &ldquo;pull&rdquo; loss to group corners and a &ldquo;push&rdquo; loss to seperate two corners.
+$$L_{p u l l}=\frac{1}{N} \sum_{k=1}^{N}\left[\left(e_{t_{k}}-e_{k}\right)^{2}+\left(e_{b_{k}}-e_{k}\right)^{2}\right]$$
+$$L_{p u s h}=\frac{1}{N(N-1)} \sum_{k=1}^{N} \sum_{j=1 \atop j \neq k}^{N} \max \left(0, \Delta-\left|e_{k}-e_{j}\right|\right)$$</li>
+</ol>
+
+<p>The overall diagram of corner net:
+<img src="/img/cornernet.jpg" width="800"></p>
+
+<p>CornerNet is a great anchor free network, but it&rsquo;s not perfect. Only detecting two corner is not enough, which leads to a lot of false positives, especially for small objects. The next two work will incorporate center point as well to improve.</p>
+
+<h2 id="corner-and-center-net">Corner and Center Net</h2>
+
+<p>Although the paper is named <a href="https://arxiv.org/abs/1904.08189" target="_blank">CenterNet: Keypoint Triplets for Object Detection</a>, I&rsquo;d rather call it Corner and Center Net because the name CenterNet goes to the next work we will talk about.</p>
+
+<p>The authors mainly addressed the missings of CornerNet and achieved 47 mAP on COCO. The idea is simple, just use center point features to filter out the incorrect bounding boxes. After the processing of CornerNet, it selects top-k center keypoints according to their scores and map them into original image to determine if they are in the image  center. If cannot find a feature point at center, the bounding boxes will be abandoned.</p>
+
+<p>One trick used to find the center point is center pooling. The detailed process of center pooling is as follows: the backbone outputs a
+feature map, and to determine if a pixel in the feature map
+is a center keypoint, we need to find the maximum value
+in its both horizontal and vertical directions and add them
+together.</p>
+
+<p>Another pooling trick is cascade corner pooling. It first looks along a boundary to find a boundary maximum value like CornerNet did, then looks inside along the location of
+the boundary maximum value
+to find an internal maximum
+value, and finally, add the two maximum values together for a corner.</p>
+
+<p><img src="/img/centerpooling.jpg" width="600"></p>
+
+<p>After finding the center points, most incorrect bounding boxes will be filtered out, which leads to a higher mAP. This method performs bery well but the speed and efficiency is not good enough.</p>
+
+<h2 id="centernet">CenterNet</h2>
+
+<p><a href="https://arxiv.org/pdf/1904.07850.pdf" target="_blank">Object as Points</a> totally abandoned the idea of detect corners and totally transformed object detection and other tasks into key point detection. The method is pretty simple and elegant.</p>
+
+<p>CenterNet represent objects by a single point at the bounding box center.  Other properties, such as object size, dimension, 3D extent, orientation, and pose are then regressed directly from image features at the center location. Images are feeded into backbone network and transformed into a headmap. Peaks in the heatmap corresponds to object centers (may off a little bit, corrected afterwards).  Image features at each peak predict the objects bounding box height, weight and other properties.</p>
+
+<h3 id="2d-object-detection">2d Object Detection</h3>
+
+<p><img src="/img/centernetresult.jpg" width="900"></p>
+
+<p>For the loss functions, the first term is key point detection loss, which is exactly the same compared to CornerNet. They both used 2D Gaussian as soft target and focal loss to handle imbalance.</p>
+
+<p>Second term of loss function, discretization error, is also similar to CornerNet. CenterNet predicts a local offset $\hat{O} \in \mathcal{R} \frac{W}{R} \times \frac{H}{R} \times 2$ for each center point and regress it with L1 loss.</p>
+
+<p>$$L_{o f f}=\frac{1}{N} \sum_{p}\left|\hat{O}_{\tilde{p}}-\left(\frac{p}{R}-\tilde{p}\right)\right|$$</p>
+
+<p>Third loss term is regarded to object size. The network will predict horizaontal and vertical size of objects, $s_{k}=\left(x_{2}^{(k)}-x_{1}^{(k)}, y_{2}^{(k)}-y_{1}^{(k)}\right)$ and regress it with L1 loss.</p>
+
+<p>$$L_{s i z e}=\frac{1}{N} \sum_{k=1}^{N}\left|\hat{S}_{p_{k}}-s_{k}\right|$$</p>
+
+<p>So, the overall loss function is:</p>
+
+<p>$$L_{d e t}=L_{k}+\lambda_{s i z e} L_{s i z e}+\lambda_{o f f} L_{o f f}$$</p>
+
+<p>And the author took $\lambda_{s i z e} = 0.1$ and $\lambda_{o f f} = 1$.</p>
+
+<p>And things becomes straightforward in inference. Just predict key point category, coordinate offset, object size and bounding box is obtained.</p>
+
+<p>CenterNet can do a lot more, like 3D object detection and 17 point human pose estimation.</p>
+
+<h3 id="3d-object-detection-and-human-pose">3D object detection and human pose</h3>
+
+<p>3D object detection requires three additional attributes per
+center point: depth, 3D dimension, and orientation for each box. CenterNet add three prediction head for each of them. For depth, CenterNet uses the same form of Eigen, $d=1 / \sigma(\hat{d})-1$, since the long depth prediction should be more error-prone. The depth $\hat{D} \in[0,1]^{\frac{W}{R}} \times \frac{H}{R}$is predicted in an additional channel with two conv layers and regressed using L1 loss. The three dimensions are three scalars, which is predicted in the sample fashion compared to 2d cases.</p>
+
+<p>The orientation is encoded in two bins for regression. An 8-scalar encoding is used to
+ease learning. The 8 scalars are divided into two groups,
+each for an angular bin. One bin is for angles in $B_1 \in [−7\pi/6, \pi/6]$ and $B_2 \in [-\pi/6, 7\pi/6]$. Within each bin, 2 of
+the scalars $b_i ∈ R^2$
+are used for softmax classification (if
+the orientation falls into to this bin i). And the rest 2 scalars
+$a_i ∈ R^2$
+are for the sin and cos value of in-bin offset (respect to box center).</p>
+
+<p>So, if the prediction $\hat{\alpha}=\left[\hat{b}_{1}, \hat{a}_{1}, \hat{b}_{2}, \hat{a}_{2}\right]$, the overall loss is:</p>
+
+<p>$$L_{o r i}=\frac{1}{N} \sum_{k=1}^{N} \sum_{i=1}^{2}\left(\operatorname{softmax}\left(\hat{b}_{i}, c_{i}\right)+c_{i}\left|\hat{a}_{i}-a_{i}\right|\right)$$</p>
+
+<p>where $c_{i}=\mathbb{1}\left(\theta \in B_{i}\right)$ and $a_{i}=\left(\sin \left(\theta-m_{i}\right), \cos \left(\theta-m_{i}\right)\right)$ and $m_i$ is box center coordinates.</p>
+
+<p>For human pose, it is inherently a key point detection task. CenterNet predict k=17 human joint heatmaps $\hat{\Phi} \in \mathcal{R}^{\frac{W}{R}} \times \frac{H}{R} \times k$  using standard human pose estimation framework and trained with focal loss and local pixel discretication shift loss.</p>
+
+<p>After that, CenterNet snap initial predictions from backbone to closest detected keypoints from standard human pose estimation. It extracts all
+keypoint locations with confidence more than 0.1 for each joint type inside the bounding box and regress these points to its closest detected key points. Basically, CenterNet uses standard human pose estimation as target to train its own simplified human pose estimation prediction head.</p>
+
+<p>Here is the result of human pose estimation and 3D object detection.</p>
+
+<p><img src="/img/centernetresult2.jpg" width="1000"></p>
+
 <h1 id="summary">Summary</h1>
 
 <p>From all the discussion above, we can see the rapid progress of object recognition in recent five years. These models inspired and equipped each other to move forward.</p>
@@ -1066,6 +1209,7 @@ DSSD.</p>
 <li><a href="https://pjreddie.com/media/files/papers/YOLOv3.pdf" target="_blank">YOLOv3</a></li>
 <li><a href="https://arxiv.org/abs/1612.03144" target="_blank">Feature Pyramid Network</a></li>
 <li><a href="https://arxiv.org/abs/1708.02002" target="_blank">Focal Loss and RetinaNet</a></li>
+<li><a href="https://arxiv.org/pdf/1808.01244.pdf" target="_blank">CornerNet: Detecting Objects as Paired Keypoints</a></li>
 </ol>
 
     </div>
